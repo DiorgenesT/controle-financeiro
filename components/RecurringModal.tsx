@@ -23,7 +23,7 @@ import { Loader2 } from "lucide-react";
 import { RecurringTransaction } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { addRecurringTransaction, updateRecurringTransaction } from "@/lib/recurring";
-import { getCategories } from "@/lib/categories";
+import { getCategories, Category } from "@/lib/categories";
 import { usePeople } from "@/hooks/usePeople";
 import { getIconById } from "@/lib/icons";
 import { toast } from "sonner";
@@ -39,7 +39,7 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
     const { user } = useAuth();
     const { people } = usePeople();
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const [formData, setFormData] = useState({
         description: "",

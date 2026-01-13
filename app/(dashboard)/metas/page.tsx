@@ -146,19 +146,15 @@ export default function MetasPage() {
 
         setSaving(true);
         try {
-            const goalData: any = {
+            const goalData = {
                 title: newMeta.title,
                 targetAmount: parseFloat(newMeta.targetAmount),
                 currentAmount: 0,
                 deadline: new Date(newMeta.deadline),
                 icon: newMeta.icon,
-                linkedAccountId: newMeta.linkedAccountId !== "none" ? newMeta.linkedAccountId : null,
+                linkedAccountId: newMeta.linkedAccountId !== "none" ? newMeta.linkedAccountId : undefined,
+                description: newMeta.description.trim() || undefined
             };
-
-            // Só adiciona description se não estiver vazia
-            if (newMeta.description.trim()) {
-                goalData.description = newMeta.description;
-            }
 
             await addGoal(user.uid, goalData);
 

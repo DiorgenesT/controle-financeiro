@@ -1,0 +1,428 @@
+yarn run v1.22.22
+$ eslint
+
+/home/dg/controle-financeiro/app/(dashboard)/boletos/page.tsx
+   39:5    warning  'TrendingUp' is defined but never used                           @typescript-eslint/no-unused-vars
+   53:36   warning  'isToday' is defined but never used                              @typescript-eslint/no-unused-vars
+   53:45   warning  'isTomorrow' is defined but never used                           @typescript-eslint/no-unused-vars
+   53:113  warning  'addDays' is defined but never used                              @typescript-eslint/no-unused-vars
+  362:22   warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  528:125  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  528:132  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  550:73   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/home/dg/controle-financeiro/app/(dashboard)/cartoes/page.tsx
+   16:5   warning  'DialogTrigger' is defined but never used  @typescript-eslint/no-unused-vars
+  504:43  warning  'Icon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/categorias/page.tsx
+  16:5  warning  'DialogTrigger' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/configuracoes/page.tsx
+   72:25  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  100:8   warning  React Hook useEffect has a missing dependency: 'fetchPeople'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  110:18  warning  'error' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  123:18  warning  'error' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/contas/page.tsx
+   3:20  warning  'useEffect' is defined but never used      @typescript-eslint/no-unused-vars
+  16:5   warning  'DialogTrigger' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/dashboard/page.tsx
+   3:20  warning  'useEffect' is defined but never used          @typescript-eslint/no-unused-vars
+  67:11  warning  'economia' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/despesas/page.tsx
+   25:10  warning  'Badge' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   53:41  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `user`, but the source dependencies were [user?.uid]. Inferred less specific property than source.
+
+/home/dg/controle-financeiro/app/(dashboard)/despesas/page.tsx:53:41
+  51 |
+  52 |     // Buscar categorias do Firestore
+> 53 |     const fetchCategories = useCallback(async () => {
+     |                                         ^^^^^^^^^^^^^
+> 54 |         if (!user?.uid) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |         try {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             const data = await getCategories(user.uid);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 57 |             setCategories(data.filter(c => c.type === "despesa"));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |         } catch (error) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |             console.error("Erro ao buscar categorias:", error);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |     }, [user?.uid]);
+     | ^^^^^^ Could not preserve existing manual memoization
+  62 |
+  63 |     useEffect(() => {
+  64 |         fetchCategories();  react-hooks/preserve-manual-memoization
+   64:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/app/(dashboard)/despesas/page.tsx:64:9
+  62 |
+  63 |     useEffect(() => {
+> 64 |         fetchCategories();
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  65 |     }, [fetchCategories]);
+  66 |
+  67 |     const filteredDespesas = despesas.filter(d =>                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/set-state-in-effect
+  180:43  warning  'categoryName' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/metas/page.tsx
+   81:7   warning  'formatDate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  149:29  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+/home/dg/controle-financeiro/app/(dashboard)/receitas/page.tsx
+   25:10  warning  'Badge' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   53:41  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `user`, but the source dependencies were [user?.uid]. Inferred less specific property than source.
+
+/home/dg/controle-financeiro/app/(dashboard)/receitas/page.tsx:53:41
+  51 |
+  52 |     // Buscar categorias do Firestore
+> 53 |     const fetchCategories = useCallback(async () => {
+     |                                         ^^^^^^^^^^^^^
+> 54 |         if (!user?.uid) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |         try {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             const data = await getCategories(user.uid);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 57 |             setCategories(data.filter(c => c.type === "receita"));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |         } catch (error) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |             console.error("Erro ao buscar categorias:", error);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |     }, [user?.uid]);
+     | ^^^^^^ Could not preserve existing manual memoization
+  62 |
+  63 |     useEffect(() => {
+  64 |         fetchCategories();  react-hooks/preserve-manual-memoization
+   64:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/app/(dashboard)/receitas/page.tsx:64:9
+  62 |
+  63 |     useEffect(() => {
+> 64 |         fetchCategories();
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  65 |     }, [fetchCategories]);
+  66 |
+  67 |     const filteredReceitas = receitas.filter(r =>                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/set-state-in-effect
+  180:43  warning  'categoryName' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/app/(dashboard)/relatorios/page.tsx
+   5:10   warning  'Button' is defined but never used        @typescript-eslint/no-unused-vars
+  12:5    warning  'Download' is defined but never used      @typescript-eslint/no-unused-vars
+  33:10   warning  'startOfMonth' is defined but never used  @typescript-eslint/no-unused-vars
+  33:24   warning  'endOfMonth' is defined but never used    @typescript-eslint/no-unused-vars
+  33:36   warning  'subMonths' is defined but never used     @typescript-eslint/no-unused-vars
+  54:145  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/dg/controle-financeiro/app/(dashboard)/transacoes/page.tsx
+  72:41  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `user`, but the source dependencies were [user?.uid]. Inferred less specific property than source.
+
+/home/dg/controle-financeiro/app/(dashboard)/transacoes/page.tsx:72:41
+  70 |
+  71 |     // Buscar categorias do Firestore
+> 72 |     const fetchCategories = useCallback(async () => {
+     |                                         ^^^^^^^^^^^^^
+> 73 |         if (!user?.uid) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 74 |         try {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 75 |             const data = await getCategories(user.uid);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 76 |             setCategories(data);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 77 |         } catch (error) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 78 |             console.error("Erro ao buscar categorias:", error);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 79 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 80 |     }, [user?.uid]);
+     | ^^^^^^ Could not preserve existing manual memoization
+  81 |
+  82 |     useEffect(() => {
+  83 |         fetchCategories();  react-hooks/preserve-manual-memoization
+  83:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/app/(dashboard)/transacoes/page.tsx:83:9
+  81 |
+  82 |     useEffect(() => {
+> 83 |         fetchCategories();
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  84 |     }, [fetchCategories]);
+  85 |
+  86 |     // Filtrar transações por mês, ano e tipo                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/set-state-in-effect
+
+/home/dg/controle-financeiro/components/AlertTicker.tsx
+    7:29   warning  'getGoals' is defined but never used         @typescript-eslint/no-unused-vars
+    7:39   warning  'updateGoal' is defined but never used       @typescript-eslint/no-unused-vars
+   10:10   warning  'AlertCircle' is defined but never used      @typescript-eslint/no-unused-vars
+   10:23   warning  'Calendar' is defined but never used         @typescript-eslint/no-unused-vars
+   10:33   warning  'Clock' is defined but never used            @typescript-eslint/no-unused-vars
+   10:109  warning  'X' is defined but never used                @typescript-eslint/no-unused-vars
+   41:11   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  200:27   warning  'verb' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/components/Header.tsx
+  14:16  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+  15:10  warning  'Input' is defined but never used   @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/components/InsightsCarousel.tsx
+  57:11  warning  'despesasVariaveis' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  59:11  warning  'receitaFixa' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/components/RecurringModal.tsx
+  42:50  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  76:8   warning  React Hook useEffect has a missing dependency: 'loadCategories'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/dg/controle-financeiro/components/Sidebar.tsx
+  10:5   warning  'TrendingUp' is defined but never used            @typescript-eslint/no-unused-vars
+  11:5   warning  'TrendingDown' is defined but never used          @typescript-eslint/no-unused-vars
+  15:5   warning  'LogOut' is defined but never used                @typescript-eslint/no-unused-vars
+  17:5   warning  'ChevronLeft' is defined but never used           @typescript-eslint/no-unused-vars
+  18:5   warning  'ChevronRight' is defined but never used          @typescript-eslint/no-unused-vars
+  25:10  warning  'Button' is defined but never used                @typescript-eslint/no-unused-vars
+  26:10  warning  'Avatar' is defined but never used                @typescript-eslint/no-unused-vars
+  26:18  warning  'AvatarFallback' is defined but never used        @typescript-eslint/no-unused-vars
+  26:34  warning  'AvatarImage' is defined but never used           @typescript-eslint/no-unused-vars
+  28:10  warning  'useState' is defined but never used              @typescript-eslint/no-unused-vars
+  93:13  warning  'user' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  93:19  warning  'signOut' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  95:11  warning  'getInitials' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/components/TransactionModal.tsx
+   33:5   warning  'Calendar' is defined but never used                    @typescript-eslint/no-unused-vars
+   46:35  warning  'updateRecurringTransaction' is defined but never used  @typescript-eslint/no-unused-vars
+   48:10  warning  'addTransaction' is defined but never used              @typescript-eslint/no-unused-vars
+   51:10  warning  'Repeat' is defined but never used                      @typescript-eslint/no-unused-vars
+   57:19  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   78:12  warning  'loadingPeople' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  889:59  warning  'bank' is assigned a value but never used               @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/hooks/useAccounts.ts
+  17:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/hooks/useAccounts.ts:17:13
+  15 |     useEffect(() => {
+  16 |         if (!user?.uid) {
+> 17 |             setAccounts([]);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |             setLoading(false);
+  19 |             return;
+  20 |         }  react-hooks/set-state-in-effect
+
+/home/dg/controle-financeiro/hooks/usePeople.ts
+  17:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/hooks/usePeople.ts:17:13
+  15 |     useEffect(() => {
+  16 |         if (!user?.uid) {
+> 17 |             setPeople([]);
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |             setLoading(false);
+  19 |             return;
+  20 |         }  react-hooks/set-state-in-effect
+
+/home/dg/controle-financeiro/hooks/useRecurring.ts
+  17:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/hooks/useRecurring.ts:17:13
+  15 |     useEffect(() => {
+  16 |         if (!user?.uid) {
+> 17 |             setRecurring([]);
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |             setLoading(false);
+  19 |             return;
+  20 |         }  react-hooks/set-state-in-effect
+  50:41  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+
+/home/dg/controle-financeiro/hooks/useTransactions.ts
+   3:31  warning  'useCallback' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   6:10  warning  'getTransactions' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  15:19  warning  'setError' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  20:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dg/controle-financeiro/hooks/useTransactions.ts:20:9
+  18 |         if (!user?.uid) return;
+  19 |
+> 20 |         setLoading(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  21 |         const q = query(
+  22 |             collection(db, "transactions"),
+  23 |             where("userId", "==", user.uid),  react-hooks/set-state-in-effect
+
+/home/dg/controle-financeiro/lib/accounts.ts
+  10:5  warning  'orderBy' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/lib/creditCards.ts
+  10:5  warning  'orderBy' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/lib/icons.ts
+   60:5   warning  'FolderOpen' is defined but never used       @typescript-eslint/no-unused-vars
+   66:5   warning  'Compass' is defined but never used          @typescript-eslint/no-unused-vars
+   73:5   warning  'Crosshair' is defined but never used        @typescript-eslint/no-unused-vars
+   89:5   warning  'Anchor' is defined but never used           @typescript-eslint/no-unused-vars
+   92:5   warning  'Satellite' is defined but never used        @typescript-eslint/no-unused-vars
+  100:5   warning  'Mic' is defined but never used              @typescript-eslint/no-unused-vars
+  103:5   warning  'Clapperboard' is defined but never used     @typescript-eslint/no-unused-vars
+  109:5   warning  'Cookie' is defined but never used           @typescript-eslint/no-unused-vars
+  111:5   warning  'Banana' is defined but never used           @typescript-eslint/no-unused-vars
+  112:5   warning  'Cherry' is defined but never used           @typescript-eslint/no-unused-vars
+  113:5   warning  'Grape' is defined but never used            @typescript-eslint/no-unused-vars
+  124:5   warning  'Lollipop' is defined but never used         @typescript-eslint/no-unused-vars
+  127:16  warning  'ReceiptIcon' is defined but never used      @typescript-eslint/no-unused-vars
+  134:17  warning  'BanknoteIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  135:18  warning  'HandCoinsIcon' is defined but never used    @typescript-eslint/no-unused-vars
+  136:17  warning  'LandmarkIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  142:5   warning  'QrCode' is defined but never used           @typescript-eslint/no-unused-vars
+  143:5   warning  'ScanLine' is defined but never used         @typescript-eslint/no-unused-vars
+  149:5   warning  'MemoryStick' is defined but never used      @typescript-eslint/no-unused-vars
+  152:14  warning  'CloudIcon' is defined but never used        @typescript-eslint/no-unused-vars
+  156:5   warning  'Fingerprint' is defined but never used      @typescript-eslint/no-unused-vars
+  157:5   warning  'Eye' is defined but never used              @typescript-eslint/no-unused-vars
+  158:5   warning  'EyeOff' is defined but never used           @typescript-eslint/no-unused-vars
+  160:5   warning  'BellRing' is defined but never used         @typescript-eslint/no-unused-vars
+  163:5   warning  'MessageCircle' is defined but never used    @typescript-eslint/no-unused-vars
+  165:5   warning  'Inbox' is defined but never used            @typescript-eslint/no-unused-vars
+  166:5   warning  'AtSign' is defined but never used           @typescript-eslint/no-unused-vars
+  167:5   warning  'Hash' is defined but never used             @typescript-eslint/no-unused-vars
+  168:5   warning  'Link' is defined but never used             @typescript-eslint/no-unused-vars
+  169:5   warning  'Paperclip' is defined but never used        @typescript-eslint/no-unused-vars
+  174:5   warning  'FolderPlus' is defined but never used       @typescript-eslint/no-unused-vars
+  175:5   warning  'FolderMinus' is defined but never used      @typescript-eslint/no-unused-vars
+  176:19  warning  'FolderOpenIcon' is defined but never used   @typescript-eslint/no-unused-vars
+  178:5   warning  'FilePlus' is defined but never used         @typescript-eslint/no-unused-vars
+  179:5   warning  'FileEdit' is defined but never used         @typescript-eslint/no-unused-vars
+  180:5   warning  'FileCheck' is defined but never used        @typescript-eslint/no-unused-vars
+  181:5   warning  'Files' is defined but never used            @typescript-eslint/no-unused-vars
+  183:5   warning  'ClipboardCheck' is defined but never used   @typescript-eslint/no-unused-vars
+  185:5   warning  'CalendarDays' is defined but never used     @typescript-eslint/no-unused-vars
+  186:5   warning  'CalendarClock' is defined but never used    @typescript-eslint/no-unused-vars
+  189:5   warning  'Hourglass' is defined but never used        @typescript-eslint/no-unused-vars
+  190:5   warning  'AlarmClock' is defined but never used       @typescript-eslint/no-unused-vars
+  191:5   warning  'History' is defined but never used          @typescript-eslint/no-unused-vars
+  192:5   warning  'Repeat' is defined but never used           @typescript-eslint/no-unused-vars
+  193:5   warning  'RefreshCw' is defined but never used        @typescript-eslint/no-unused-vars
+  194:5   warning  'RotateCw' is defined but never used         @typescript-eslint/no-unused-vars
+  195:5   warning  'Download' is defined but never used         @typescript-eslint/no-unused-vars
+  196:5   warning  'Upload' is defined but never used           @typescript-eslint/no-unused-vars
+  197:5   warning  'Share' is defined but never used            @typescript-eslint/no-unused-vars
+  198:5   warning  'Share2' is defined but never used           @typescript-eslint/no-unused-vars
+  199:5   warning  'Copy' is defined but never used             @typescript-eslint/no-unused-vars
+  200:5   warning  'Clipboard' is defined but never used        @typescript-eslint/no-unused-vars
+  201:5   warning  'Crop' is defined but never used             @typescript-eslint/no-unused-vars
+  202:5   warning  'Move' is defined but never used             @typescript-eslint/no-unused-vars
+  203:5   warning  'ZoomIn' is defined but never used           @typescript-eslint/no-unused-vars
+  204:5   warning  'ZoomOut' is defined but never used          @typescript-eslint/no-unused-vars
+  205:5   warning  'Maximize' is defined but never used         @typescript-eslint/no-unused-vars
+  206:5   warning  'Minimize' is defined but never used         @typescript-eslint/no-unused-vars
+  207:5   warning  'ArrowUp' is defined but never used          @typescript-eslint/no-unused-vars
+  208:5   warning  'ArrowDown' is defined but never used        @typescript-eslint/no-unused-vars
+  209:5   warning  'ArrowLeft' is defined but never used        @typescript-eslint/no-unused-vars
+  210:5   warning  'ArrowRight' is defined but never used       @typescript-eslint/no-unused-vars
+  211:5   warning  'ChevronUp' is defined but never used        @typescript-eslint/no-unused-vars
+  212:5   warning  'ChevronDown' is defined but never used      @typescript-eslint/no-unused-vars
+  213:5   warning  'ChevronLeft' is defined but never used      @typescript-eslint/no-unused-vars
+  214:5   warning  'ChevronRight' is defined but never used     @typescript-eslint/no-unused-vars
+  215:5   warning  'ChevronsUp' is defined but never used       @typescript-eslint/no-unused-vars
+  216:5   warning  'ChevronsDown' is defined but never used     @typescript-eslint/no-unused-vars
+  217:5   warning  'CornerDownRight' is defined but never used  @typescript-eslint/no-unused-vars
+  218:5   warning  'CornerUpLeft' is defined but never used     @typescript-eslint/no-unused-vars
+  219:5   warning  'Shuffle' is defined but never used          @typescript-eslint/no-unused-vars
+  220:5   warning  'Repeat1' is defined but never used          @typescript-eslint/no-unused-vars
+  221:5   warning  'Play' is defined but never used             @typescript-eslint/no-unused-vars
+  222:5   warning  'Pause' is defined but never used            @typescript-eslint/no-unused-vars
+  223:5   warning  'SkipBack' is defined but never used         @typescript-eslint/no-unused-vars
+  224:5   warning  'SkipForward' is defined but never used      @typescript-eslint/no-unused-vars
+  225:5   warning  'FastForward' is defined but never used      @typescript-eslint/no-unused-vars
+  226:5   warning  'Rewind' is defined but never used           @typescript-eslint/no-unused-vars
+  227:5   warning  'Volume' is defined but never used           @typescript-eslint/no-unused-vars
+  228:5   warning  'Volume1' is defined but never used          @typescript-eslint/no-unused-vars
+  229:5   warning  'Volume2' is defined but never used          @typescript-eslint/no-unused-vars
+  230:5   warning  'VolumeX' is defined but never used          @typescript-eslint/no-unused-vars
+  231:5   warning  'Smile' is defined but never used            @typescript-eslint/no-unused-vars
+  232:5   warning  'Frown' is defined but never used            @typescript-eslint/no-unused-vars
+  233:5   warning  'Meh' is defined but never used              @typescript-eslint/no-unused-vars
+  238:5   warning  'UserPlus' is defined but never used         @typescript-eslint/no-unused-vars
+  239:5   warning  'UserMinus' is defined but never used        @typescript-eslint/no-unused-vars
+  240:5   warning  'UserCheck' is defined but never used        @typescript-eslint/no-unused-vars
+  241:5   warning  'UserX' is defined but never used            @typescript-eslint/no-unused-vars
+  242:5   warning  'Users2' is defined but never used           @typescript-eslint/no-unused-vars
+  243:5   warning  'Contact' is defined but never used          @typescript-eslint/no-unused-vars
+  244:5   warning  'Contact2' is defined but never used         @typescript-eslint/no-unused-vars
+  245:5   warning  'PersonStanding' is defined but never used   @typescript-eslint/no-unused-vars
+  246:5   warning  'Accessibility' is defined but never used    @typescript-eslint/no-unused-vars
+  255:5   warning  'Bone' is defined but never used             @typescript-eslint/no-unused-vars
+  256:5   warning  'Footprints' is defined but never used       @typescript-eslint/no-unused-vars
+  257:5   warning  'Hand' is defined but never used             @typescript-eslint/no-unused-vars
+  258:5   warning  'Ear' is defined but never used              @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/lib/recurring.ts
+  2:97  warning  'Timestamp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/dg/controle-financeiro/lib/settings.ts
+   2:45  warning  'deleteDoc' is defined but never used     @typescript-eslint/no-unused-vars
+   2:56  warning  'doc' is defined but never used           @typescript-eslint/no-unused-vars
+  30:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:27  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 184 problems (21 errors, 163 warnings)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

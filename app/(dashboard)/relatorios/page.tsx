@@ -51,13 +51,13 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload?: any }>; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload?: { fill?: string;[key: string]: unknown } }>; label?: string }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 shadow-xl">
                 <p className="text-zinc-400 text-sm mb-2">{label}</p>
                 {payload.map((entry, index) => (
-                    <p key={index} className="text-sm" style={{ color: entry.color || entry.payload.fill || "#fff" }}>
+                    <p key={index} className="text-sm" style={{ color: entry.color || (entry.payload && entry.payload.fill) || "#fff" }}>
                         {entry.name}: {formatCurrency(entry.value)}
                     </p>
                 ))}

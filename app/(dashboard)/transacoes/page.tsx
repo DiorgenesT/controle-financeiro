@@ -69,19 +69,18 @@ export default function TransacoesPage() {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     // Buscar categorias do Firestore
-    const fetchCategories = useCallback(async () => {
-        if (!user?.uid) return;
-        try {
-            const data = await getCategories(user.uid);
-            setCategories(data);
-        } catch (error) {
-            console.error("Erro ao buscar categorias:", error);
-        }
-    }, [user?.uid]);
-
     useEffect(() => {
+        async function fetchCategories() {
+            if (!user?.uid) return;
+            try {
+                const data = await getCategories(user.uid);
+                setCategories(data);
+            } catch (error) {
+                console.error("Erro ao buscar categorias:", error);
+            }
+        }
         fetchCategories();
-    }, [fetchCategories]);
+    }, [user?.uid]);
 
     // Filtrar transações por mês, ano e tipo
     const filteredTransactions = useMemo(() => {

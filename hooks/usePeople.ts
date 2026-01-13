@@ -13,12 +13,9 @@ export function usePeople() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user?.uid) {
-            setPeople([]);
-            setLoading(false);
-            return;
-        }
+        if (!user?.uid) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         const q = query(
             collection(db, "people"),
@@ -42,8 +39,8 @@ export function usePeople() {
     }, [user?.uid]);
 
     return {
-        people,
-        loading,
+        people: user?.uid ? people : [],
+        loading: user?.uid ? loading : false,
         addPerson,
         deletePerson
     };

@@ -13,12 +13,9 @@ export function useRecurring() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user?.uid) {
-            setRecurring([]);
-            setLoading(false);
-            return;
-        }
+        if (!user?.uid) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         const q = query(
             collection(db, "recurring_transactions"),
@@ -45,9 +42,9 @@ export function useRecurring() {
     }, [user?.uid]);
 
     return {
-        recurring,
-        loading,
-        addRecurringTransaction: (data: any) =>
+        recurring: user?.uid ? recurring : [],
+        loading: user?.uid ? loading : false,
+        addRecurringTransaction: (data: Omit<RecurringTransaction, "id" | "createdAt" | "updatedAt" | "lastProcessedDate">) =>
             user?.uid ? addRecurringTransaction(user.uid, data) : Promise.reject("Usuário não autenticado"),
         updateRecurringTransaction,
         deleteRecurringTransaction

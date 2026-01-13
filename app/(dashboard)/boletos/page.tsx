@@ -525,7 +525,7 @@ export default function BoletosPage() {
                 <div className="flex items-center justify-between bg-zinc-900/30 border border-zinc-800 border-dashed rounded-xl px-4 py-3">
                     <div className="flex items-center gap-3 text-zinc-400">
                         <Barcode className="w-5 h-5" />
-                        <span className="text-sm">Para adicionar um novo boleto, crie uma transação com método de pagamento "Boleto"</span>
+                        <span className="text-sm">Para adicionar um novo boleto, crie uma transação com método de pagamento &quot;Boleto&quot;</span>
                     </div>
                     <Link href="/transacoes">
                         <Button variant="ghost" size="sm" className="text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
@@ -547,7 +547,7 @@ export default function BoletosPage() {
                                 className="pl-10 bg-zinc-900 border-zinc-800 text-white"
                             />
                         </div>
-                        <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                        <Select value={statusFilter} onValueChange={(v: "all" | "pending" | "paid" | "overdue") => setStatusFilter(v)}>
                             <SelectTrigger className="w-[140px] bg-zinc-900 border-zinc-800 text-white">
                                 <SelectValue placeholder="Status" />
                             </SelectTrigger>

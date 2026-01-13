@@ -44,7 +44,7 @@ import { getPeople } from "@/lib/people";
 import { getBankByCode } from "@/lib/banks";
 import { getIconById } from "@/lib/icons";
 import { addRecurringTransaction, updateRecurringTransaction } from "@/lib/recurring";
-import { PaymentMethod, BoletoStatus, Person, Goal } from "@/types";
+import { PaymentMethod, BoletoStatus, Person, Goal, Transaction } from "@/types";
 import { addTransaction, getGoals, updateGoal } from "@/lib/firestore";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -54,7 +54,7 @@ interface TransactionModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     type?: "receita" | "despesa";
-    initialData?: any; // Usar Transaction type se possível, mas any evita conflito circular se não importado
+    initialData?: Transaction | null;
     defaultPaymentMethod?: PaymentMethod;
 }
 
@@ -101,7 +101,7 @@ export function TransactionModal({
                             return new Date().toISOString().split("T")[0];
                         }
                     })(),
-                    paymentMethod: initialData.paymentMethod,
+                    paymentMethod: initialData.paymentMethod || "debit",
                     accountId: initialData.accountId || "",
                     creditCardId: initialData.creditCardId || "",
                     installments: initialData.installments || 1,
@@ -156,7 +156,7 @@ export function TransactionModal({
         amount: "",
         category: "",
         date: new Date().toISOString().split("T")[0],
-        paymentMethod: defaultPaymentMethod || "debit" as PaymentMethod,
+        paymentMethod: (defaultPaymentMethod || "debit") as PaymentMethod,
         accountId: "",
         creditCardId: "",
         installments: 1,
@@ -374,12 +374,12 @@ export function TransactionModal({
                     if (linkedGoal) {
                         const newAmount = Math.max(0, linkedGoal.currentAmount - amount);
                         const newStatus = newAmount >= linkedGoal.targetAmount ? "concluida" : "em_progresso";
-                        
+
                         await updateGoal(linkedGoal.id, {
                             currentAmount: newAmount,
                             status: newStatus
                         });
-                        
+
                         // Atualizar estado local das metas para refletir mudança imediata se modal reabrir
                         setGoals(prev => prev.map(g => g.id === linkedGoal.id ? { ...g, currentAmount: newAmount, status: newStatus } : g));
                     }
@@ -435,12 +435,12 @@ export function TransactionModal({
                             if (linkedGoal) {
                                 const newAmount = Math.max(0, linkedGoal.currentAmount - amount);
                                 const newStatus = newAmount >= linkedGoal.targetAmount ? "concluida" : "em_progresso";
-                                
+
                                 await updateGoal(linkedGoal.id, {
                                     currentAmount: newAmount,
                                     status: newStatus
                                 });
-                                
+
                                 // Atualizar estado local das metas
                                 setGoals(prev => prev.map(g => g.id === linkedGoal.id ? { ...g, currentAmount: newAmount, status: newStatus } : g));
                             }

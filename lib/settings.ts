@@ -1,5 +1,5 @@
 import { db, auth } from "./firebase";
-import { collection, query, where, getDocs, deleteDoc, doc, writeBatch } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc, writeBatch, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 
 // Coleções para limpar
@@ -27,8 +27,8 @@ export async function resetUserData(userId: string): Promise<void> {
         if (snapshot.empty) continue;
 
         // Deletar em batches de 500
-        const chunks: any[][] = [];
-        let currentChunk: any[] = [];
+        const chunks: QueryDocumentSnapshot<DocumentData>[][] = [];
+        let currentChunk: QueryDocumentSnapshot<DocumentData>[] = [];
 
         snapshot.docs.forEach(doc => {
             currentChunk.push(doc);
@@ -41,7 +41,7 @@ export async function resetUserData(userId: string): Promise<void> {
 
         for (const chunk of chunks) {
             const batch = writeBatch(db);
-            chunk.forEach(docSnap => {
+            chunk.forEach((docSnap: QueryDocumentSnapshot<DocumentData>) => {
                 batch.delete(docSnap.ref);
             });
             await batch.commit();

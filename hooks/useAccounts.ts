@@ -13,12 +13,9 @@ export function useAccounts() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user?.uid) {
-            setAccounts([]);
-            setLoading(false);
-            return;
-        }
+        if (!user?.uid) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         const q = query(
             collection(db, "accounts"),
@@ -44,8 +41,8 @@ export function useAccounts() {
     }, [user?.uid]);
 
     return {
-        accounts,
-        loading,
+        accounts: user?.uid ? accounts : [],
+        loading: user?.uid ? loading : false,
         createAccount: (data: Omit<Account, "id" | "userId" | "createdAt" | "updatedAt">) =>
             user?.uid ? createAccount(user.uid, data) : Promise.reject("Usuário não autenticado"),
         updateAccount,

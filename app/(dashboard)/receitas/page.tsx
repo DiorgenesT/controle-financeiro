@@ -50,19 +50,18 @@ export default function ReceitasPage() {
     const [categories, setCategories] = useState<Category[]>([]);
 
     // Buscar categorias do Firestore
-    const fetchCategories = useCallback(async () => {
-        if (!user?.uid) return;
-        try {
-            const data = await getCategories(user.uid);
-            setCategories(data.filter(c => c.type === "receita"));
-        } catch (error) {
-            console.error("Erro ao buscar categorias:", error);
-        }
-    }, [user?.uid]);
-
     useEffect(() => {
+        async function fetchCategories() {
+            if (!user?.uid) return;
+            try {
+                const data = await getCategories(user.uid);
+                setCategories(data.filter(c => c.type === "receita"));
+            } catch (error) {
+                console.error("Erro ao buscar categorias:", error);
+            }
+        }
         fetchCategories();
-    }, [fetchCategories]);
+    }, [user?.uid]);
 
     const filteredReceitas = receitas.filter(r =>
         r.description.toLowerCase().includes(searchTerm.toLowerCase())

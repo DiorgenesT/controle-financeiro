@@ -50,19 +50,18 @@ export default function DespesasPage() {
     const [categories, setCategories] = useState<Category[]>([]);
 
     // Buscar categorias do Firestore
-    const fetchCategories = useCallback(async () => {
-        if (!user?.uid) return;
-        try {
-            const data = await getCategories(user.uid);
-            setCategories(data.filter(c => c.type === "despesa"));
-        } catch (error) {
-            console.error("Erro ao buscar categorias:", error);
-        }
-    }, [user?.uid]);
-
     useEffect(() => {
+        async function fetchCategories() {
+            if (!user?.uid) return;
+            try {
+                const data = await getCategories(user.uid);
+                setCategories(data.filter(c => c.type === "despesa"));
+            } catch (error) {
+                console.error("Erro ao buscar categorias:", error);
+            }
+        }
         fetchCategories();
-    }, [fetchCategories]);
+    }, [user?.uid]);
 
     const filteredDespesas = despesas.filter(d =>
         d.description.toLowerCase().includes(searchTerm.toLowerCase())

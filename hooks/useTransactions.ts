@@ -17,6 +17,7 @@ export function useTransactions() {
     useEffect(() => {
         if (!user?.uid) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         const q = query(
             collection(db, "transactions"),
@@ -93,13 +94,13 @@ export function useTransactions() {
     const saldo = totalReceitas - totalDespesas;
 
     return {
-        transactions,
-        receitas,
-        despesas,
-        totalReceitas,
-        totalDespesas,
-        saldo,
-        loading,
+        transactions: user?.uid ? transactions : [],
+        receitas: user?.uid ? receitas : [],
+        despesas: user?.uid ? despesas : [],
+        totalReceitas: user?.uid ? totalReceitas : 0,
+        totalDespesas: user?.uid ? totalDespesas : 0,
+        saldo: user?.uid ? saldo : 0,
+        loading: user?.uid ? loading : false,
         error,
         add,
         remove,

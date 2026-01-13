@@ -69,12 +69,13 @@ export default function ConfiguracoesPage() {
             setShowResetModal(false);
             setResetPassword("");
             window.location.reload();
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            if (error.code === 'auth/wrong-password') {
+            const firebaseError = error as { code?: string; message: string };
+            if (firebaseError.code === 'auth/wrong-password') {
                 toast.error("Senha incorreta");
             } else {
-                toast.error("Erro ao resetar dados: " + error.message);
+                toast.error("Erro ao resetar dados: " + firebaseError.message);
             }
         } finally {
             setResetting(false);
