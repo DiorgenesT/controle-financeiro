@@ -247,14 +247,14 @@ export default function ContasPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Contas" />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-zinc-400">
+                        <p className="text-muted-foreground">
                             Gerencie suas contas bancárias e carteiras digitais
                         </p>
                     </div>
@@ -263,7 +263,7 @@ export default function ContasPage() {
                         <Button
                             onClick={() => setTransferDialog(prev => ({ ...prev, open: true }))}
                             variant="outline"
-                            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                            className="border-input text-muted-foreground hover:bg-accent hover:text-foreground"
                         >
                             <ArrowRightLeft className="w-4 h-4 mr-2" />
                             Transferir
@@ -278,33 +278,33 @@ export default function ContasPage() {
                     </div>
 
                     <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+                        <DialogContent className="bg-background border-border max-w-md">
                             <DialogHeader>
-                                <DialogTitle className="text-white">
+                                <DialogTitle className="text-foreground">
                                     {editingAccount ? "Editar Conta" : "Nova Conta"}
                                 </DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogDescription className="text-muted-foreground">
                                     {editingAccount ? "Altere os dados da conta" : "Adicione uma nova conta bancária"}
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Banco/Instituição</Label>
+                                    <Label className="text-muted-foreground">Banco/Instituição</Label>
                                     <Select
                                         value={formData.bankCode}
                                         onValueChange={(v) => setFormData({ ...formData, bankCode: v })}
                                     >
-                                        <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                        <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800 max-h-60">
+                                        <SelectContent className="bg-background border-border max-h-60">
                                             {BANKS.map((bank) => {
                                                 const Icon = getIconById(bank.icon);
                                                 return (
                                                     <SelectItem
                                                         key={bank.code}
                                                         value={bank.code}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-accent focus:text-foreground"
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <div
@@ -323,31 +323,31 @@ export default function ContasPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Nome da Conta (opcional)</Label>
+                                    <Label className="text-muted-foreground">Nome da Conta (opcional)</Label>
                                     <Input
                                         placeholder={getBankByCode(formData.bankCode).name}
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Tipo</Label>
+                                        <Label className="text-muted-foreground">Tipo</Label>
                                         <Select
                                             value={formData.type}
                                             onValueChange={(v) => setFormData({ ...formData, type: v as Account["type"] })}
                                         >
-                                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                            <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            <SelectContent className="bg-background border-border">
                                                 {ACCOUNT_TYPES.map((type) => (
                                                     <SelectItem
                                                         key={type.value}
                                                         value={type.value}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-accent focus:text-foreground"
                                                     >
                                                         {type.label}
                                                     </SelectItem>
@@ -357,14 +357,14 @@ export default function ContasPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Saldo Inicial</Label>
+                                        <Label className="text-muted-foreground">Saldo Inicial</Label>
                                         <Input
                                             type="number"
                                             step="0.01"
                                             placeholder="0,00"
                                             value={formData.balance}
                                             onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                         />
                                     </div>
                                 </div>
@@ -374,14 +374,14 @@ export default function ContasPage() {
                                         type="checkbox"
                                         checked={formData.isDefault}
                                         onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                                        className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500 focus:ring-emerald-500"
+                                        className="w-4 h-4 rounded border-input bg-muted text-emerald-500 focus:ring-emerald-500"
                                     />
-                                    <span className="text-sm text-zinc-300">Definir como conta padrão</span>
+                                    <span className="text-sm text-muted-foreground">Definir como conta padrão</span>
                                 </label>
 
                                 {/* Preview */}
-                                <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                                    <p className="text-xs text-zinc-400 mb-2">Preview:</p>
+                                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                                    <p className="text-xs text-muted-foreground mb-2">Preview:</p>
                                     <div className="flex items-center gap-3">
                                         <div
                                             className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -393,10 +393,10 @@ export default function ContasPage() {
                                             })()}
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium">
+                                            <p className="text-foreground font-medium">
                                                 {formData.name || getBankByCode(formData.bankCode).name}
                                             </p>
-                                            <p className="text-xs text-zinc-400">
+                                            <p className="text-xs text-muted-foreground">
                                                 {getAccountTypeLabel(formData.type)}
                                             </p>
                                         </div>
@@ -404,7 +404,7 @@ export default function ContasPage() {
                                 </div>
 
                                 <DialogFooter>
-                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-zinc-400">
+                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-muted-foreground">
                                         Cancelar
                                     </Button>
                                     <Button type="submit" disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -417,27 +417,27 @@ export default function ContasPage() {
                     </Dialog>
 
                     <Dialog open={transferDialog.open} onOpenChange={(open) => setTransferDialog(prev => ({ ...prev, open }))}>
-                        <DialogContent className="bg-zinc-900 border-zinc-800">
+                        <DialogContent className="bg-background border-border">
                             <DialogHeader>
-                                <DialogTitle className="text-white">Transferência entre Contas</DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogTitle className="text-foreground">Transferência entre Contas</DialogTitle>
+                                <DialogDescription className="text-muted-foreground">
                                     Mova dinheiro entre suas contas
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">De (Origem)</Label>
+                                        <Label className="text-muted-foreground">De (Origem)</Label>
                                         <Select
                                             value={transferDialog.sourceId}
                                             onValueChange={(value) => setTransferDialog(prev => ({ ...prev, sourceId: value }))}
                                         >
-                                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                            <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                                 <SelectValue placeholder="Selecione" />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            <SelectContent className="bg-background border-border">
                                                 {accounts.map((account) => (
-                                                    <SelectItem key={account.id} value={account.id} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">
+                                                    <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
                                                         {account.name} ({formatCurrency(account.balance)})
                                                     </SelectItem>
                                                 ))}
@@ -445,19 +445,19 @@ export default function ContasPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Para (Destino)</Label>
+                                        <Label className="text-muted-foreground">Para (Destino)</Label>
                                         <Select
                                             value={transferDialog.targetId}
                                             onValueChange={(value) => setTransferDialog(prev => ({ ...prev, targetId: value }))}
                                         >
-                                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                            <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                                 <SelectValue placeholder="Selecione" />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            <SelectContent className="bg-background border-border">
                                                 {accounts
                                                     .filter(a => a.id !== transferDialog.sourceId)
                                                     .map((account) => (
-                                                        <SelectItem key={account.id} value={account.id} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">
+                                                        <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
                                                             {account.name}
                                                         </SelectItem>
                                                     ))}
@@ -468,7 +468,7 @@ export default function ContasPage() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Valor</Label>
+                                        <Label className="text-muted-foreground">Valor</Label>
                                         <Input
                                             type="number"
                                             step="0.01"
@@ -476,32 +476,32 @@ export default function ContasPage() {
                                             placeholder="0,00"
                                             value={transferDialog.amount}
                                             onChange={(e) => setTransferDialog(prev => ({ ...prev, amount: e.target.value }))}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Data</Label>
+                                        <Label className="text-muted-foreground">Data</Label>
                                         <Input
                                             type="date"
                                             value={transferDialog.date}
                                             onChange={(e) => setTransferDialog(prev => ({ ...prev, date: e.target.value }))}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Descrição</Label>
+                                    <Label className="text-muted-foreground">Descrição</Label>
                                     <Input
                                         placeholder="Ex: Transferência para poupança"
                                         value={transferDialog.description}
                                         onChange={(e) => setTransferDialog(prev => ({ ...prev, description: e.target.value }))}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                     />
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="ghost" onClick={() => setTransferDialog(prev => ({ ...prev, open: false }))} className="text-zinc-400">
+                                <Button variant="ghost" onClick={() => setTransferDialog(prev => ({ ...prev, open: false }))} className="text-muted-foreground">
                                     Cancelar
                                 </Button>
                                 <Button onClick={handleTransfer} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -514,37 +514,39 @@ export default function ContasPage() {
                 </div>
 
                 {/* Saldo Total */}
-                <Card className="bg-gradient-to-br from-emerald-900/30 to-zinc-900/50 border-emerald-800/50">
+                <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none shadow-lg shadow-emerald-500/20">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-emerald-400">Saldo Total em Contas</p>
+                                <p className="text-sm text-white/80 font-medium">Saldo Total em Contas</p>
                                 {loading ? (
-                                    <div className="h-9 w-40 bg-zinc-800 rounded animate-pulse mt-1" />
+                                    <div className="h-9 w-40 bg-white/20 rounded animate-pulse mt-1" />
                                 ) : (
-                                    <p className={`text-3xl font-bold mt-1 ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
+                                    <p className={`text-3xl font-bold mt-1 text-white`}>
                                         {formatCurrency(totalBalance)}
                                     </p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                                <Wallet className="w-8 h-8 text-emerald-400" />
+                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                <Wallet className="w-8 h-8 text-white" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Lista de Contas */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <Building className="w-5 h-5 text-emerald-400" />
                             Suas Contas
-                            <Badge variant="secondary" className="ml-2 bg-zinc-800 text-zinc-300">
+                            <Building className="w-5 h-5 text-emerald-400" />
+                            Suas Contas
+                            <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
                                 {accounts.length}
                             </Badge>
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Gerencie suas contas bancárias
                         </CardDescription>
                     </CardHeader>
@@ -552,14 +554,14 @@ export default function ContasPage() {
                         {loading ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="h-28 rounded-lg bg-zinc-800/50 animate-pulse" />
+                                    <div key={i} className="h-28 rounded-lg bg-muted animate-pulse" />
                                 ))}
                             </div>
                         ) : accounts.length === 0 ? (
                             <div className="text-center py-12">
-                                <Wallet className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                                <p className="text-zinc-400">Nenhuma conta cadastrada</p>
-                                <p className="text-sm text-zinc-500 mt-1">
+                                <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">Nenhuma conta cadastrada</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Adicione sua primeira conta para começar
                                 </p>
                                 <Button
@@ -578,25 +580,27 @@ export default function ContasPage() {
                                     return (
                                         <div
                                             key={account.id}
-                                            className="p-4 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors group relative"
+                                            className="p-4 rounded-xl transition-colors group relative shadow-lg"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${account.color}, ${account.color}dd)`
+                                            }}
                                         >
                                             {account.isDefault && (
-                                                <Badge className="absolute top-2 right-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                                                    <Star className="w-3 h-3 mr-1 fill-yellow-400" />
+                                                <Badge className="absolute top-2 right-2 bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                                                    <Star className="w-3 h-3 mr-1 fill-white" />
                                                     Padrão
                                                 </Badge>
                                             )}
                                             <div className="flex items-start gap-3">
                                                 <div
-                                                    className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                    style={{ backgroundColor: account.color }}
+                                                    className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/20 backdrop-blur-sm"
                                                 >
                                                     <Icon className="w-6 h-6 text-white" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-medium text-white truncate">{account.name}</p>
-                                                    <p className="text-xs text-zinc-400">{getAccountTypeLabel(account.type)}</p>
-                                                    <p className={`text-lg font-bold mt-2 ${account.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                    <p className="text-xs text-white/80">{getAccountTypeLabel(account.type)}</p>
+                                                    <p className="text-lg font-bold mt-2 text-white">
                                                         {formatCurrency(account.balance)}
                                                     </p>
                                                 </div>
@@ -605,14 +609,14 @@ export default function ContasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white h-8 w-8"
+                                                            className="opacity-0 group-hover:opacity-100 text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                    <DropdownMenuContent className="bg-popover border-border">
                                                         <DropdownMenuItem
-                                                            className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800"
+                                                            className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
                                                             onClick={() => openEditDialog(account)}
                                                         >
                                                             <Pencil className="w-4 h-4 mr-2" />

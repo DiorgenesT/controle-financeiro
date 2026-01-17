@@ -58,6 +58,7 @@ import { BANKS, getBankByCode } from "@/lib/banks";
 import { getIconById } from "@/lib/icons";
 import { toast } from "sonner";
 import { PayInvoiceModal } from "@/components/PayInvoiceModal";
+import { InvoiceDetailsModal } from "@/components/InvoiceDetailsModal";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -78,6 +79,8 @@ export default function CartoesPage() {
     const [payModalOpen, setPayModalOpen] = useState(false);
     const [selectedInvoice, setSelectedInvoice] = useState<CreditCardInvoice | null>(null);
     const [selectedCardName, setSelectedCardName] = useState("");
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [selectedInvoiceForDetails, setSelectedInvoiceForDetails] = useState<CreditCardInvoice | null>(null);
 
     const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
     const [saving, setSaving] = useState(false);
@@ -241,14 +244,14 @@ export default function CartoesPage() {
         .reduce((acc, inv) => acc + inv.totalAmount, 0);
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Cartões" />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-zinc-400">
+                        <p className="text-muted-foreground">
                             Gerencie seus cartões de crédito e faturas
                         </p>
                     </div>
@@ -262,33 +265,33 @@ export default function CartoesPage() {
                     </Button>
 
                     <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+                        <DialogContent className="bg-popover border-border max-w-md">
                             <DialogHeader>
-                                <DialogTitle className="text-white">
+                                <DialogTitle className="text-foreground">
                                     {editingCard ? "Editar Cartão" : "Novo Cartão"}
                                 </DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogDescription className="text-muted-foreground">
                                     {editingCard ? "Altere os dados do cartão" : "Adicione um novo cartão de crédito"}
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Banco Emissor</Label>
+                                    <Label className="text-muted-foreground">Banco Emissor</Label>
                                     <Select
                                         value={formData.bankCode}
                                         onValueChange={(v) => setFormData({ ...formData, bankCode: v })}
                                     >
-                                        <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                        <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800 max-h-60">
+                                        <SelectContent className="bg-popover border-border max-h-60">
                                             {BANKS.filter(b => b.code !== "dinheiro").map((bank) => {
                                                 const Icon = getIconById(bank.icon);
                                                 return (
                                                     <SelectItem
                                                         key={bank.code}
                                                         value={bank.code}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-muted focus:text-foreground"
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <div
@@ -308,55 +311,55 @@ export default function CartoesPage() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Nome do Cartão</Label>
+                                        <Label className="text-muted-foreground">Nome do Cartão</Label>
                                         <Input
                                             placeholder="Ex: Platinium, Gold..."
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Últimos 4 dígitos</Label>
+                                        <Label className="text-muted-foreground">Últimos 4 dígitos</Label>
                                         <Input
                                             placeholder="1234"
                                             maxLength={4}
                                             value={formData.lastFourDigits}
                                             onChange={(e) => setFormData({ ...formData, lastFourDigits: e.target.value.replace(/\D/g, "") })}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Limite</Label>
+                                    <Label className="text-muted-foreground">Limite</Label>
                                     <Input
                                         type="number"
                                         step="0.01"
                                         placeholder="5000,00"
                                         value={formData.limit}
                                         onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                         required
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Dia de Fechamento</Label>
+                                        <Label className="text-muted-foreground">Dia de Fechamento</Label>
                                         <Select
                                             value={formData.closingDay}
                                             onValueChange={(v) => setFormData({ ...formData, closingDay: v })}
                                         >
-                                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                            <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800 max-h-48">
+                                            <SelectContent className="bg-popover border-border max-h-48">
                                                 {CLOSING_DAYS.map((day) => (
                                                     <SelectItem
                                                         key={day}
                                                         value={day.toString()}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-muted focus:text-foreground"
                                                     >
                                                         Dia {day}
                                                     </SelectItem>
@@ -365,20 +368,20 @@ export default function CartoesPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Dia de Vencimento</Label>
+                                        <Label className="text-muted-foreground">Dia de Vencimento</Label>
                                         <Select
                                             value={formData.dueDay}
                                             onValueChange={(v) => setFormData({ ...formData, dueDay: v })}
                                         >
-                                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                            <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800 max-h-48">
+                                            <SelectContent className="bg-popover border-border max-h-48">
                                                 {CLOSING_DAYS.map((day) => (
                                                     <SelectItem
                                                         key={day}
                                                         value={day.toString()}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-muted focus:text-foreground"
                                                     >
                                                         Dia {day}
                                                     </SelectItem>
@@ -418,7 +421,7 @@ export default function CartoesPage() {
                                 </div>
 
                                 <DialogFooter>
-                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-zinc-400">
+                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-muted-foreground">
                                         Cancelar
                                     </Button>
                                     <Button type="submit" disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white">
@@ -432,46 +435,46 @@ export default function CartoesPage() {
                 </div>
 
                 {/* Resumo de Limites */}
-                <Card className="bg-gradient-to-br from-violet-900/30 to-zinc-900/50 border-violet-800/50">
+                <Card className="bg-gradient-to-br from-violet-500 to-violet-700 border-none text-white shadow-lg shadow-violet-500/20">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <p className="text-sm text-violet-400">Limite Total Disponível</p>
+                                <p className="text-sm text-white/80 font-medium">Limite Total Disponível</p>
                                 {loading ? (
-                                    <div className="h-9 w-40 bg-zinc-800 rounded animate-pulse mt-1" />
+                                    <div className="h-9 w-40 bg-white/20 rounded animate-pulse mt-1" />
                                 ) : (
                                     <p className="text-3xl font-bold text-white mt-1">
                                         {formatCurrency(totalLimit - totalUsed)}
                                     </p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-violet-500/20 flex items-center justify-center">
-                                <CreditCardIcon className="w-8 h-8 text-violet-400" />
+                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center">
+                                <CreditCardIcon className="w-8 h-8 text-white" />
                             </div>
                         </div>
                         {!loading && totalLimit > 0 && (
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-zinc-400">Usado: {formatCurrency(totalUsed)}</span>
-                                    <span className="text-zinc-400">Limite: {formatCurrency(totalLimit)}</span>
+                                    <span className="text-white/80">Usado: {formatCurrency(totalUsed)}</span>
+                                    <span className="text-white/80">Limite: {formatCurrency(totalLimit)}</span>
                                 </div>
-                                <Progress value={(totalUsed / totalLimit) * 100} className="h-2 bg-zinc-800" />
+                                <Progress value={(totalUsed / totalLimit) * 100} className="h-2 bg-black/20 [&>div]:bg-white" />
                             </div>
                         )}
                     </CardContent>
                 </Card>
 
                 {/* Lista de Cartões */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <CreditCardIcon className="w-5 h-5 text-violet-400" />
                             Seus Cartões
-                            <Badge variant="secondary" className="ml-2 bg-zinc-800 text-zinc-300">
+                            <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
                                 {cards.length}
                             </Badge>
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Gerencie seus cartões de crédito
                         </CardDescription>
                     </CardHeader>
@@ -479,14 +482,14 @@ export default function CartoesPage() {
                         {loading ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[1, 2].map((i) => (
-                                    <div key={i} className="h-48 rounded-xl bg-zinc-800/50 animate-pulse" />
+                                    <div key={i} className="h-48 rounded-xl bg-muted/50 animate-pulse" />
                                 ))}
                             </div>
                         ) : cards.length === 0 ? (
                             <div className="text-center py-12">
-                                <CreditCardIcon className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                                <p className="text-zinc-400">Nenhum cartão cadastrado</p>
-                                <p className="text-sm text-zinc-500 mt-1">
+                                <CreditCardIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">Nenhum cartão cadastrado</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Adicione seu primeiro cartão de crédito
                                 </p>
                                 <Button
@@ -516,12 +519,12 @@ export default function CartoesPage() {
                                             <div
                                                 className="p-4 relative overflow-hidden"
                                                 style={{
-                                                    background: `linear-gradient(135deg, ${card.color}dd, ${card.color}88)`
+                                                    background: `linear-gradient(135deg, ${card.color}, ${card.color}dd)`
                                                 }}
                                             >
-                                                <div className="absolute inset-0 opacity-10">
-                                                    <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-white/20" />
-                                                    <div className="absolute top-8 right-8 w-16 h-16 rounded-full bg-white/10" />
+                                                <div className="absolute inset-0 opacity-20">
+                                                    <div className="absolute top-4 right-4 w-24 h-24 rounded-full bg-white/20 blur-xl" />
+                                                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-black/10 blur-xl" />
                                                 </div>
                                                 <div className="relative">
                                                     <div className="flex justify-between items-start mb-4">
@@ -536,9 +539,9 @@ export default function CartoesPage() {
                                                                     <MoreHorizontal className="w-4 h-4" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
-                                                            <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                            <DropdownMenuContent className="bg-popover border-border">
                                                                 <DropdownMenuItem
-                                                                    className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800"
+                                                                    className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted"
                                                                     onClick={() => openEditDialog(card)}
                                                                 >
                                                                     <Pencil className="w-4 h-4 mr-2" />
@@ -562,11 +565,11 @@ export default function CartoesPage() {
                                             </div>
 
                                             {/* Info da fatura */}
-                                            <div className="bg-zinc-800/80 p-4 space-y-3">
+                                            <div className="bg-card/80 p-4 space-y-3">
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <Receipt className="w-4 h-4 text-zinc-400" />
-                                                        <span className="text-zinc-300">Fatura Atual</span>
+                                                        <Receipt className="w-4 h-4 text-muted-foreground" />
+                                                        <span className="text-muted-foreground">Fatura Atual</span>
                                                     </div>
                                                     {currentInvoice?.status === "paid" ? (
                                                         <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
@@ -587,39 +590,70 @@ export default function CartoesPage() {
 
                                                 <div className="flex justify-between items-end">
                                                     <div>
-                                                        <p className="text-2xl font-bold text-white">{formatCurrency(usedAmount)}</p>
-                                                        <p className="text-xs text-zinc-400">de {formatCurrency(card.limit)}</p>
+                                                        <p className="text-2xl font-bold text-foreground">{formatCurrency(usedAmount)}</p>
+                                                        <p className="text-xs text-muted-foreground">de {formatCurrency(card.limit)}</p>
                                                     </div>
+
                                                     <div className="text-right flex flex-col items-end gap-2">
-                                                        <div className="flex items-center gap-1 text-sm text-zinc-400">
+                                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                                             <Calendar className="w-3 h-3" />
                                                             Vence dia {card.dueDay}
                                                         </div>
-                                                        {currentInvoice && currentInvoice.status !== "paid" && usedAmount > 0 && (
-                                                            <Button
-                                                                size="sm"
-                                                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                                onClick={() => {
-                                                                    setSelectedInvoice(currentInvoice);
-                                                                    setSelectedCardName(card.name);
-                                                                    setPayModalOpen(true);
-                                                                }}
-                                                            >
-                                                                Pagar Fatura
-                                                            </Button>
-                                                        )}
+                                                        <div className="flex gap-2">
+                                                            {currentInvoice && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="h-7 text-xs border-violet-500/30 text-violet-400 hover:bg-violet-500/10 hover:text-violet-300"
+                                                                    onClick={() => {
+                                                                        setSelectedInvoiceForDetails(currentInvoice);
+                                                                        setSelectedCardName(card.name);
+                                                                        setDetailsModalOpen(true);
+                                                                    }}
+                                                                >
+                                                                    Ver Detalhes
+                                                                </Button>
+                                                            )}
+                                                            {currentInvoice && currentInvoice.status !== "paid" && usedAmount > 0 && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                                    onClick={() => {
+                                                                        setSelectedInvoice(currentInvoice);
+                                                                        setSelectedCardName(card.name);
+                                                                        setPayModalOpen(true);
+                                                                    }}
+                                                                >
+                                                                    Pagar Fatura
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
 
                                                 <Progress
                                                     value={usedPercent}
-                                                    className={`h-2 ${usedPercent > 80 ? 'bg-red-900/50' : 'bg-zinc-700'}`}
+                                                    className={`h-2 ${usedPercent > 80 ? 'bg-red-900/50' : 'bg-muted'}`}
                                                 />
 
                                                 {nextInvoice && nextInvoice.totalAmount > 0 && (
-                                                    <div className="pt-3 mt-3 border-t border-zinc-700/50 flex justify-between items-center text-xs">
-                                                        <span className="text-zinc-400">Próximo Mês ({nextInvoice.month.toString().padStart(2, '0')}/{nextInvoice.year})</span>
-                                                        <span className="text-zinc-300 font-medium">{formatCurrency(nextInvoice.totalAmount)}</span>
+                                                    <div className="pt-3 mt-3 border-t border-border/50 flex justify-between items-center text-xs">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-muted-foreground">Próximo Mês ({nextInvoice.month.toString().padStart(2, '0')}/{nextInvoice.year})</span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-5 px-2 text-[10px] text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
+                                                                onClick={() => {
+                                                                    setSelectedInvoiceForDetails(nextInvoice);
+                                                                    setSelectedCardName(card.name);
+                                                                    setDetailsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                Ver Detalhes
+                                                            </Button>
+                                                        </div>
+                                                        <span className="text-muted-foreground font-medium">{formatCurrency(nextInvoice.totalAmount)}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -640,6 +674,13 @@ export default function CartoesPage() {
                 accounts={accounts}
                 onSuccess={fetchCards}
             />
-        </div>
+
+            <InvoiceDetailsModal
+                isOpen={detailsModalOpen}
+                onClose={() => setDetailsModalOpen(false)}
+                invoice={selectedInvoiceForDetails}
+                cardName={selectedCardName}
+            />
+        </div >
     );
 }

@@ -50,6 +50,46 @@ export function useTransactions() {
         return id;
     };
 
+    const update = async (id: string, data: Partial<Transaction>) => {
+        if (!user?.uid) throw new Error("Usuário não autenticado");
+
+        // 1. Buscar transação antiga para reverter saldo
+        const oldTransaction = await getTransaction(id);
+        if (oldTransaction && oldTransaction.accountId) {
+            // Reverter saldo antigo
+            if (oldTransaction.type === "receita") {
+                await updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, "subtract");
+            } else if (oldTransaction.type === "despesa") {
+                if (oldTransaction.paymentMethod === "debit" || oldTransaction.paymentMethod === "pix") {
+                    await updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, "add");
+                } else if (oldTransaction.paymentMethod === "boleto" && oldTransaction.boletoStatus === "paid") {
+                    await updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, "add");
+                }
+            }
+        }
+
+        // 2. Atualizar transação no Firestore
+        // Importar updateTransaction dinamicamente ou adicionar ao import lá em cima
+        const { updateTransaction } = await import("@/lib/firestore");
+        await updateTransaction(id, data);
+
+        // 3. Aplicar novo saldo
+        // Precisamos dos dados completos (antigos + novos) para saber o novo saldo
+        const newTransaction = { ...oldTransaction, ...data } as Transaction;
+
+        if (newTransaction.accountId) {
+            if (newTransaction.type === "receita") {
+                await updateAccountBalance(newTransaction.accountId, newTransaction.amount, "add");
+            } else if (newTransaction.type === "despesa") {
+                if (newTransaction.paymentMethod === "debit" || newTransaction.paymentMethod === "pix") {
+                    await updateAccountBalance(newTransaction.accountId, newTransaction.amount, "subtract");
+                } else if (newTransaction.paymentMethod === "boleto" && newTransaction.boletoStatus === "paid") {
+                    await updateAccountBalance(newTransaction.accountId, newTransaction.amount, "subtract");
+                }
+            }
+        }
+    };
+
     const remove = async (id: string) => {
         try {
             const transaction = await getTransaction(id);
@@ -103,6 +143,7 @@ export function useTransactions() {
         loading: user?.uid ? loading : false,
         error,
         add,
+        update,
         remove,
         refresh: () => { }, // Mantido para compatibilidade, mas vazio
     };

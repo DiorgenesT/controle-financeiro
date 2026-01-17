@@ -15,6 +15,8 @@ import { Bell, Search, Settings, LogOut, User, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { AlertTicker } from "@/components/AlertTicker";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsPopover } from "@/components/NotificationsPopover";
 
 interface HeaderProps {
     title?: string;
@@ -34,11 +36,11 @@ export function Header({ title }: HeaderProps) {
     };
 
     return (
-        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-xl px-6">
+        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-border bg-card/80 backdrop-blur-xl px-6">
             {/* Esquerda - Título */}
             <div className="flex items-center gap-4 w-1/4">
                 {title && (
-                    <h1 className="text-xl font-semibold text-white">{title}</h1>
+                    <h1 className="text-xl font-semibold text-foreground">{title}</h1>
                 )}
             </div>
 
@@ -52,14 +54,10 @@ export function Header({ title }: HeaderProps) {
             {/* Direita - Ações */}
             <div className="flex items-center justify-end gap-4 w-1/4">
                 {/* Notifications */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-zinc-400 hover:text-white hover:bg-zinc-800"
-                >
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full" />
-                </Button>
+                {/* Notifications */}
+                <NotificationsPopover />
+
+                <ThemeToggle />
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -67,47 +65,47 @@ export function Header({ title }: HeaderProps) {
                         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                             <Avatar className="h-10 w-10 border-2 border-emerald-500/50">
                                 <AvatarImage src={user?.photoURL || undefined} />
-                                <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white font-bold">
                                     {getInitials(user?.displayName ?? null)}
                                 </AvatarFallback>
                             </Avatar>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                        className="w-56 bg-zinc-900 border-zinc-800"
+                        className="w-56 bg-card border-border"
                         align="end"
                         forceMount
                     >
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium text-white">
+                                <p className="text-sm font-medium text-foreground">
                                     {user?.displayName || "Usuário"}
                                 </p>
-                                <p className="text-xs text-zinc-400">{user?.email}</p>
+                                <p className="text-xs text-muted-foreground">{user?.email}</p>
                             </div>
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-zinc-800" />
+                        <DropdownMenuSeparator className="bg-border" />
                         <DropdownMenuItem asChild>
-                            <Link href="/configuracoes" className="flex items-center cursor-pointer text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                            <Link href="/configuracoes" className="flex items-center cursor-pointer text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                 <User className="mr-2 h-4 w-4" />
                                 <span>Meu Perfil</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                            <Link href="/assinatura" className="flex items-center cursor-pointer text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                            <Link href="/assinatura" className="flex items-center cursor-pointer text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                 <CreditCard className="mr-2 h-4 w-4" />
                                 <span>Assinatura</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                            <Link href="/configuracoes" className="flex items-center cursor-pointer text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                            <Link href="/configuracoes" className="flex items-center cursor-pointer text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                 <Settings className="mr-2 h-4 w-4" />
                                 <span>Configurações</span>
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-zinc-800" />
+                        <DropdownMenuSeparator className="bg-border" />
                         <DropdownMenuItem
-                            className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
+                            className="text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-500/10 cursor-pointer"
                             onClick={signOut}
                         >
                             <LogOut className="mr-2 h-4 w-4" />

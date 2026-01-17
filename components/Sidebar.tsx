@@ -104,14 +104,14 @@ export function Sidebar() {
 
     return (
         <aside
-            className="fixed left-0 top-0 z-40 h-screen w-64 bg-zinc-900/95 backdrop-blur-xl border-r border-zinc-800 flex flex-col"
+            className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border flex flex-col"
         >
             {/* Header - mesma altura do Header principal (h-20) */}
-            <div className="h-20 px-4 flex items-center border-b border-zinc-800">
+            <div className="h-20 px-4 flex items-center border-b border-sidebar-border">
                 <Link href="/dashboard" className="flex items-center gap-3 px-2 w-full justify-center">
                     <div className="relative w-56 h-20">
                         <Image
-                            src="/logo.png"
+                            src="/logo-new.png"
                             alt="Tudo Em Dia"
                             fill
                             className="object-contain"
@@ -132,18 +132,18 @@ export function Sidebar() {
                             className={cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
                                 isActive
-                                    ? "bg-emerald-500/20 text-emerald-400"
-                                    : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
                             )}
                         >
-                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-emerald-400")} />
+                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
                             <span className="font-medium">{item.title}</span>
                         </Link>
                     );
                 })}
             </nav>
 
-            <Separator className="bg-zinc-800" />
+            <Separator className="bg-sidebar-border" />
 
             {/* Bottom Menu */}
             <div className="p-3 space-y-1">
@@ -156,11 +156,11 @@ export function Sidebar() {
                             className={cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
                                 isActive
-                                    ? "bg-emerald-500/20 text-emerald-400"
-                                    : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
                             )}
                         >
-                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-emerald-400")} />
+                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
                             <span className="font-medium">{item.title}</span>
                         </Link>
                     );

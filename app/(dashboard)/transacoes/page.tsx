@@ -61,6 +61,7 @@ export default function TransacoesPage() {
     const { transactions, loading, remove } = useTransactions();
     const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<typeof transactions[0] | undefined>(undefined);
     const [categories, setCategories] = useState<Category[]>([]);
     const [filterType, setFilterType] = useState<FilterType>("todas");
 
@@ -89,6 +90,11 @@ export default function TransacoesPage() {
             const matchMonth = date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
             const matchType = filterType === "todas" || t.type === filterType;
             const matchSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+            // Filtros de visibilidade (ocultar crédito e boletos pendentes)
+            if (t.paymentMethod === "credit") return false;
+            if (t.paymentMethod === "boleto" && t.boletoStatus === "pending") return false;
+
             return matchMonth && matchType && matchSearch;
         });
     }, [transactions, selectedMonth, selectedYear, filterType, searchTerm]);
@@ -131,6 +137,11 @@ export default function TransacoesPage() {
         }
     };
 
+    const handleEdit = (transaction: typeof transactions[0]) => {
+        setEditingTransaction(transaction);
+        setShowModal(true);
+    };
+
     const prevMonth = () => {
         if (selectedMonth === 0) {
             setSelectedMonth(11);
@@ -159,10 +170,17 @@ export default function TransacoesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Transações" />
 
-            <TransactionModal open={showModal} onOpenChange={setShowModal} />
+            <TransactionModal
+                open={showModal}
+                onOpenChange={(open) => {
+                    setShowModal(open);
+                    if (!open) setEditingTransaction(undefined);
+                }}
+                initialData={editingTransaction}
+            />
 
             <div className="p-6 space-y-6">
                 {/* Seletor de Mês */}
@@ -171,12 +189,12 @@ export default function TransacoesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={prevMonth}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </Button>
                     <div className="text-center">
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-foreground">
                             {MONTHS[selectedMonth]} {selectedYear}
                         </h2>
                     </div>
@@ -184,7 +202,7 @@ export default function TransacoesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={nextMonth}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </Button>
@@ -192,61 +210,61 @@ export default function TransacoesPage() {
 
                 {/* Cards de Resumo */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-gradient-to-br from-green-900/30 to-zinc-900/50 border-green-800/50">
+                    <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none text-white shadow-lg shadow-green-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-green-400">Receitas</p>
+                                    <p className="text-sm text-white/80 font-medium">Receitas</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-zinc-800 mt-1" />
+                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
                                     ) : (
                                         <p className="text-2xl font-bold text-white mt-1">
                                             +{formatCurrency(monthTotals.receitas)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                    <TrendingUp className="w-6 h-6 text-green-400" />
+                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <TrendingUp className="w-6 h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-red-900/30 to-zinc-900/50 border-red-800/50">
+                    <Card className="bg-gradient-to-br from-red-500 to-red-700 border-none text-white shadow-lg shadow-red-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-red-400">Despesas</p>
+                                    <p className="text-sm text-white/80 font-medium">Despesas</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-zinc-800 mt-1" />
+                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
                                     ) : (
                                         <p className="text-2xl font-bold text-white mt-1">
                                             -{formatCurrency(monthTotals.despesas)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-                                    <TrendingDown className="w-6 h-6 text-red-400" />
+                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <TrendingDown className="w-6 h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-zinc-900 to-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-blue-500 to-blue-700 border-none text-white shadow-lg shadow-blue-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-zinc-400">Balanço do Mês</p>
+                                    <p className="text-sm text-white/80">Balanço do Mês</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-zinc-800 mt-1" />
+                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
                                     ) : (
-                                        <p className={`text-2xl font-bold mt-1 ${monthTotals.saldo >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <p className="text-2xl font-bold mt-1 text-white">
                                             {monthTotals.saldo >= 0 ? '+' : ''}{formatCurrency(monthTotals.saldo)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-                                    <ArrowUpDown className="w-6 h-6 text-zinc-400" />
+                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <ArrowUpDown className="w-6 h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>
@@ -257,23 +275,23 @@ export default function TransacoesPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-between">
                     <div className="flex gap-2 flex-1 max-w-md">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                                 placeholder="Buscar transações..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500"
+                                className="pl-10 bg-muted/50 border-input text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
                     </div>
 
                     <div className="flex gap-2">
-                        <div className="flex rounded-lg border border-zinc-700 overflow-hidden">
+                        <div className="flex rounded-lg border border-input overflow-hidden">
                             <button
                                 onClick={() => setFilterType("todas")}
                                 className={`px-4 py-2 text-sm transition-colors ${filterType === "todas"
-                                    ? "bg-zinc-700 text-white"
-                                    : "bg-zinc-800/50 text-zinc-400 hover:text-white"
+                                    ? "bg-muted text-foreground"
+                                    : "bg-muted/50 text-muted-foreground hover:text-foreground"
                                     }`}
                             >
                                 Todas
@@ -282,7 +300,7 @@ export default function TransacoesPage() {
                                 onClick={() => setFilterType("receita")}
                                 className={`px-4 py-2 text-sm transition-colors ${filterType === "receita"
                                     ? "bg-green-500/30 text-green-400"
-                                    : "bg-zinc-800/50 text-zinc-400 hover:text-white"
+                                    : "bg-muted/50 text-muted-foreground hover:text-foreground"
                                     }`}
                             >
                                 Receitas
@@ -291,7 +309,7 @@ export default function TransacoesPage() {
                                 onClick={() => setFilterType("despesa")}
                                 className={`px-4 py-2 text-sm transition-colors ${filterType === "despesa"
                                     ? "bg-red-500/30 text-red-400"
-                                    : "bg-zinc-800/50 text-zinc-400 hover:text-white"
+                                    : "bg-muted/50 text-muted-foreground hover:text-foreground"
                                     }`}
                             >
                                 Despesas
@@ -309,12 +327,12 @@ export default function TransacoesPage() {
                 </div>
 
                 {/* Lista de Transações */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white">
+                        <CardTitle className="text-foreground">
                             Transações de {MONTHS[selectedMonth]}
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             {filteredTransactions.length} transação(ões) encontrada(s)
                         </CardDescription>
                     </CardHeader>
@@ -322,23 +340,23 @@ export default function TransacoesPage() {
                         {loading ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                                    <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                                         <div className="flex items-center gap-4">
-                                            <Skeleton className="w-12 h-12 rounded-lg bg-zinc-700" />
+                                            <Skeleton className="w-12 h-12 rounded-lg bg-muted" />
                                             <div className="space-y-2">
-                                                <Skeleton className="h-4 w-40 bg-zinc-700" />
-                                                <Skeleton className="h-3 w-32 bg-zinc-700" />
+                                                <Skeleton className="h-4 w-40 bg-muted" />
+                                                <Skeleton className="h-3 w-32 bg-muted" />
                                             </div>
                                         </div>
-                                        <Skeleton className="h-5 w-24 bg-zinc-700" />
+                                        <Skeleton className="h-5 w-24 bg-muted" />
                                     </div>
                                 ))}
                             </div>
                         ) : filteredTransactions.length === 0 ? (
                             <div className="text-center py-12">
-                                <FileText className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                                <p className="text-zinc-400">Nenhuma transação encontrada</p>
-                                <p className="text-sm text-zinc-500 mt-1">
+                                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">Nenhuma transação encontrada</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     {filterType !== "todas"
                                         ? `Sem ${filterType === "receita" ? "receitas" : "despesas"} neste mês`
                                         : "Adicione sua primeira transação"
@@ -359,24 +377,26 @@ export default function TransacoesPage() {
                                     return (
                                         <div
                                             key={transaction.id}
-                                            className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group"
+                                            className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                                                    style={{ backgroundColor: `${color}20` }}
+                                                    className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-lg ${isReceita
+                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20'
+                                                        : 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/20'
+                                                        }`}
                                                 >
-                                                    <Icon className="w-5 h-5" style={{ color }} />
+                                                    <Icon className="w-6 h-6 text-white" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-white">{transaction.description}</p>
+                                                    <p className="font-bold text-foreground text-lg">{transaction.description}</p>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-sm text-zinc-500 flex items-center">
+                                                        <span className="text-sm text-muted-foreground flex items-center">
                                                             <Calendar className="w-3 h-3 mr-1" />
                                                             {formatDate(transaction.date)}
                                                         </span>
                                                         {transaction.paymentMethod && !isReceita && (
-                                                            <span className="flex items-center gap-1.5 text-xs text-zinc-400 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700/50">
+                                                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground px-2 py-0.5 rounded-md bg-muted border border-border">
                                                                 {getPaymentIcon(transaction)}
                                                                 <span>
                                                                     {transaction.paymentMethod === "credit" && "Crédito"}
@@ -387,7 +407,7 @@ export default function TransacoesPage() {
                                                             </span>
                                                         )}
                                                         {transaction.boletoStatus === "pending" && (
-                                                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                                                            <Badge className="bg-yellow-500 text-white border-none text-xs">
                                                                 Pendente
                                                             </Badge>
                                                         )}
@@ -396,11 +416,11 @@ export default function TransacoesPage() {
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="text-right">
-                                                    <span className={`text-lg font-semibold ${isReceita ? 'text-green-400' : 'text-red-400'}`}>
+                                                    <span className={`text-lg font-bold ${isReceita ? 'text-emerald-600' : 'text-red-600'}`}>
                                                         {isReceita ? '+' : '-'}{formatCurrency(transaction.amount)}
                                                     </span>
                                                     {showInstallments && (
-                                                        <p className="text-xs text-zinc-500">
+                                                        <p className="text-xs text-muted-foreground">
                                                             {transaction.installmentNumber}/{transaction.installments}
                                                         </p>
                                                     )}
@@ -410,13 +430,16 @@ export default function TransacoesPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-white"
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
-                                                        <DropdownMenuItem className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                                                    <DropdownMenuContent className="bg-popover border-border">
+                                                        <DropdownMenuItem
+                                                            className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
+                                                            onClick={() => handleEdit(transaction)}
+                                                        >
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Editar
                                                         </DropdownMenuItem>
@@ -433,11 +456,11 @@ export default function TransacoesPage() {
                                         </div>
                                     );
                                 })}
-                            </div>
+                            </div >
                         )}
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    </CardContent >
+                </Card >
+            </div >
+        </div >
     );
 }

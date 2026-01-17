@@ -166,14 +166,14 @@ export default function CategoriasPage() {
     const despesaCats = categories.filter(c => c.type === "despesa");
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Categorias" />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-zinc-400">
+                        <p className="text-muted-foreground">
                             Gerencie suas categorias para organizar transações
                         </p>
                     </div>
@@ -187,64 +187,64 @@ export default function CategoriasPage() {
                     </Button>
 
                     <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="bg-background border-border max-w-lg max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle className="text-white">
+                                <DialogTitle className="text-foreground">
                                     {editingCategory ? "Editar Categoria" : "Nova Categoria"}
                                 </DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogDescription className="text-muted-foreground">
                                     {editingCategory ? "Altere os dados da categoria" : `Crie uma categoria personalizada (${ICON_LIBRARY.length} ícones disponíveis)`}
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Nome</Label>
+                                    <Label className="text-muted-foreground">Nome</Label>
                                     <Input
                                         placeholder="Ex: Streaming, Academia..."
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Tipo</Label>
+                                    <Label className="text-muted-foreground">Tipo</Label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
                                             type="button"
                                             onClick={() => setFormData({ ...formData, type: "receita" })}
                                             className={`p-3 rounded-lg border flex items-center justify-center gap-2 transition-all ${formData.type === "receita"
-                                                ? "border-green-500 bg-green-500/20 text-green-400"
-                                                : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800"
+                                                ? "bg-gradient-to-r from-green-500 to-green-600 text-white border-transparent shadow-md"
+                                                : "border-input bg-muted/50 text-muted-foreground hover:bg-muted"
                                                 }`}
                                         >
-                                            <TrendingUp className="w-4 h-4" />
+                                            <TrendingUp className={`w-4 h-4 ${formData.type === "receita" ? "text-white" : ""}`} />
                                             Receita
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setFormData({ ...formData, type: "despesa" })}
                                             className={`p-3 rounded-lg border flex items-center justify-center gap-2 transition-all ${formData.type === "despesa"
-                                                ? "border-red-500 bg-red-500/20 text-red-400"
-                                                : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800"
+                                                ? "bg-gradient-to-r from-red-500 to-red-600 text-white border-transparent shadow-md"
+                                                : "border-input bg-muted/50 text-muted-foreground hover:bg-muted"
                                                 }`}
                                         >
-                                            <TrendingDown className="w-4 h-4" />
+                                            <TrendingDown className={`w-4 h-4 ${formData.type === "despesa" ? "text-white" : ""}`} />
                                             Despesa
                                         </button>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Ícone ({filteredIcons.length} disponíveis)</Label>
+                                    <Label className="text-muted-foreground">Ícone ({filteredIcons.length} disponíveis)</Label>
                                     <Input
                                         placeholder="Buscar ícone..."
                                         value={iconFilter}
                                         onChange={(e) => setIconFilter(e.target.value)}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                     />
-                                    <div className="grid grid-cols-8 gap-1.5 h-48 overflow-y-auto p-2 rounded-lg bg-zinc-800/30 border border-zinc-700">
+                                    <div className="grid grid-cols-8 gap-1.5 h-48 overflow-y-auto p-2 rounded-lg bg-muted/30 border border-input">
                                         {filteredIcons.map((item) => {
                                             const Icon = item.icon;
                                             return (
@@ -253,12 +253,12 @@ export default function CategoriasPage() {
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, icon: item.id })}
                                                     className={`aspect-square rounded-lg border transition-all flex items-center justify-center ${formData.icon === item.id
-                                                        ? "border-emerald-500 bg-emerald-500/20"
-                                                        : "border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 hover:border-zinc-600"
+                                                        ? "bg-gradient-to-br from-emerald-500 to-emerald-600 border-transparent shadow-sm"
+                                                        : "border-input bg-muted/50 hover:bg-muted hover:border-accent"
                                                         }`}
                                                     title={item.name}
                                                 >
-                                                    <Icon className="w-5 h-5 text-zinc-300" />
+                                                    <Icon className={`w-5 h-5 ${formData.icon === item.id ? "text-white" : "text-muted-foreground"}`} />
                                                 </button>
                                             );
                                         })}
@@ -266,7 +266,7 @@ export default function CategoriasPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Cor</Label>
+                                    <Label className="text-muted-foreground">Cor</Label>
                                     <div className="grid grid-cols-10 gap-1">
                                         {COLORS.map((color) => (
                                             <button
@@ -274,34 +274,43 @@ export default function CategoriasPage() {
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, color })}
                                                 className={`w-7 h-7 rounded-lg transition-all ${formData.color === color
-                                                    ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-900"
-                                                    : ""
+                                                    ? "ring-2 ring-white ring-offset-2 ring-offset-background scale-110 shadow-sm"
+                                                    : "hover:scale-105"
                                                     }`}
-                                                style={{ backgroundColor: color }}
+                                                style={{
+                                                    background: `linear-gradient(135deg, ${color}, ${color}dd)`
+                                                }}
                                             />
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Preview */}
-                                <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                                    <p className="text-xs text-zinc-400 mb-2">Preview:</p>
-                                    <div className="flex items-center gap-3">
+                                <div
+                                    className="p-4 rounded-xl border border-transparent shadow-lg transition-all"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${formData.color}, ${formData.color}dd)`
+                                    }}
+                                >
+                                    <p className="text-xs text-white/80 mb-2 font-medium">Preview:</p>
+                                    <div className="flex items-center gap-4">
                                         <div
-                                            className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                            style={{ backgroundColor: `${formData.color}20` }}
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 backdrop-blur-sm shadow-inner"
                                         >
                                             {(() => {
                                                 const Icon = getIconById(formData.icon);
-                                                return <Icon className="w-5 h-5" style={{ color: formData.color }} />;
+                                                return <Icon className="w-6 h-6 text-white" />;
                                             })()}
                                         </div>
-                                        <span className="text-white">{formData.name || "Nome da categoria"}</span>
+                                        <div>
+                                            <span className="text-white font-bold text-lg block">{formData.name || "Nome da categoria"}</span>
+                                            <span className="text-white/80 text-sm capitalize">{formData.type}</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <DialogFooter>
-                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-zinc-400">
+                                    <Button type="button" variant="ghost" onClick={handleCloseDialog} className="text-muted-foreground">
                                         Cancelar
                                     </Button>
                                     <Button type="submit" disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -315,16 +324,16 @@ export default function CategoriasPage() {
                 </div>
 
                 {/* Categorias de Receita */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-green-400" />
                             Categorias de Receita
-                            <Badge variant="secondary" className="ml-2 bg-zinc-800 text-zinc-300">
+                            <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
                                 {receitaCats.length}
                             </Badge>
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Categorias para entradas de dinheiro
                         </CardDescription>
                     </CardHeader>
@@ -332,13 +341,13 @@ export default function CategoriasPage() {
                         {loading ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="h-16 rounded-lg bg-zinc-800/50 animate-pulse" />
+                                    <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
                                 ))}
                             </div>
                         ) : receitaCats.length === 0 ? (
                             <div className="text-center py-8">
-                                <Tag className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                                <p className="text-zinc-400 text-sm">Nenhuma categoria de receita</p>
+                                <Tag className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                <p className="text-muted-foreground text-sm">Nenhuma categoria de receita</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -347,19 +356,21 @@ export default function CategoriasPage() {
                                     return (
                                         <div
                                             key={cat.id}
-                                            className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 group hover:bg-zinc-800 transition-colors"
+                                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
                                         >
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <div
-                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                    style={{ backgroundColor: `${cat.color}20` }}
+                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)`
+                                                    }}
                                                 >
-                                                    <Icon className="w-5 h-5" style={{ color: cat.color }} />
+                                                    <Icon className="w-5 h-5 text-white" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <span className="text-white text-sm block truncate">{cat.name}</span>
+                                                    <span className="text-foreground text-sm block truncate">{cat.name}</span>
                                                     {cat.isDefault && (
-                                                        <span className="text-xs text-zinc-500">Padrão</span>
+                                                        <span className="text-xs text-muted-foreground">Padrão</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -368,14 +379,14 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white h-8 w-8 flex-shrink-0"
+                                                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
                                                     >
                                                         <MoreHorizontal className="w-4 h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                <DropdownMenuContent className="bg-popover border-border">
                                                     <DropdownMenuItem
-                                                        className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800"
+                                                        className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
                                                         onClick={() => openEditDialog(cat)}
                                                     >
                                                         <Pencil className="w-4 h-4 mr-2" />
@@ -399,16 +410,16 @@ export default function CategoriasPage() {
                 </Card>
 
                 {/* Categorias de Despesa */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <TrendingDown className="w-5 h-5 text-red-400" />
                             Categorias de Despesa
-                            <Badge variant="secondary" className="ml-2 bg-zinc-800 text-zinc-300">
+                            <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
                                 {despesaCats.length}
                             </Badge>
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Categorias para saídas de dinheiro
                         </CardDescription>
                     </CardHeader>
@@ -416,13 +427,13 @@ export default function CategoriasPage() {
                         {loading ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                                    <div key={i} className="h-16 rounded-lg bg-zinc-800/50 animate-pulse" />
+                                    <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
                                 ))}
                             </div>
                         ) : despesaCats.length === 0 ? (
                             <div className="text-center py-8">
-                                <Tag className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                                <p className="text-zinc-400 text-sm">Nenhuma categoria de despesa</p>
+                                <Tag className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                <p className="text-muted-foreground text-sm">Nenhuma categoria de despesa</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -431,19 +442,21 @@ export default function CategoriasPage() {
                                     return (
                                         <div
                                             key={cat.id}
-                                            className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 group hover:bg-zinc-800 transition-colors"
+                                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
                                         >
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <div
-                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                    style={{ backgroundColor: `${cat.color}20` }}
+                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)`
+                                                    }}
                                                 >
-                                                    <Icon className="w-5 h-5" style={{ color: cat.color }} />
+                                                    <Icon className="w-5 h-5 text-white" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <span className="text-white text-sm block truncate">{cat.name}</span>
+                                                    <span className="text-foreground text-sm block truncate">{cat.name}</span>
                                                     {cat.isDefault && (
-                                                        <span className="text-xs text-zinc-500">Padrão</span>
+                                                        <span className="text-xs text-muted-foreground">Padrão</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -452,14 +465,14 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white h-8 w-8 flex-shrink-0"
+                                                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
                                                     >
                                                         <MoreHorizontal className="w-4 h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                <DropdownMenuContent className="bg-popover border-border">
                                                     <DropdownMenuItem
-                                                        className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800"
+                                                        className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
                                                         onClick={() => openEditDialog(cat)}
                                                     >
                                                         <Pencil className="w-4 h-4 mr-2" />

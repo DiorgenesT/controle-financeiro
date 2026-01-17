@@ -302,14 +302,14 @@ export default function MetasPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Metas Financeiras" />
 
             <div className="p-6 space-y-6">
                 {/* Header Actions */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-zinc-400">
+                        <p className="text-muted-foreground">
                             Acompanhe seu progresso em direção aos seus objetivos
                         </p>
                     </div>
@@ -321,16 +321,16 @@ export default function MetasPage() {
                                 Nova Meta
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-zinc-900 border-zinc-800">
+                        <DialogContent className="bg-background border-border">
                             <DialogHeader>
-                                <DialogTitle className="text-white">Criar Nova Meta</DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogTitle className="text-foreground">Criar Nova Meta</DialogTitle>
+                                <DialogDescription className="text-muted-foreground">
                                     Defina um objetivo financeiro para alcançar
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Ícone</Label>
+                                    <Label className="text-muted-foreground">Ícone</Label>
                                     <div className="flex gap-2 flex-wrap">
                                         {GOAL_ICONS.map((item) => {
                                             const Icon = item.icon;
@@ -341,7 +341,7 @@ export default function MetasPage() {
                                                     onClick={() => setNewMeta({ ...newMeta, icon: item.id })}
                                                     className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${newMeta.icon === item.id
                                                         ? "bg-purple-500/30 border-2 border-purple-500"
-                                                        : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"
+                                                        : "bg-muted border border-input hover:bg-accent"
                                                         }`}
                                                     title={item.name}
                                                 >
@@ -352,27 +352,27 @@ export default function MetasPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Título da Meta</Label>
+                                    <Label className="text-muted-foreground">Título da Meta</Label>
                                     <Input
                                         placeholder="Ex: Fundo de Emergência"
                                         value={newMeta.title}
                                         onChange={(e) => setNewMeta({ ...newMeta, title: e.target.value })}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                         required
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Descrição (opcional)</Label>
+                                    <Label className="text-muted-foreground">Descrição (opcional)</Label>
                                     <Input
                                         placeholder="Ex: 6 meses de despesas"
                                         value={newMeta.description}
                                         onChange={(e) => setNewMeta({ ...newMeta, description: e.target.value })}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Valor da Meta</Label>
+                                        <Label className="text-muted-foreground">Valor da Meta</Label>
                                         <Input
                                             type="number"
                                             step="0.01"
@@ -380,45 +380,45 @@ export default function MetasPage() {
                                             placeholder="0,00"
                                             value={newMeta.targetAmount}
                                             onChange={(e) => setNewMeta({ ...newMeta, targetAmount: e.target.value })}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                             required
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Prazo</Label>
+                                        <Label className="text-muted-foreground">Prazo</Label>
                                         <Input
                                             type="date"
                                             value={newMeta.deadline}
                                             onChange={(e) => setNewMeta({ ...newMeta, deadline: e.target.value })}
-                                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                                            className="bg-muted/50 border-input text-foreground"
                                             required
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Conta Vinculada (Opcional)</Label>
+                                    <Label className="text-muted-foreground">Conta Vinculada (Opcional)</Label>
                                     <Select
                                         value={newMeta.linkedAccountId}
                                         onValueChange={(value) => setNewMeta({ ...newMeta, linkedAccountId: value })}
                                     >
-                                        <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                        <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue placeholder="Selecione uma conta" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800">
-                                            <SelectItem value="none" className="text-zinc-400">Nenhuma</SelectItem>
+                                        <SelectContent className="bg-background border-border">
+                                            <SelectItem value="none" className="text-muted-foreground">Nenhuma</SelectItem>
                                             {accounts.map((account) => (
-                                                <SelectItem key={account.id} value={account.id} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">
+                                                <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
                                                     {account.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <p className="text-xs text-zinc-500">
+                                    <p className="text-xs text-muted-foreground">
                                         Se selecionada, o valor da meta será considerado parte do saldo desta conta.
                                     </p>
                                 </div>
                                 <DialogFooter>
-                                    <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-zinc-400">
+                                    <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-muted-foreground">
                                         Cancelar
                                     </Button>
                                     <Button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white">
@@ -431,16 +431,16 @@ export default function MetasPage() {
                     </Dialog>
 
                     <Dialog open={addValueDialog.open} onOpenChange={(open) => setAddValueDialog(prev => ({ ...prev, open }))}>
-                        <DialogContent className="bg-zinc-900 border-zinc-800">
+                        <DialogContent className="bg-background border-border">
                             <DialogHeader>
-                                <DialogTitle className="text-white">Adicionar Valor</DialogTitle>
-                                <DialogDescription className="text-zinc-400">
+                                <DialogTitle className="text-foreground">Adicionar Valor</DialogTitle>
+                                <DialogDescription className="text-muted-foreground">
                                     Adicione dinheiro à sua meta {addValueDialog.goal?.title}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Valor</Label>
+                                    <Label className="text-muted-foreground">Valor</Label>
                                     <Input
                                         type="number"
                                         step="0.01"
@@ -448,34 +448,34 @@ export default function MetasPage() {
                                         placeholder="0,00"
                                         value={addValueDialog.amount}
                                         onChange={(e) => setAddValueDialog(prev => ({ ...prev, amount: e.target.value }))}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="bg-muted/50 border-input text-foreground"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Conta de Origem (Opcional)</Label>
+                                    <Label className="text-muted-foreground">Conta de Origem (Opcional)</Label>
                                     <Select
                                         value={addValueDialog.sourceAccountId}
                                         onValueChange={(value) => setAddValueDialog(prev => ({ ...prev, sourceAccountId: value }))}
                                     >
-                                        <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                        <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue placeholder="Selecione a conta de origem" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800">
-                                            <SelectItem value="none" className="text-zinc-400">Nenhuma (Apenas registrar)</SelectItem>
+                                        <SelectContent className="bg-background border-border">
+                                            <SelectItem value="none" className="text-muted-foreground">Nenhuma (Apenas registrar)</SelectItem>
                                             {accounts.map((account) => (
-                                                <SelectItem key={account.id} value={account.id} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">
+                                                <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
                                                     {account.name} ({formatCurrency(account.balance)})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <p className="text-xs text-zinc-500">
+                                    <p className="text-xs text-muted-foreground">
                                         Se selecionada, o valor será debitado desta conta.
                                     </p>
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="ghost" onClick={() => setAddValueDialog(prev => ({ ...prev, open: false }))} className="text-zinc-400">
+                                <Button variant="ghost" onClick={() => setAddValueDialog(prev => ({ ...prev, open: false }))} className="text-muted-foreground">
                                     Cancelar
                                 </Button>
                                 <Button onClick={confirmAddValue} disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white">
@@ -488,32 +488,32 @@ export default function MetasPage() {
                 </div>
 
                 {/* Progress Summary */}
-                <Card className="bg-gradient-to-br from-purple-900/30 to-zinc-900/50 border-purple-800/50">
+                <Card className="bg-gradient-to-br from-purple-500 to-purple-700 border-none text-white shadow-lg shadow-purple-500/20">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <p className="text-sm text-purple-400">Progresso Geral</p>
+                                <p className="text-sm text-white/80">Progresso Geral</p>
                                 {loading ? (
-                                    <Skeleton className="h-9 w-48 bg-zinc-800 mt-1" />
+                                    <Skeleton className="h-9 w-48 bg-white/20 mt-1" />
                                 ) : (
                                     <p className="text-3xl font-bold text-white mt-1">
-                                        {formatCurrency(totalAtual)} <span className="text-lg text-zinc-400">/ {formatCurrency(totalMetas)}</span>
+                                        {formatCurrency(totalAtual)} <span className="text-lg text-white/60">/ {formatCurrency(totalMetas)}</span>
                                     </p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                                <Target className="w-8 h-8 text-purple-400" />
+                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center">
+                                <Target className="w-8 h-8 text-white" />
                             </div>
                         </div>
                         {!loading && (
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-zinc-400">{metasEmProgresso.length} metas em andamento</span>
-                                    <span className="text-purple-400">{progressoGeral.toFixed(1)}%</span>
+                                    <span className="text-white/80">{metasEmProgresso.length} metas em andamento</span>
+                                    <span className="text-white font-bold">{progressoGeral.toFixed(1)}%</span>
                                 </div>
-                                <div className="h-3 rounded-full bg-zinc-800 overflow-hidden">
+                                <div className="h-3 rounded-full bg-black/20 overflow-hidden">
                                     <div
-                                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-500"
+                                        className="h-full rounded-full bg-white transition-all duration-500"
                                         style={{ width: `${progressoGeral}%` }}
                                     />
                                 </div>
@@ -524,7 +524,7 @@ export default function MetasPage() {
 
                 {/* Metas em Progresso */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                         <Clock className="w-5 h-5 text-purple-400" />
                         Em Andamento
                     </h3>
@@ -532,28 +532,28 @@ export default function MetasPage() {
                     {loading ? (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {[1, 2, 3].map((i) => (
-                                <Card key={i} className="bg-zinc-900/50 border-zinc-800">
+                                <Card key={i} className="bg-card border-border">
                                     <CardHeader className="pb-2">
                                         <div className="flex items-start gap-3">
-                                            <Skeleton className="w-12 h-12 rounded-xl bg-zinc-700" />
+                                            <Skeleton className="w-12 h-12 rounded-xl bg-muted" />
                                             <div className="space-y-2 flex-1">
-                                                <Skeleton className="h-4 w-32 bg-zinc-700" />
-                                                <Skeleton className="h-3 w-24 bg-zinc-700" />
+                                                <Skeleton className="h-4 w-32 bg-muted" />
+                                                <Skeleton className="h-3 w-24 bg-muted" />
                                             </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <Skeleton className="h-2 w-full bg-zinc-700 rounded-full" />
+                                        <Skeleton className="h-2 w-full bg-muted rounded-full" />
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
                     ) : metasEmProgresso.length === 0 ? (
-                        <Card className="bg-zinc-900/50 border-zinc-800">
+                        <Card className="bg-card border-border">
                             <CardContent className="py-12 text-center">
-                                <Target className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                                <p className="text-zinc-400">Nenhuma meta em andamento</p>
-                                <p className="text-sm text-zinc-500 mt-1">
+                                <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">Nenhuma meta em andamento</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Crie sua primeira meta clicando no botão acima
                                 </p>
                             </CardContent>
@@ -566,17 +566,17 @@ export default function MetasPage() {
                                 const Icon = getIconComponent(meta.icon || "target");
 
                                 return (
-                                    <Card key={meta.id} className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 transition-colors group">
+                                    <Card key={meta.id} className="bg-gradient-to-br from-indigo-500 to-indigo-700 border-none text-white shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all duration-300 group">
                                         <CardHeader className="pb-2">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                                                        <Icon className="w-6 h-6 text-purple-400" />
+                                                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                                        <Icon className="w-6 h-6 text-white" />
                                                     </div>
                                                     <div>
                                                         <CardTitle className="text-white text-base">{meta.title}</CardTitle>
                                                         {meta.description && (
-                                                            <CardDescription className="text-zinc-400 text-sm">
+                                                            <CardDescription className="text-white/70 text-sm">
                                                                 {meta.description}
                                                             </CardDescription>
                                                         )}
@@ -587,20 +587,20 @@ export default function MetasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-white h-8 w-8"
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/70 hover:text-white hover:bg-white/20 h-8 w-8"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                    <DropdownMenuContent className="bg-popover border-border">
                                                         <DropdownMenuItem
-                                                            className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800"
+                                                            className="text-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
                                                             onClick={() => handleAddValueClick(meta)}
                                                         >
                                                             <TrendingUp className="w-4 h-4 mr-2" />
                                                             Adicionar Valor
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                                                        <DropdownMenuItem className="text-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Editar
                                                         </DropdownMenuItem>
@@ -618,26 +618,26 @@ export default function MetasPage() {
                                         <CardContent>
                                             <div className="space-y-3">
                                                 <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-zinc-400">
+                                                    <span className="text-white/80">
                                                         {formatCurrency(meta.currentAmount)}
                                                     </span>
                                                     <span className="text-white font-medium">
                                                         {formatCurrency(meta.targetAmount)}
                                                     </span>
                                                 </div>
-                                                <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                                                <div className="h-2 rounded-full bg-black/20 overflow-hidden">
                                                     <div
-                                                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-500"
+                                                        className="h-full rounded-full bg-white transition-all duration-500"
                                                         style={{ width: `${Math.min(percentage, 100)}%` }}
                                                     />
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-purple-400">{percentage.toFixed(0)}%</span>
+                                                    <span className="text-xs text-white/80">{percentage.toFixed(0)}%</span>
                                                     <Badge
                                                         variant="secondary"
-                                                        className={`text-xs ${daysRemaining < 30
-                                                            ? "bg-amber-500/20 text-amber-400"
-                                                            : "bg-zinc-700 text-zinc-300"
+                                                        className={`text-xs border-none ${daysRemaining < 30
+                                                            ? "bg-amber-500 text-white"
+                                                            : "bg-white/20 text-white"
                                                             }`}
                                                     >
                                                         <Calendar className="w-3 h-3 mr-1" />
@@ -656,7 +656,7 @@ export default function MetasPage() {
                 {/* Metas Concluídas */}
                 {metasConcluidas.length > 0 && (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5 text-green-400" />
                             Concluídas
                         </h3>
@@ -664,15 +664,15 @@ export default function MetasPage() {
                             {metasConcluidas.map((meta) => {
                                 const Icon = getIconComponent(meta.icon || "target");
                                 return (
-                                    <Card key={meta.id} className="bg-zinc-900/50 border-green-800/50 opacity-75">
+                                    <Card key={meta.id} className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none text-white shadow-lg shadow-emerald-500/20 opacity-90 hover:opacity-100 transition-opacity">
                                         <CardContent className="pt-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                                    <Icon className="w-6 h-6 text-green-400" />
+                                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                                    <Icon className="w-6 h-6 text-white" />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-white">{meta.title}</p>
-                                                    <p className="text-sm text-green-400 flex items-center gap-1">
+                                                    <p className="text-sm text-white/90 flex items-center gap-1">
                                                         {formatCurrency(meta.targetAmount)}
                                                         <CheckCircle2 className="w-3 h-3" />
                                                     </p>

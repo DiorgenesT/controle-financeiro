@@ -23,10 +23,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     // Loading state
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-zinc-900">
+            <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
-                    <p className="text-zinc-400">Carregando...</p>
+                    <p className="text-muted-foreground">Carregando...</p>
                 </div>
             </div>
         );
@@ -35,17 +35,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     // Redirect states
     if (!user || isFirstAccess) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-zinc-900">
+            <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
-                    <p className="text-zinc-400">Redirecionando...</p>
+                    <p className="text-muted-foreground">Redirecionando...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Sidebar />
             <div className="pl-64 transition-all duration-300 peer-[[data-collapsed=true]]:pl-20">
                 <main className="min-h-screen">

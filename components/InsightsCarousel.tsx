@@ -104,15 +104,15 @@ export function InsightsCarousel({
             id: "economia",
             title: "Economia Mensal",
             icon: TrendingUp,
-            iconColor: "text-purple-400",
-            bgIcon: "bg-purple-500/20",
-            gradient: "from-purple-500/10",
+            iconColor: "text-white",
+            bgIcon: "bg-white/20",
+            fullGradient: "bg-gradient-to-br from-purple-500 to-purple-700",
             content: (
                 <>
                     <div className="text-2xl font-bold text-white">
                         {economia.toFixed(1)}%
                     </div>
-                    <p className="text-xs text-purple-400 flex items-center mt-1">
+                    <p className="text-xs text-white/80 flex items-center mt-1">
                         <ArrowUpRight className="w-3 h-3 mr-1" />
                         Da receita mensal
                     </p>
@@ -123,15 +123,15 @@ export function InsightsCarousel({
             id: "reserva",
             title: "Reserva de Emergência",
             icon: Shield,
-            iconColor: "text-emerald-400",
-            bgIcon: "bg-emerald-500/20",
-            gradient: "from-emerald-500/10",
+            iconColor: "text-white",
+            bgIcon: "bg-white/20",
+            fullGradient: "bg-gradient-to-br from-emerald-500 to-emerald-700",
             content: (
                 <>
                     <div className="text-2xl font-bold text-white">
-                        {mesesCobertura.toFixed(1)} <span className="text-sm font-normal text-zinc-400">meses</span>
+                        {mesesCobertura.toFixed(1)} <span className="text-sm font-normal text-white/80">meses</span>
                     </div>
-                    <p className="text-xs text-emerald-400 flex items-center mt-1">
+                    <p className="text-xs text-white/80 flex items-center mt-1">
                         <Shield className="w-3 h-3 mr-1" />
                         Cobertura atual
                     </p>
@@ -142,15 +142,15 @@ export function InsightsCarousel({
             id: "metas",
             title: "Metas em Andamento",
             icon: Target,
-            iconColor: "text-blue-400",
-            bgIcon: "bg-blue-500/20",
-            gradient: "from-blue-500/10",
+            iconColor: "text-white",
+            bgIcon: "bg-white/20",
+            fullGradient: "bg-gradient-to-br from-blue-500 to-blue-700",
             content: (
                 <>
                     <div className="text-2xl font-bold text-white">
                         {progressoMetas.toFixed(0)}%
                     </div>
-                    <p className="text-xs text-blue-400 flex items-center mt-1">
+                    <p className="text-xs text-white/80 flex items-center mt-1">
                         <Target className="w-3 h-3 mr-1" />
                         Conclusão geral
                     </p>
@@ -161,38 +161,21 @@ export function InsightsCarousel({
             id: "saude",
             title: "Saúde Financeira",
             icon: Activity,
-            iconColor: health.color,
-            bgIcon: `bg-${health.color.split('-')[1]}-500/20`, // Hacky but works for standard tailwind colors if configured, otherwise fallback might be needed. Better to map explicitly.
-            gradient: `from-${health.color.split('-')[1]}-500/10`,
+            iconColor: "text-white",
+            bgIcon: "bg-white/20",
+            fullGradient: `bg-gradient-to-br from-${health.color.split('-')[1]}-500 to-${health.color.split('-')[1]}-700`,
             content: (
                 <>
-                    <div className={`text-lg font-bold ${health.color}`}>
+                    <div className="text-base font-bold text-white">
                         {health.status}
                     </div>
-                    <p className="text-xs text-zinc-400 mt-1 leading-tight">
+                    <p className="text-xs text-white/80 mt-1 leading-tight">
                         {health.message}
                     </p>
                 </>
             )
         }
     ];
-
-    // Fix background color mapping for dynamic classes
-    const getBgColor = (colorClass: string) => {
-        if (colorClass.includes("emerald")) return "bg-emerald-500/20";
-        if (colorClass.includes("amber")) return "bg-amber-500/20";
-        if (colorClass.includes("red")) return "bg-red-500/20";
-        if (colorClass.includes("blue")) return "bg-blue-500/20";
-        return "bg-purple-500/20";
-    };
-
-    const getGradient = (colorClass: string) => {
-        if (colorClass.includes("emerald")) return "from-emerald-500/10";
-        if (colorClass.includes("amber")) return "from-amber-500/10";
-        if (colorClass.includes("red")) return "from-red-500/10";
-        if (colorClass.includes("blue")) return "from-blue-500/10";
-        return "from-purple-500/10";
-    };
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -205,28 +188,22 @@ export function InsightsCarousel({
     const currentSlide = slides[currentIndex];
     const Icon = currentSlide.icon;
 
-    // Override dynamic classes for the health slide to ensure they work
-    const bgIconClass = currentSlide.id === 'saude' ? getBgColor(health.color) : currentSlide.bgIcon;
-    const gradientClass = currentSlide.id === 'saude' ? getGradient(health.color) : currentSlide.gradient;
-
     return (
-        <Card className="bg-gradient-to-br from-zinc-900 to-zinc-900/50 border-zinc-800 overflow-hidden relative h-full transition-all duration-500">
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} to-transparent transition-all duration-500`} />
-
+        <Card className={`${currentSlide.fullGradient} border-none overflow-hidden relative h-full transition-all duration-500 shadow-lg`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-                <CardTitle className="text-sm font-medium text-zinc-400">
+                <CardTitle className="text-sm font-medium text-white/90">
                     {currentSlide.title}
                 </CardTitle>
-                <div className={`w-10 h-10 rounded-lg ${bgIconClass} flex items-center justify-center transition-colors duration-500`}>
+                <div className={`w-10 h-10 rounded-lg ${currentSlide.bgIcon} flex items-center justify-center transition-colors duration-500`}>
                     <Icon className={`w-5 h-5 ${currentSlide.iconColor}`} />
                 </div>
             </CardHeader>
 
             <CardContent className="relative">
                 {loading || loadingRecurring ? (
-                    <Skeleton className="h-8 w-32 bg-zinc-800" />
+                    <Skeleton className="h-8 w-32 bg-white/20" />
                 ) : (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-500 h-[55px] flex flex-col justify-center">
                         {currentSlide.content}
                     </div>
                 )}
@@ -236,7 +213,7 @@ export function InsightsCarousel({
                     {slides.map((_, idx) => (
                         <div
                             key={idx}
-                            className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? `w-4 ${currentSlide.iconColor.replace('text-', 'bg-')}` : "w-1 bg-zinc-800"
+                            className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? "w-4 bg-white" : "w-1 bg-white/30"
                                 }`}
                         />
                     ))}

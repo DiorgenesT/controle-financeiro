@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useRecurring } from "@/hooks/useRecurring";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCreditCards, getNextInvoice } from "@/lib/creditCards";
 import { addMonths, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
@@ -17,6 +18,7 @@ const formatCurrency = (value: number) => {
 
 export function ForecastCard() {
     const { transactions } = useTransactions();
+    const { recurring } = useRecurring();
     const { user } = useAuth();
     const [forecast, setForecast] = useState({
         income: 0,
@@ -29,14 +31,14 @@ export function ForecastCard() {
         const calculateForecast = async () => {
             if (!user?.uid) return;
 
-            // 1. Receitas Fixas
-            const fixedIncome = transactions
-                .filter(t => t.type === 'receita' && t.isRecurring)
+            // 1. Receitas Fixas (Baseado nas regras de recorrência ativas)
+            const fixedIncome = recurring
+                .filter(t => t.type === 'receita' && t.active)
                 .reduce((acc, t) => acc + t.amount, 0);
 
-            // 2. Despesas Fixas (excluindo cartão, pois cartão é tratado via fatura)
-            const fixedExpenses = transactions
-                .filter(t => t.type === 'despesa' && t.isRecurring && t.paymentMethod !== 'credit')
+            // 2. Despesas Fixas (Baseado nas regras de recorrência ativas)
+            const fixedExpenses = recurring
+                .filter(t => t.type === 'despesa' && t.active)
                 .reduce((acc, t) => acc + t.amount, 0);
 
             // 3. Boletos Parcelados / Futuros do Próximo Mês
@@ -79,14 +81,14 @@ export function ForecastCard() {
         };
 
         calculateForecast();
-    }, [transactions, user?.uid]);
+    }, [transactions, recurring, user?.uid]);
 
-    if (loading) return <div className="h-[200px] bg-zinc-900/50 rounded-xl animate-pulse border border-zinc-800" />;
+    if (loading) return <div className="h-[200px] bg-muted/50 rounded-xl animate-pulse border border-border" />;
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800">
+        <Card className="bg-card border-border h-full flex flex-col">
             <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Previsão Próximo Mês
                 </CardTitle>
@@ -95,24 +97,24 @@ export function ForecastCard() {
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-green-500/10 rounded-lg">
-                                <TrendingUp className="w-4 h-4 text-green-400" />
+                            <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm">
+                                <TrendingUp className="w-4 h-4 text-white" />
                             </div>
-                            <span className="text-sm text-zinc-300">Receitas Fixas</span>
+                            <span className="text-sm text-muted-foreground">Receitas Fixas</span>
                         </div>
-                        <span className="font-bold text-white">{formatCurrency(forecast.income)}</span>
+                        <span className="font-bold text-foreground">{formatCurrency(forecast.income)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-red-500/10 rounded-lg">
-                                <TrendingDown className="w-4 h-4 text-red-400" />
+                            <div className="p-2 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-sm">
+                                <TrendingDown className="w-4 h-4 text-white" />
                             </div>
-                            <span className="text-sm text-zinc-300">Despesas Previstas</span>
+                            <span className="text-sm text-muted-foreground">Despesas Previstas</span>
                         </div>
-                        <span className="font-bold text-white">{formatCurrency(forecast.expenses)}</span>
+                        <span className="font-bold text-foreground">{formatCurrency(forecast.expenses)}</span>
                     </div>
-                    <div className="pt-4 border-t border-zinc-800 flex justify-between items-center">
-                        <span className="text-sm font-medium text-zinc-400">Saldo Previsto</span>
+                    <div className="pt-4 border-t border-border flex justify-between items-center">
+                        <span className="text-sm font-medium text-muted-foreground">Saldo Previsto</span>
                         <span className={`font-bold ${forecast.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {formatCurrency(forecast.balance)}
                         </span>

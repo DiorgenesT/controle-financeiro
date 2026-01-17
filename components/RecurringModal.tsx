@@ -22,7 +22,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { RecurringTransaction } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { addRecurringTransaction, updateRecurringTransaction } from "@/lib/recurring";
+import { addRecurringTransaction, updateRecurringTransaction, updateFutureLinkedTransactions } from "@/lib/recurring";
 import { getCategories, Category } from "@/lib/categories";
 import { usePeople } from "@/hooks/usePeople";
 import { getIconById } from "@/lib/icons";
@@ -50,10 +50,14 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
         personId: "family", // "family" or personId
     });
 
+    const [editingId, setEditingId] = useState<string | null>(null);
+
     useEffect(() => {
         if (open) {
             loadCategories();
             if (initialData) {
+                console.log("Setting editing data:", initialData);
+                setEditingId(initialData.id);
                 setFormData({
                     description: initialData.description,
                     amount: initialData.amount.toString(),
@@ -63,6 +67,8 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                     personId: initialData.personId || "family",
                 });
             } else {
+                console.log("Setting new data mode");
+                setEditingId(null);
                 setFormData({
                     description: "",
                     amount: "",
@@ -85,6 +91,8 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
         e.preventDefault();
         if (!user?.uid) return;
 
+        console.log("RecurringModal handleSubmit", { initialData, formData });
+
         setLoading(true);
         try {
             const data = {
@@ -97,10 +105,12 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                 active: true,
             };
 
-            if (initialData) {
-                await updateRecurringTransaction(initialData.id, data);
+            if (editingId) {
+                console.log("Updating recurring transaction (by ID):", editingId);
+                await updateRecurringTransaction(editingId, data);
                 toast.success("Fixa atualizada!");
             } else {
+                console.log("Creating new recurring transaction (no ID)");
                 await addRecurringTransaction(user.uid, data);
                 toast.success("Fixa criada!");
             }

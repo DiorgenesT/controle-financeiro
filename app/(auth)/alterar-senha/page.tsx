@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { changePassword, DEFAULT_PASSWORD } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -130,124 +131,135 @@ export default function AlterarSenhaPage() {
     }
 
     return (
-        <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl">
-            <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold text-white">Alterar Senha</CardTitle>
-                <CardDescription className="text-zinc-400">
-                    Por segurança, altere sua senha padrão
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm">
-                        <p>Você está usando a senha temporária. Por segurança, crie uma nova senha.</p>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="currentPassword" className="text-zinc-300">Senha Atual</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <Input
-                                id="currentPassword"
-                                type="password"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="newPassword" className="text-zinc-300">Nova Senha</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <Input
-                                id="newPassword"
-                                type={showNewPassword ? "text" : "password"}
-                                placeholder="••••••••"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="pl-10 pr-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
-                            >
-                                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="confirmPassword" className="text-zinc-300">Confirmar Nova Senha</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <Input
-                                id="confirmPassword"
-                                type={showConfirmPassword ? "text" : "password"}
-                                placeholder="••••••••"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="pl-10 pr-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
-                            >
-                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="text-xs text-zinc-500 space-y-1">
-                        <p>A senha deve conter:</p>
-                        <ul className="list-disc list-inside space-y-0.5">
-                            <li className={newPassword.length >= 8 ? "text-emerald-400" : ""}>
-                                Pelo menos 8 caracteres
-                            </li>
-                            <li className={/[A-Z]/.test(newPassword) ? "text-emerald-400" : ""}>
-                                Uma letra maiúscula
-                            </li>
-                            <li className={/[a-z]/.test(newPassword) ? "text-emerald-400" : ""}>
-                                Uma letra minúscula
-                            </li>
-                            <li className={/[0-9]/.test(newPassword) ? "text-emerald-400" : ""}>
-                                Um número
-                            </li>
-                            <li className={/[!@#$%^&*(),.?\":{}|<>]/.test(newPassword) ? "text-emerald-400" : ""}>
-                                Um caractere especial
-                            </li>
-                        </ul>
-                    </div>
-
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Alterando...
-                            </>
-                        ) : (
-                            "Alterar Senha"
+        <div className="flex flex-col items-center gap-8 w-full max-w-md">
+            <div className="relative w-64 h-24">
+                <Image
+                    src="/logo-new.png"
+                    alt="Tudo Em Dia"
+                    fill
+                    className="object-contain"
+                    priority
+                />
+            </div>
+            <Card className="w-full border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl font-bold text-white">Alterar Senha</CardTitle>
+                    <CardDescription className="text-zinc-400">
+                        Por segurança, altere sua senha padrão
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {error && (
+                            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                <span>{error}</span>
+                            </div>
                         )}
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
+
+                        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm">
+                            <p>Você está usando a senha temporária. Por segurança, crie uma nova senha.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="currentPassword" className="text-zinc-300">Senha Atual</Label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <Input
+                                    id="currentPassword"
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="newPassword" className="text-zinc-300">Nova Senha</Label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <Input
+                                    id="newPassword"
+                                    type={showNewPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="pl-10 pr-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                                >
+                                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword" className="text-zinc-300">Confirmar Nova Senha</Label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <Input
+                                    id="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="pl-10 pr-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="text-xs text-zinc-500 space-y-1">
+                            <p>A senha deve conter:</p>
+                            <ul className="list-disc list-inside space-y-0.5">
+                                <li className={newPassword.length >= 8 ? "text-emerald-400" : ""}>
+                                    Pelo menos 8 caracteres
+                                </li>
+                                <li className={/[A-Z]/.test(newPassword) ? "text-emerald-400" : ""}>
+                                    Uma letra maiúscula
+                                </li>
+                                <li className={/[a-z]/.test(newPassword) ? "text-emerald-400" : ""}>
+                                    Uma letra minúscula
+                                </li>
+                                <li className={/[0-9]/.test(newPassword) ? "text-emerald-400" : ""}>
+                                    Um número
+                                </li>
+                                <li className={/[!@#$%^&*(),.?\":{}|<>]/.test(newPassword) ? "text-emerald-400" : ""}>
+                                    Um caractere especial
+                                </li>
+                            </ul>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Alterando...
+                                </>
+                            ) : (
+                                "Alterar Senha"
+                            )}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
     );
 }

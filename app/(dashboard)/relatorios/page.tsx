@@ -32,6 +32,7 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { usePeople } from "@/hooks/usePeople";
 import { startOfMonth, endOfMonth, subMonths, addMonths, format, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useTheme } from "next-themes";
 
 const COLORS = [
     "#10B981", // Emerald
@@ -54,8 +55,8 @@ const formatCurrency = (value: number) => {
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload?: { fill?: string;[key: string]: unknown } }>; label?: string }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 shadow-xl">
-                <p className="text-zinc-400 text-sm mb-2">{label}</p>
+            <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
+                <p className="text-muted-foreground text-sm mb-2">{label}</p>
                 {payload.map((entry, index) => (
                     <p key={index} className="text-sm" style={{ color: entry.color || (entry.payload && entry.payload.fill) || "#fff" }}>
                         {entry.name}: {formatCurrency(entry.value)}
@@ -70,6 +71,10 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 export default function RelatoriosPage() {
     const { transactions, loading: loadingTransactions } = useTransactions();
     const { people } = usePeople();
+    const { resolvedTheme } = useTheme();
+    const isDark = resolvedTheme === 'dark';
+    const gridColor = isDark ? '#27272a' : '#e5e7eb';
+    const axisColor = isDark ? '#71717a' : '#6b7280';
 
     // Processamento de dados
     const today = new Date();
@@ -160,18 +165,18 @@ export default function RelatoriosPage() {
     });
 
     if (loadingTransactions) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Carregando relatórios...</div>;
+        return <div className="min-h-screen bg-background flex items-center justify-center text-foreground">Carregando relatórios...</div>;
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Relatórios" />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-zinc-400">
+                        <p className="text-muted-foreground">
                             Visualize seus dados financeiros de forma clara e objetiva
                         </p>
                     </div>
@@ -183,43 +188,43 @@ export default function RelatoriosPage() {
 
                 {/* Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none text-white shadow-lg shadow-green-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                                    <TrendingUp className="w-6 h-6 text-green-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
+                                    <TrendingUp className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-zinc-400">Receitas ({currentMonthData.name})</p>
-                                    <p className="text-2xl font-bold text-green-400">{formatCurrency(totalReceitas)}</p>
+                                    <p className="text-sm text-white/80">Receitas ({currentMonthData.name})</p>
+                                    <p className="text-2xl font-bold text-white">{formatCurrency(totalReceitas)}</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-red-500 to-red-700 border-none text-white shadow-lg shadow-red-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center">
-                                    <TrendingDown className="w-6 h-6 text-red-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
+                                    <TrendingDown className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-zinc-400">Despesas ({currentMonthData.name})</p>
-                                    <p className="text-2xl font-bold text-red-400">{formatCurrency(totalDespesas)}</p>
+                                    <p className="text-sm text-white/80">Despesas ({currentMonthData.name})</p>
+                                    <p className="text-2xl font-bold text-white">{formatCurrency(totalDespesas)}</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none text-white shadow-lg shadow-emerald-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                                    <BarChart3 className="w-6 h-6 text-emerald-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
+                                    <BarChart3 className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-zinc-400">Taxa de Economia</p>
-                                    <p className="text-2xl font-bold text-emerald-400">{taxaEconomia}%</p>
+                                    <p className="text-sm text-white/80">Taxa de Economia</p>
+                                    <p className="text-2xl font-bold text-white">{taxaEconomia}%</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -228,29 +233,41 @@ export default function RelatoriosPage() {
 
                 {/* Charts */}
                 <Tabs defaultValue="visao-geral" className="space-y-4">
-                    <TabsList className="bg-zinc-800/50 border border-zinc-700">
-                        <TabsTrigger value="visao-geral" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+                    <TabsList className="bg-muted/50 border border-input p-1 h-auto">
+                        <TabsTrigger
+                            value="visao-geral"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+                        >
                             Visão Geral
                         </TabsTrigger>
-                        <TabsTrigger value="categorias" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+                        <TabsTrigger
+                            value="categorias"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+                        >
                             Por Categoria
                         </TabsTrigger>
-                        <TabsTrigger value="usuarios" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+                        <TabsTrigger
+                            value="usuarios"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+                        >
                             Por Usuário
                         </TabsTrigger>
-                        <TabsTrigger value="evolucao" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+                        <TabsTrigger
+                            value="evolucao"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+                        >
                             Evolução Patrimonial
                         </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="visao-geral" className="space-y-4">
-                        <Card className="bg-zinc-900/50 border-zinc-800">
+                        <Card className="bg-card border-border">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
+                                <CardTitle className="text-foreground flex items-center gap-2">
                                     <Calendar className="w-5 h-5 text-emerald-400" />
                                     Receitas vs Despesas
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-muted-foreground">
                                     Previsão para os próximos 7 meses
                                 </CardDescription>
                             </CardHeader>
@@ -258,9 +275,16 @@ export default function RelatoriosPage() {
                                 <div className="h-80">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={monthlyData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                                            <XAxis dataKey="name" stroke="#71717a" />
-                                            <YAxis stroke="#71717a" tickFormatter={(value) => `R$${value / 1000}k`} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                            <XAxis dataKey="name" stroke={axisColor} />
+                                            <YAxis
+                                                stroke={axisColor}
+                                                tickFormatter={(value) => {
+                                                    if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+                                                    return `R$ ${value}`;
+                                                }}
+                                                width={80}
+                                            />
                                             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                                             <Legend />
                                             <Bar dataKey="receitas" name="Receitas" fill="#10B981" radius={[4, 4, 0, 0]} />
@@ -273,13 +297,13 @@ export default function RelatoriosPage() {
                     </TabsContent>
 
                     <TabsContent value="categorias" className="space-y-4">
-                        <Card className="bg-zinc-900/50 border-zinc-800">
+                        <Card className="bg-card border-border">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
+                                <CardTitle className="text-foreground flex items-center gap-2">
                                     <PieChart className="w-5 h-5 text-emerald-400" />
                                     Despesas por Categoria
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-muted-foreground">
                                     Distribuição das suas despesas em {currentMonthData.fullName}
                                 </CardDescription>
                             </CardHeader>
@@ -310,8 +334,8 @@ export default function RelatoriosPage() {
                                     {categoryData.map((cat) => (
                                         <div key={cat.name} className="flex items-center gap-2 text-sm">
                                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                                            <span className="text-zinc-400">{cat.name}:</span>
-                                            <span className="text-white">{formatCurrency(cat.value)}</span>
+                                            <span className="text-muted-foreground">{cat.name}:</span>
+                                            <span className="text-foreground">{formatCurrency(cat.value)}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -320,13 +344,13 @@ export default function RelatoriosPage() {
                     </TabsContent>
 
                     <TabsContent value="usuarios" className="space-y-4">
-                        <Card className="bg-zinc-900/50 border-zinc-800">
+                        <Card className="bg-card border-border">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
+                                <CardTitle className="text-foreground flex items-center gap-2">
                                     <Users className="w-5 h-5 text-emerald-400" />
                                     Despesas por Usuário
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-muted-foreground">
                                     Quem gastou mais em {currentMonthData.fullName}
                                 </CardDescription>
                             </CardHeader>
@@ -357,8 +381,8 @@ export default function RelatoriosPage() {
                                     {userData.map((user) => (
                                         <div key={user.name} className="flex items-center gap-2 text-sm">
                                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: user.color }} />
-                                            <span className="text-zinc-400">{user.name}:</span>
-                                            <span className="text-white">{formatCurrency(user.value)}</span>
+                                            <span className="text-muted-foreground">{user.name}:</span>
+                                            <span className="text-foreground">{formatCurrency(user.value)}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -367,13 +391,13 @@ export default function RelatoriosPage() {
                     </TabsContent>
 
                     <TabsContent value="evolucao" className="space-y-4">
-                        <Card className="bg-zinc-900/50 border-zinc-800">
+                        <Card className="bg-card border-border">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
+                                <CardTitle className="text-foreground flex items-center gap-2">
                                     <TrendingUp className="w-5 h-5 text-emerald-400" />
                                     Evolução do Patrimônio
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-muted-foreground">
                                     Evolução acumulada (Mês Atual)
                                 </CardDescription>
                             </CardHeader>
@@ -381,9 +405,16 @@ export default function RelatoriosPage() {
                                 <div className="h-80">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={evolutionData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                                            <XAxis dataKey="name" stroke="#71717a" />
-                                            <YAxis stroke="#71717a" tickFormatter={(value) => `R$${value / 1000}k`} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                            <XAxis dataKey="name" stroke={axisColor} />
+                                            <YAxis
+                                                stroke={axisColor}
+                                                tickFormatter={(value) => {
+                                                    if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+                                                    return `R$ ${value}`;
+                                                }}
+                                                width={80}
+                                            />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Line
                                                 type="monotone"
@@ -401,7 +432,7 @@ export default function RelatoriosPage() {
                         </Card>
                     </TabsContent>
                 </Tabs>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ import {
 
 export default function ConfiguracoesPage() {
     const { user, refreshUser } = useAuth();
+    const { theme, setTheme } = useTheme();
     const [name, setName] = useState(user?.displayName || "");
     const [saving, setSaving] = useState(false);
 
@@ -153,60 +155,65 @@ export default function ConfiguracoesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Configurações" />
 
             <div className="p-6 max-w-4xl mx-auto space-y-6">
                 {/* Profile Section */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <User className="w-5 h-5 text-emerald-400" />
                             Perfil
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Gerencie suas informações pessoais
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center gap-6">
-                            <Avatar className="w-24 h-24 border-4 border-emerald-500/30">
-                                <AvatarImage src={user?.photoURL || undefined} />
-                                <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-2xl">
-                                    {getInitials(user?.displayName ?? null)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h3 className="text-lg font-medium text-white">{user?.displayName || "Usuário"}</h3>
-                                <p className="text-zinc-400">{user?.email}</p>
-                                <p className="text-xs text-emerald-400 mt-1">
+                            <div className="relative">
+                                <Avatar className="w-24 h-24 border-4 border-background shadow-xl">
+                                    <AvatarImage src={user?.photoURL || undefined} />
+                                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-2xl font-bold">
+                                        {getInitials(user?.displayName ?? null)}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-medium text-foreground">
+                                    {user?.displayName || "Usuário"}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                <p className="text-xs text-emerald-500 font-medium mt-1">
                                     Plano {user?.subscriptionStatus === "active" ? "Ativo" : "Inativo"}
                                 </p>
                             </div>
                         </div>
 
-                        <Separator className="bg-zinc-800" />
+                        <Separator className="bg-border" />
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
-                                <Label className="text-zinc-300">Nome Completo</Label>
+                                <Label htmlFor="name" className="text-muted-foreground">Nome Completo</Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
+                                        id="name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="pl-10 bg-zinc-800/50 border-zinc-700 text-white"
+                                        className="pl-10 bg-muted/50 border-input text-foreground"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-zinc-300">Email</Label>
+                                <Label className="text-muted-foreground">Email</Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
                                         value={user?.email || ""}
                                         disabled
-                                        className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-400"
+                                        className="pl-10 bg-muted/50 border-input text-muted-foreground"
                                     />
                                 </div>
                             </div>
@@ -228,14 +235,14 @@ export default function ConfiguracoesPage() {
                 </Card>
 
                 {/* Family Members Section */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                            <Users className="w-5 h-5 text-emerald-400" />
+                        <CardTitle className="text-foreground flex items-center gap-2">
+                            <Users className="w-5 h-5 text-emerald-500" />
                             Membros da Família
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
-                            Cadastre pessoas para atribuir compras e filtrar relatórios
+                        <CardDescription className="text-muted-foreground">
+                            Gerencie quem tem acesso à conta
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -244,7 +251,7 @@ export default function ConfiguracoesPage() {
                                 placeholder="Nome do membro (ex: João)"
                                 value={newPersonName}
                                 onChange={(e) => setNewPersonName(e.target.value)}
-                                className="bg-zinc-800/50 border-zinc-700 text-white"
+                                className="bg-muted/50 border-input text-foreground"
                             />
                             <Button
                                 onClick={handleAddPerson}
@@ -255,25 +262,33 @@ export default function ConfiguracoesPage() {
                             </Button>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {loadingPeople ? (
-                                <p className="text-sm text-zinc-500">Carregando...</p>
+                                <p className="text-sm text-muted-foreground">Carregando...</p>
                             ) : people.length === 0 ? (
-                                <p className="text-sm text-zinc-500 italic">Nenhum membro cadastrado.</p>
+                                <p className="text-sm text-muted-foreground italic">Nenhum membro cadastrado.</p>
                             ) : (
                                 people.map((person) => (
-                                    <div key={person.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30 border border-zinc-800">
+                                    <div
+                                        key={person.id}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/50 to-muted/30 border border-border/50 hover:border-emerald-500/30 transition-all"
+                                    >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-zinc-300 text-xs font-bold">
-                                                {getInitials(person.name)}
+                                            <Avatar className="w-10 h-10 border border-border">
+                                                <AvatarImage src={undefined} />
+                                                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-medium">
+                                                    {getInitials(person.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-medium text-foreground">{person.name}</p>
                                             </div>
-                                            <span className="text-zinc-200">{person.name}</span>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => handleDeletePerson(person.id)}
-                                            className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                                            className="text-red-400 hover:text-red-500 hover:bg-red-500/10"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
@@ -285,28 +300,28 @@ export default function ConfiguracoesPage() {
                 </Card>
 
                 {/* Security Section */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <Shield className="w-5 h-5 text-emerald-400" />
                             Segurança
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Gerencie sua senha e segurança da conta
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
                                     <Lock className="w-5 h-5 text-amber-400" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-white">Alterar Senha</p>
-                                    <p className="text-sm text-zinc-400">Atualize sua senha periodicamente</p>
+                                    <p className="font-medium text-foreground">Alterar Senha</p>
+                                    <p className="text-sm text-muted-foreground">Atualize sua senha periodicamente</p>
                                 </div>
                             </div>
-                            <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+                            <Button variant="outline" className="border-input text-muted-foreground hover:bg-accent hover:text-foreground">
                                 Alterar
                             </Button>
                         </div>
@@ -314,41 +329,41 @@ export default function ConfiguracoesPage() {
                 </Card>
 
                 {/* Notifications Section */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <Bell className="w-5 h-5 text-emerald-400" />
                             Notificações
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Configure como você deseja receber alertas
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                             <div>
-                                <p className="font-medium text-white">Alertas de Orçamento</p>
-                                <p className="text-sm text-zinc-400">Receba alertas quando estiver próximo do limite</p>
+                                <p className="font-medium text-foreground">Alertas de Orçamento</p>
+                                <p className="text-sm text-muted-foreground">Receba alertas quando estiver próximo do limite</p>
                             </div>
                             <Button variant="outline" size="sm" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20">
                                 Ativado
                             </Button>
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                             <div>
-                                <p className="font-medium text-white">Lembretes de Metas</p>
-                                <p className="text-sm text-zinc-400">Receba lembretes sobre suas metas financeiras</p>
+                                <p className="font-medium text-foreground">Lembretes de Metas</p>
+                                <p className="text-sm text-muted-foreground">Receba lembretes sobre suas metas financeiras</p>
                             </div>
                             <Button variant="outline" size="sm" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20">
                                 Ativado
                             </Button>
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                             <div>
-                                <p className="font-medium text-white">Relatórios Semanais</p>
-                                <p className="text-sm text-zinc-400">Receba um resumo semanal por email</p>
+                                <p className="font-medium text-foreground">Relatórios Semanais</p>
+                                <p className="text-sm text-muted-foreground">Receba um resumo semanal por email</p>
                             </div>
-                            <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-400 hover:bg-zinc-800">
+                            <Button variant="outline" size="sm" className="border-input text-muted-foreground hover:bg-accent hover:text-foreground">
                                 Desativado
                             </Button>
                         </div>
@@ -356,33 +371,52 @@ export default function ConfiguracoesPage() {
                 </Card>
 
                 {/* Appearance Section */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
+                        <CardTitle className="text-foreground flex items-center gap-2">
                             <Palette className="w-5 h-5 text-emerald-400" />
                             Aparência
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-muted-foreground">
                             Personalize a interface do aplicativo
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                             <div>
-                                <p className="font-medium text-white">Tema</p>
-                                <p className="text-sm text-zinc-400">Escolha entre claro e escuro</p>
+                                <p className="font-medium text-foreground">Tema</p>
+                                <p className="text-sm text-muted-foreground">Escolha entre claro e escuro</p>
                             </div>
                             <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-400">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setTheme("light")}
+                                    className={`border-input ${theme === 'light' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                >
                                     Claro
                                 </Button>
-                                <Button variant="outline" size="sm" className="border-emerald-500 text-emerald-400 bg-emerald-500/10">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setTheme("dark")}
+                                    className={`border-input ${theme === 'dark' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                >
                                     Escuro
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setTheme("system")}
+                                    className={`border-input ${theme === 'system' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                >
+                                    Sistema
                                 </Button>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
+
                 {/* Danger Zone */}
                 <Card className="bg-red-950/10 border-red-900/50">
                     <CardHeader>
@@ -415,13 +449,13 @@ export default function ConfiguracoesPage() {
             </div>
 
             <Dialog open={showResetModal} onOpenChange={setShowResetModal}>
-                <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
+                <DialogContent className="bg-popover border-border text-foreground">
                     <DialogHeader>
                         <DialogTitle className="text-red-400 flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5" />
                             Confirmar Reset de Dados
                         </DialogTitle>
-                        <DialogDescription className="text-zinc-400">
+                        <DialogDescription className="text-muted-foreground">
                             Esta ação é <strong>IRREVERSÍVEL</strong>. Todos os seus dados serão apagados permanentemente.
                             Digite sua senha para confirmar.
                         </DialogDescription>
@@ -433,7 +467,7 @@ export default function ConfiguracoesPage() {
                                 type="password"
                                 value={resetPassword}
                                 onChange={(e) => setResetPassword(e.target.value)}
-                                className="bg-zinc-800 border-zinc-700 text-white"
+                                className="bg-muted/50 border-input text-foreground"
                                 placeholder="Digite sua senha..."
                             />
                         </div>
@@ -442,7 +476,7 @@ export default function ConfiguracoesPage() {
                         <Button
                             variant="ghost"
                             onClick={() => setShowResetModal(false)}
-                            className="text-zinc-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                         >
                             Cancelar
                         </Button>

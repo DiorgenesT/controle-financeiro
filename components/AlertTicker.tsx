@@ -251,7 +251,7 @@ export function AlertTicker() {
 
     if (alerts.length === 0) {
         return (
-            <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm bg-zinc-900/50 px-4 py-3 rounded-xl border border-zinc-800 w-full">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm bg-muted/50 px-4 py-3 rounded-xl border border-border w-full">
                 <CheckCircle className="w-4 h-4 text-emerald-500" />
                 <span>Tudo em dia! Nenhuma pendência próxima.</span>
             </div>
@@ -274,19 +274,19 @@ export function AlertTicker() {
                 >
                     {/* Navegação esquerda */}
                     {alerts.length > 1 && (
-                        <button onClick={goPrev} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-                            <ChevronLeft className="w-4 h-4 text-zinc-400" />
+                        <button onClick={goPrev} className="p-1 hover:bg-muted rounded-lg transition-colors">
+                            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                         </button>
                     )}
 
                     {/* Ícone */}
-                    <Icon className={`w-5 h-5 shrink-0 ${currentAlert.type === "danger" ? "text-red-400" :
-                        currentAlert.type === "warning" ? "text-amber-400" : "text-blue-400"
+                    <Icon className={`w-5 h-5 shrink-0 ${currentAlert.type === "danger" ? "text-red-500" :
+                        currentAlert.type === "warning" ? "text-amber-500" : "text-blue-500"
                         }`} />
 
                     {/* Mensagem */}
-                    <span className={`flex-1 text-sm font-medium ${currentAlert.type === "danger" ? "text-red-200" :
-                        currentAlert.type === "warning" ? "text-amber-200" : "text-blue-200"
+                    <span className={`flex-1 text-sm font-medium ${currentAlert.type === "danger" ? "text-red-600 dark:text-red-200" :
+                        currentAlert.type === "warning" ? "text-amber-600 dark:text-amber-200" : "text-blue-600 dark:text-blue-200"
                         }`}>
                         {currentAlert.message}
                     </span>
@@ -304,15 +304,15 @@ export function AlertTicker() {
 
                     {/* Indicador de página */}
                     {alerts.length > 1 && (
-                        <span className="text-xs text-zinc-500 tabular-nums">
+                        <span className="text-xs text-muted-foreground tabular-nums">
                             {currentIndex + 1}/{alerts.length}
                         </span>
                     )}
 
                     {/* Navegação direita */}
                     {alerts.length > 1 && (
-                        <button onClick={goNext} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-                            <ChevronRight className="w-4 h-4 text-zinc-400" />
+                        <button onClick={goNext} className="p-1 hover:bg-muted rounded-lg transition-colors">
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </button>
                     )}
                 </div>
@@ -320,33 +320,33 @@ export function AlertTicker() {
 
             {/* Modal de Confirmação com Edição de Valor */}
             <Dialog open={confirmModal.open} onOpenChange={(open) => setConfirmModal({ open, item: null })}>
-                <DialogContent className="bg-zinc-900 border-zinc-800 max-w-sm">
+                <DialogContent className="bg-popover border-border max-w-sm">
                     <DialogHeader>
-                        <DialogTitle className="text-white">
+                        <DialogTitle className="text-foreground">
                             Confirmar {confirmModal.item?.type === 'receita' ? 'Recebimento' : 'Pagamento'}
                         </DialogTitle>
                     </DialogHeader>
 
                     {confirmModal.item && (
                         <div className="space-y-4">
-                            <div className="p-3 bg-zinc-800/50 rounded-lg">
-                                <p className="text-sm text-zinc-400">Descrição</p>
-                                <p className="text-white font-medium">{confirmModal.item.description}</p>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                                <p className="text-sm text-muted-foreground">Descrição</p>
+                                <p className="text-foreground font-medium">{confirmModal.item.description}</p>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="value" className="text-zinc-400">Valor (pode ser editado)</Label>
+                                <Label htmlFor="value" className="text-muted-foreground">Valor (pode ser editado)</Label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">R$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
                                     <Input
                                         id="value"
                                         value={editValue}
                                         onChange={(e) => setEditValue(e.target.value)}
-                                        className="pl-10 bg-zinc-800 border-zinc-700 text-white text-lg font-bold"
+                                        className="pl-10 bg-muted border-input text-foreground text-lg font-bold"
                                         placeholder="0,00"
                                     />
                                 </div>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-xs text-muted-foreground">
                                     Valor original: {formatCurrency(confirmModal.item.amount)}
                                 </p>
                             </div>
@@ -357,7 +357,7 @@ export function AlertTicker() {
                         <Button
                             variant="ghost"
                             onClick={() => setConfirmModal({ open: false, item: null })}
-                            className="text-zinc-400"
+                            className="text-muted-foreground"
                         >
                             Cancelar
                         </Button>

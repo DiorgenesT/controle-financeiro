@@ -77,14 +77,14 @@ const safeParseDate = (dateValue: Date | string | undefined | null): Date | null
 const NextBoletoCard = ({ boleto }: { boleto: Transaction | null }) => {
     if (!boleto) {
         return (
-            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+            <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none text-white shadow-lg shadow-emerald-500/20">
                 <CardContent className="pt-6">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-emerald-500/10 rounded-xl">
-                            <CheckCircle className="w-6 h-6 text-emerald-400" />
+                        <div className="p-3 bg-white/20 rounded-xl">
+                            <CheckCircle className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p className="text-sm text-emerald-400 font-medium">Tudo em dia!</p>
+                            <p className="text-sm text-white/90 font-medium">Tudo em dia!</p>
                             <p className="text-lg font-bold text-white">Nenhum boleto pendente</p>
                         </div>
                     </div>
@@ -104,44 +104,33 @@ const NextBoletoCard = ({ boleto }: { boleto: Transaction | null }) => {
     const isOverdue = daysUntilDue < 0;
 
     let urgencyText = '';
-    let urgencyColor = 'text-blue-400';
-    let bgGradient = 'from-blue-500/10 to-blue-600/5';
-    let borderColor = 'border-blue-500/20';
-    let iconBg = 'bg-blue-500/10';
+    let bgGradient = 'from-blue-500 to-blue-700';
+    let shadowColor = 'shadow-blue-500/20';
 
     if (!isValidDate) {
         urgencyText = 'Data não definida';
-        urgencyColor = 'text-zinc-400';
-        bgGradient = 'from-zinc-500/10 to-zinc-600/5';
-        borderColor = 'border-zinc-500/20';
-        iconBg = 'bg-zinc-500/10';
+        bgGradient = 'from-gray-500 to-gray-700';
+        shadowColor = 'shadow-gray-500/20';
     } else if (isOverdue) {
         urgencyText = `Vencido há ${Math.abs(daysUntilDue)} dia${Math.abs(daysUntilDue) > 1 ? 's' : ''}`;
-        urgencyColor = 'text-red-400';
-        bgGradient = 'from-red-500/10 to-red-600/5';
-        borderColor = 'border-red-500/20';
-        iconBg = 'bg-red-500/10';
+        bgGradient = 'from-red-500 to-red-700';
+        shadowColor = 'shadow-red-500/20';
     } else if (daysUntilDue === 0) {
         urgencyText = 'Vence HOJE!';
-        urgencyColor = 'text-amber-400';
-        bgGradient = 'from-amber-500/10 to-amber-600/5';
-        borderColor = 'border-amber-500/20';
-        iconBg = 'bg-amber-500/10';
+        bgGradient = 'from-amber-500 to-amber-700';
+        shadowColor = 'shadow-amber-500/20';
     } else if (daysUntilDue === 1) {
         urgencyText = 'Vence amanhã';
-        urgencyColor = 'text-amber-400';
-        bgGradient = 'from-amber-500/10 to-amber-600/5';
-        borderColor = 'border-amber-500/20';
-        iconBg = 'bg-amber-500/10';
+        bgGradient = 'from-amber-500 to-amber-700';
+        shadowColor = 'shadow-amber-500/20';
     } else if (daysUntilDue <= 7) {
         urgencyText = `Vence em ${daysUntilDue} dias`;
-        urgencyColor = 'text-blue-400';
+        bgGradient = 'from-blue-500 to-blue-700';
+        shadowColor = 'shadow-blue-500/20';
     } else {
         urgencyText = `Vence em ${daysUntilDue} dias`;
-        urgencyColor = 'text-zinc-400';
-        bgGradient = 'from-zinc-500/10 to-zinc-600/5';
-        borderColor = 'border-zinc-500/20';
-        iconBg = 'bg-zinc-500/10';
+        bgGradient = 'from-blue-500 to-blue-700';
+        shadowColor = 'shadow-blue-500/20';
     }
 
     const formattedDate = isValidDate
@@ -149,17 +138,17 @@ const NextBoletoCard = ({ boleto }: { boleto: Transaction | null }) => {
         : "Data inválida";
 
     return (
-        <Card className={`bg-gradient-to-br ${bgGradient} ${borderColor}`}>
+        <Card className={`bg-gradient-to-br ${bgGradient} border-none text-white shadow-lg ${shadowColor}`}>
             <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
-                        <div className={`p-3 ${iconBg} rounded-xl`}>
-                            <CalendarClock className={`w-6 h-6 ${urgencyColor}`} />
+                        <div className={`p-3 bg-white/20 rounded-xl`}>
+                            <CalendarClock className={`w-6 h-6 text-white`} />
                         </div>
                         <div>
-                            <p className={`text-sm ${urgencyColor} font-medium`}>{urgencyText}</p>
+                            <p className={`text-sm text-white/90 font-medium`}>{urgencyText}</p>
                             <p className="text-lg font-bold text-white truncate max-w-[200px]">{boleto.description}</p>
-                            <p className="text-xs text-zinc-500 mt-1">
+                            <p className="text-xs text-white/80 mt-1">
                                 {formattedDate}
                             </p>
                         </div>
@@ -436,7 +425,7 @@ export default function BoletosPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Boletos" />
 
             <div className="p-6 space-y-6">
@@ -446,21 +435,21 @@ export default function BoletosPage() {
                 {/* Métricas dinâmicas */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Vencidos */}
-                    <Card className={`bg-zinc-900/50 border-zinc-800 ${metrics.totalOverdueCount > 0 ? 'ring-1 ring-red-500/30' : ''}`}>
+                    <Card className={`bg-gradient-to-br from-red-500 to-red-700 border-none text-white shadow-lg shadow-red-500/20`}>
                         <CardContent className="pt-5 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-lg ${metrics.totalOverdueCount > 0 ? 'bg-red-500/10' : 'bg-zinc-800'}`}>
-                                    <AlertTriangle className={`w-4 h-4 ${metrics.totalOverdueCount > 0 ? 'text-red-400' : 'text-zinc-500'}`} />
+                                <div className={`p-2 rounded-lg bg-white/20`}>
+                                    <AlertTriangle className={`w-4 h-4 text-white`} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-500">Vencidos</p>
-                                    <p className={`text-xl font-bold ${metrics.totalOverdueCount > 0 ? 'text-red-400' : 'text-zinc-600'}`}>
+                                    <p className="text-xs text-white/80">Vencidos</p>
+                                    <p className={`text-xl font-bold text-white`}>
                                         {metrics.totalOverdueCount}
                                     </p>
                                 </div>
                             </div>
                             {metrics.totalOverdueCount > 0 && (
-                                <p className="text-xs text-red-400/70 mt-2">
+                                <p className="text-xs text-white/70 mt-2">
                                     {formatCurrency(metrics.totalOverdueAmount)}
                                 </p>
                             )}
@@ -468,19 +457,19 @@ export default function BoletosPage() {
                     </Card>
 
                     {/* Próximos 7 dias */}
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-amber-500 to-amber-700 border-none text-white shadow-lg shadow-amber-500/20">
                         <CardContent className="pt-5 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-500/10 rounded-lg">
-                                    <Clock className="w-4 h-4 text-amber-400" />
+                                <div className="p-2 bg-white/20 rounded-lg">
+                                    <Clock className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-500">Próx. 7 dias</p>
+                                    <p className="text-xs text-white/80">Próx. 7 dias</p>
                                     <p className="text-xl font-bold text-white">{metrics.next7DaysCount}</p>
                                 </div>
                             </div>
                             {metrics.next7DaysCount > 0 && (
-                                <p className="text-xs text-zinc-500 mt-2">
+                                <p className="text-xs text-white/70 mt-2">
                                     {formatCurrency(metrics.totalNext7DaysAmount)}
                                 </p>
                             )}
@@ -488,33 +477,33 @@ export default function BoletosPage() {
                     </Card>
 
                     {/* Total pendentes */}
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-blue-500 to-blue-700 border-none text-white shadow-lg shadow-blue-500/20">
                         <CardContent className="pt-5 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-500/10 rounded-lg">
-                                    <FileText className="w-4 h-4 text-blue-400" />
+                                <div className="p-2 bg-white/20 rounded-lg">
+                                    <FileText className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-500">Pendentes</p>
+                                    <p className="text-xs text-white/80">Pendentes</p>
                                     <p className="text-xl font-bold text-white">{metrics.totalPendingCount}</p>
                                 </div>
                             </div>
-                            <p className="text-xs text-zinc-500 mt-2">
+                            <p className="text-xs text-white/70 mt-2">
                                 {formatCurrency(metrics.totalPendingAmount)}
                             </p>
                         </CardContent>
                     </Card>
 
                     {/* Pagos este mês */}
-                    <Card className="bg-zinc-900/50 border-zinc-800">
+                    <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none text-white shadow-lg shadow-emerald-500/20">
                         <CardContent className="pt-5 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                <div className="p-2 bg-white/20 rounded-lg">
+                                    <CheckCircle className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-500">Pagos (mês)</p>
-                                    <p className="text-xl font-bold text-emerald-400">{metrics.paidThisMonthCount}</p>
+                                    <p className="text-xs text-white/80">Pagos (mês)</p>
+                                    <p className="text-xl font-bold text-white">{metrics.paidThisMonthCount}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -522,8 +511,8 @@ export default function BoletosPage() {
                 </div>
 
                 {/* Dica para criar boleto */}
-                <div className="flex items-center justify-between bg-zinc-900/30 border border-zinc-800 border-dashed rounded-xl px-4 py-3">
-                    <div className="flex items-center gap-3 text-zinc-400">
+                <div className="flex items-center justify-between bg-muted/30 border border-border border-dashed rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-3 text-muted-foreground">
                         <Barcode className="w-5 h-5" />
                         <span className="text-sm">Para adicionar um novo boleto, crie uma transação com método de pagamento &quot;Boleto&quot;</span>
                     </div>
@@ -539,19 +528,19 @@ export default function BoletosPage() {
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                     <div className="flex gap-2 w-full md:w-auto">
                         <div className="relative flex-1 md:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                                 placeholder="Buscar boletos..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 bg-zinc-900 border-zinc-800 text-white"
+                                className="pl-10 bg-muted/50 border-input text-foreground"
                             />
                         </div>
                         <Select value={statusFilter} onValueChange={(v: "all" | "pending" | "paid" | "overdue") => setStatusFilter(v)}>
-                            <SelectTrigger className="w-[140px] bg-zinc-900 border-zinc-800 text-white">
+                            <SelectTrigger className="w-[140px] bg-muted/50 border-input text-foreground">
                                 <SelectValue placeholder="Status" />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                            <SelectContent className="bg-popover border-border">
                                 <SelectItem value="all">Todos</SelectItem>
                                 <SelectItem value="pending">A Vencer</SelectItem>
                                 <SelectItem value="overdue">Vencidos</SelectItem>
@@ -566,20 +555,20 @@ export default function BoletosPage() {
                     {loading ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="h-20 bg-zinc-900/50 rounded-xl animate-pulse" />
+                                <div key={i} className="h-20 bg-muted/50 rounded-xl animate-pulse" />
                             ))}
                         </div>
                     ) : groupedBoletos.length === 0 ? (
-                        <div className="text-center py-12 bg-zinc-900/30 rounded-xl border border-zinc-800 border-dashed">
-                            <Barcode className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                            <p className="text-zinc-400">Nenhum boleto encontrado</p>
+                        <div className="text-center py-12 bg-muted/30 rounded-xl border border-border border-dashed">
+                            <Barcode className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                            <p className="text-muted-foreground">Nenhum boleto encontrado</p>
                         </div>
                     ) : (
                         groupedBoletos.map((group) => (
                             <div key={group.title} className="space-y-3">
-                                <h3 className="text-sm font-medium text-zinc-400 px-1">
+                                <h3 className="text-sm font-medium text-muted-foreground px-1">
                                     {group.title}
-                                    <span className="ml-2 text-xs text-zinc-600">({group.boletos.length})</span>
+                                    <span className="ml-2 text-xs text-muted-foreground">({group.boletos.length})</span>
                                 </h3>
                                 <div className="space-y-2">
                                     {group.boletos.map((boleto) => {
@@ -590,29 +579,29 @@ export default function BoletosPage() {
                                         return (
                                             <div
                                                 key={boleto.id}
-                                                className={`bg-zinc-900/50 border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors ${isOverdue
+                                                className={`bg-card border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors ${isOverdue
                                                     ? 'border-red-500/30 hover:border-red-500/50'
                                                     : boleto.boletoStatus === 'paid'
-                                                        ? 'border-zinc-800/50 opacity-70 hover:opacity-100'
-                                                        : 'border-zinc-800 hover:border-zinc-700'
+                                                        ? 'border-border/50 opacity-70 hover:opacity-100'
+                                                        : 'border-border hover:border-input'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-4 w-full md:w-auto">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${boleto.boletoStatus === 'paid'
-                                                        ? 'bg-emerald-500/10 text-emerald-400'
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-md ${boleto.boletoStatus === 'paid'
+                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
                                                         : isOverdue
-                                                            ? 'bg-red-500/10 text-red-400'
-                                                            : 'bg-blue-500/10 text-blue-400'
+                                                            ? 'bg-gradient-to-br from-red-500 to-red-600'
+                                                            : 'bg-gradient-to-br from-blue-500 to-blue-600'
                                                         }`}>
-                                                        <Barcode className="w-5 h-5" />
+                                                        <Barcode className="w-5 h-5 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-white">{boleto.description}</p>
-                                                        <div className="flex items-center gap-2 text-sm text-zinc-400">
+                                                        <p className="font-medium text-foreground">{boleto.description}</p>
+                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                             <Calendar className="w-3 h-3" />
                                                             <span>{getDueDateText(boleto)}</span>
                                                             {boleto.installments && boleto.installments > 1 && (
-                                                                <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded-full">
+                                                                <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
                                                                     {boleto.installmentNumber || 1}/{boleto.installments}
                                                                 </span>
                                                             )}
@@ -622,7 +611,7 @@ export default function BoletosPage() {
 
                                                 <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                                                     <div className="text-right">
-                                                        <p className="font-bold text-white">{formatCurrency(boleto.amount)}</p>
+                                                        <p className="font-bold text-foreground">{formatCurrency(boleto.amount)}</p>
                                                         <Badge variant="outline" className={`
                                                             ${boleto.boletoStatus === 'paid'
                                                                 ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
@@ -637,11 +626,11 @@ export default function BoletosPage() {
 
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white">
+                                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                                                                 <MoreHorizontal className="w-4 h-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+                                                        <DropdownMenuContent className="bg-popover border-border">
                                                             {boleto.boletoStatus !== 'paid' && (
                                                                 <DropdownMenuItem
                                                                     className="text-emerald-400 focus:text-emerald-300 focus:bg-emerald-500/10"
@@ -652,7 +641,7 @@ export default function BoletosPage() {
                                                                 </DropdownMenuItem>
                                                             )}
                                                             <DropdownMenuItem
-                                                                className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+                                                                className="text-muted-foreground focus:text-foreground focus:bg-muted"
                                                                 onClick={() => handleEdit(boleto)}
                                                             >
                                                                 <Pencil className="w-4 h-4 mr-2" />
@@ -691,13 +680,13 @@ export default function BoletosPage() {
 
             {/* Modal de Pagamento */}
             <Dialog open={payModal.open} onOpenChange={(open) => setPayModal({ open, boleto: null })}>
-                <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+                <DialogContent className="bg-popover border-border max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
+                        <DialogTitle className="text-foreground flex items-center gap-2">
                             <Wallet className="w-5 h-5 text-emerald-400" />
                             Pagar Boleto
                         </DialogTitle>
-                        <DialogDescription className="text-zinc-400">
+                        <DialogDescription className="text-muted-foreground">
                             Confirme o pagamento e selecione a conta para debitar
                         </DialogDescription>
                     </DialogHeader>
@@ -705,18 +694,18 @@ export default function BoletosPage() {
                     {payModal.boleto && (
                         <div className="space-y-4">
                             {/* Detalhes do boleto */}
-                            <div className="p-4 bg-zinc-800/50 rounded-xl border border-zinc-700">
-                                <p className="text-sm text-zinc-400">Descrição</p>
-                                <p className="text-white font-medium">{payModal.boleto.description}</p>
+                            <div className="p-4 bg-muted/50 rounded-xl border border-input">
+                                <p className="text-sm text-muted-foreground">Descrição</p>
+                                <p className="text-foreground font-medium">{payModal.boleto.description}</p>
                                 {payModal.boleto.installments && payModal.boleto.installments > 1 && (
-                                    <p className="text-xs text-zinc-500 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         Parcela {payModal.boleto.installmentNumber}/{payModal.boleto.installments}
                                     </p>
                                 )}
                             </div>
 
-                            <div className="p-4 bg-zinc-800/50 rounded-xl border border-zinc-700">
-                                <p className="text-sm text-zinc-400">Valor a pagar</p>
+                            <div className="p-4 bg-muted/50 rounded-xl border border-input">
+                                <p className="text-sm text-muted-foreground">Valor a pagar</p>
                                 <p className="text-2xl font-bold text-emerald-400">
                                     {formatCurrency(payModal.boleto.amount)}
                                 </p>
@@ -724,11 +713,11 @@ export default function BoletosPage() {
 
                             {/* Seleção de conta */}
                             <div className="space-y-2">
-                                <Label className="text-zinc-300">Debitar de qual conta?</Label>
+                                <Label className="text-muted-foreground">Debitar de qual conta?</Label>
                                 {accounts.length === 0 ? (
-                                    <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
-                                        <AlertCircle className="w-8 h-8 text-zinc-500 mx-auto mb-2" />
-                                        <p className="text-sm text-zinc-400">Nenhuma conta cadastrada</p>
+                                    <div className="p-4 rounded-lg bg-muted/50 border border-input text-center">
+                                        <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                                        <p className="text-sm text-muted-foreground">Nenhuma conta cadastrada</p>
                                         <Link
                                             href="/contas"
                                             onClick={() => setPayModal({ open: false, boleto: null })}
@@ -739,10 +728,10 @@ export default function BoletosPage() {
                                     </div>
                                 ) : (
                                     <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-                                        <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
+                                        <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue placeholder="Selecione uma conta" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                                        <SelectContent className="bg-popover border-border">
                                             {accounts.map((acc) => {
                                                 const bank = getBankByCode(acc.bankCode);
                                                 const Icon = getIconById(bank.icon);
@@ -750,7 +739,7 @@ export default function BoletosPage() {
                                                     <SelectItem
                                                         key={acc.id}
                                                         value={acc.id}
-                                                        className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                                                        className="text-muted-foreground focus:bg-muted focus:text-foreground"
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <div
@@ -760,7 +749,7 @@ export default function BoletosPage() {
                                                                 <Icon className="w-3 h-3 text-white" />
                                                             </div>
                                                             <span>{acc.name}</span>
-                                                            <span className="text-zinc-500 text-xs ml-auto">
+                                                            <span className="text-muted-foreground text-xs ml-auto">
                                                                 {formatCurrency(acc.balance)}
                                                             </span>
                                                         </div>
@@ -778,7 +767,7 @@ export default function BoletosPage() {
                         <Button
                             variant="ghost"
                             onClick={() => setPayModal({ open: false, boleto: null })}
-                            className="text-zinc-400"
+                            className="text-muted-foreground"
                             disabled={paying}
                         >
                             Cancelar

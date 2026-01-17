@@ -86,7 +86,7 @@ export default function ReceitasPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-background">
             <Header title="Receitas" />
 
             <TransactionModal open={showModal} onOpenChange={setShowModal} />
@@ -101,10 +101,10 @@ export default function ReceitasPage() {
                                 placeholder="Buscar receitas..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500"
+                                className="pl-10 bg-muted/50 border-input text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
-                        <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+                        <Button variant="outline" className="border-input text-muted-foreground hover:bg-accent hover:text-foreground">
                             <Filter className="w-4 h-4 mr-2" />
                             Filtrar
                         </Button>
@@ -120,29 +120,29 @@ export default function ReceitasPage() {
                 </div>
 
                 {/* Summary Card */}
-                <Card className="bg-gradient-to-br from-green-900/30 to-zinc-900/50 border-green-800/50">
+                <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none shadow-lg shadow-green-500/20">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-green-400">Total de Receitas</p>
+                                <p className="text-sm text-white/80 font-medium">Total de Receitas</p>
                                 {loading ? (
-                                    <Skeleton className="h-9 w-40 bg-zinc-800 mt-1" />
+                                    <Skeleton className="h-9 w-40 bg-white/20 mt-1" />
                                 ) : (
                                     <p className="text-3xl font-bold text-white mt-1">{formatCurrency(totalReceitas)}</p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                <TrendingUp className="w-8 h-8 text-green-400" />
+                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                <TrendingUp className="w-8 h-8 text-white" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Receitas List */}
-                <Card className="bg-zinc-900/50 border-zinc-800">
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle className="text-white">Histórico de Receitas</CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardTitle className="text-foreground">Histórico de Receitas</CardTitle>
+                        <CardDescription className="text-muted-foreground">
                             Todas as suas entradas registradas
                         </CardDescription>
                     </CardHeader>
@@ -150,23 +150,23 @@ export default function ReceitasPage() {
                         {loading ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50">
+                                    <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                                         <div className="flex items-center gap-4">
-                                            <Skeleton className="w-12 h-12 rounded-lg bg-zinc-700" />
+                                            <Skeleton className="w-12 h-12 rounded-lg bg-muted" />
                                             <div className="space-y-2">
-                                                <Skeleton className="h-4 w-40 bg-zinc-700" />
-                                                <Skeleton className="h-3 w-32 bg-zinc-700" />
+                                                <Skeleton className="h-4 w-40 bg-muted" />
+                                                <Skeleton className="h-3 w-32 bg-muted" />
                                             </div>
                                         </div>
-                                        <Skeleton className="h-5 w-24 bg-zinc-700" />
+                                        <Skeleton className="h-5 w-24 bg-muted" />
                                     </div>
                                 ))}
                             </div>
                         ) : filteredReceitas.length === 0 ? (
                             <div className="text-center py-12">
-                                <FileText className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                                <p className="text-zinc-400">Nenhuma receita encontrada</p>
-                                <p className="text-sm text-zinc-500 mt-1">
+                                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">Nenhuma receita encontrada</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Adicione sua primeira receita clicando no botão acima
                                 </p>
                             </div>
@@ -176,30 +176,31 @@ export default function ReceitasPage() {
                                     const category = getCategoryByName(receita.category);
                                     const Icon = category ? getIconById(category.icon) : TrendingUp;
                                     const color = category?.color || "#10B981";
-                                    const categoryName = category?.name || receita.category;
 
                                     return (
                                         <div
                                             key={receita.id}
-                                            className="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group"
+                                            className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                                                    style={{ backgroundColor: `${color}20` }}
+                                                    className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg"
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${color}, ${color}dd)`
+                                                    }}
                                                 >
-                                                    <Icon className="w-5 h-5" style={{ color }} />
+                                                    <Icon className="w-6 h-6 text-white" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-white">{receita.description}</p>
-                                                    <span className="text-sm text-zinc-500 flex items-center mt-1">
+                                                    <p className="font-bold text-foreground text-lg">{receita.description}</p>
+                                                    <span className="text-sm text-muted-foreground flex items-center mt-1">
                                                         <Calendar className="w-3 h-3 mr-1" />
                                                         {formatDate(receita.date)}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
-                                                <span className="text-lg font-semibold text-green-400">
+                                                <span className="text-lg font-bold text-emerald-600">
                                                     +{formatCurrency(receita.amount)}
                                                 </span>
                                                 <DropdownMenu>
@@ -207,13 +208,13 @@ export default function ReceitasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-white"
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
-                                                        <DropdownMenuItem className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800">
+                                                    <DropdownMenuContent className="bg-popover border-border">
+                                                        <DropdownMenuItem className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Editar
                                                         </DropdownMenuItem>
