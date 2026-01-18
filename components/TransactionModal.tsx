@@ -1014,7 +1014,6 @@ export function TransactionModal({
                                             <Input
                                                 type="number"
                                                 min="1"
-                                                placeholder="1"
                                                 value={formData.boletoInstallments}
                                                 onChange={(e) => setFormData({ ...formData, boletoInstallments: e.target.value })}
                                                 className="bg-muted/50 border-input text-foreground"

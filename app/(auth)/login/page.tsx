@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signIn } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,10 +14,17 @@ import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            router.push("/dashboard");
+        }
+    }, [user, authLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +33,7 @@ export default function LoginPage() {
 
         try {
             await signIn(email, password);
-            router.push("/dashboard");
+            // Redirecionamento é tratado pelo useEffect
         } catch (err: unknown) {
             console.error(err);
             if (err instanceof Error && 'code' in err) {

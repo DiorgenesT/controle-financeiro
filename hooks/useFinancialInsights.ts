@@ -30,9 +30,15 @@ export function useFinancialInsights() {
         const lastMonthStart = startOfMonth(subMonths(today, 1));
         const lastMonthEnd = endOfMonth(subMonths(today, 1));
 
+        // Filter out transfers
+        const validTransactions = transactions.filter(t =>
+            !t.category?.toLowerCase().includes('transferência') &&
+            !t.category?.toLowerCase().includes('transferencia')
+        );
+
         // Helper to get total expenses for a period
         const getExpenses = (start: Date, end: Date) => {
-            return transactions
+            return validTransactions
                 .filter(t =>
                     t.type === 'despesa' &&
                     t.date >= start &&
@@ -43,7 +49,7 @@ export function useFinancialInsights() {
 
         // Helper to get total income for a period
         const getIncome = (start: Date, end: Date) => {
-            return transactions
+            return validTransactions
                 .filter(t =>
                     t.type === 'receita' &&
                     t.date >= start &&
@@ -101,7 +107,7 @@ export function useFinancialInsights() {
 
         // 3. Category Analysis (Top Spender)
         const categoryTotals: Record<string, number> = {};
-        transactions
+        validTransactions
             .filter(t => t.type === 'despesa' && isSameMonth(t.date, today))
             .forEach(t => {
                 const cat = t.category || 'Outros';

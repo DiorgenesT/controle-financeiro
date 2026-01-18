@@ -146,15 +146,21 @@ export default function MetasPage() {
 
         setSaving(true);
         try {
-            const goalData = {
+            const goalData: any = {
                 title: newMeta.title,
                 targetAmount: parseFloat(newMeta.targetAmount),
                 currentAmount: 0,
                 deadline: new Date(newMeta.deadline),
                 icon: newMeta.icon,
-                linkedAccountId: newMeta.linkedAccountId !== "none" ? newMeta.linkedAccountId : undefined,
-                description: newMeta.description.trim() || undefined
             };
+
+            if (newMeta.linkedAccountId && newMeta.linkedAccountId !== "none") {
+                goalData.linkedAccountId = newMeta.linkedAccountId;
+            }
+
+            if (newMeta.description && newMeta.description.trim()) {
+                goalData.description = newMeta.description.trim();
+            }
 
             await addGoal(user.uid, goalData);
 

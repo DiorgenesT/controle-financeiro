@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { DisableInputScroll } from "@/components/DisableInputScroll";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            <DisableInputScroll />
             {children}
             <Toaster
               position="top-right"

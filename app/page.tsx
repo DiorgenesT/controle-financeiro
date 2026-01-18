@@ -20,8 +20,11 @@ import {
   Coins,
   ArrowUpRight,
   CreditCard,
-  CircleDollarSign
+  CircleDollarSign,
+  Menu
 } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -401,12 +404,15 @@ export default function Home() {
               />
             </div>
           </Link>
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-zinc-600 hover:text-emerald-600 transition-colors">Recursos</a>
             <a href="#pricing" className="text-zinc-600 hover:text-emerald-600 transition-colors">Preços</a>
             <a href="#testimonials" className="text-zinc-600 hover:text-emerald-600 transition-colors">Depoimentos</a>
           </nav>
-          <div className="flex items-center gap-4">
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-4">
             <Link
               href="/login"
               className="text-zinc-600 hover:text-emerald-600 transition-colors"
@@ -419,6 +425,38 @@ export default function Home() {
             >
               Assinar Agora
             </a>
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-zinc-600">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+                <nav className="flex flex-col gap-6 mt-8">
+                  <a href="#features" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Recursos</a>
+                  <a href="#pricing" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Preços</a>
+                  <a href="#testimonials" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Depoimentos</a>
+                  <hr className="border-zinc-200" />
+                  <Link
+                    href="/login"
+                    className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors"
+                  >
+                    Já sou cliente
+                  </Link>
+                  <a
+                    href="#pricing"
+                    className="w-full text-center px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all"
+                  >
+                    Assinar Agora
+                  </a>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
