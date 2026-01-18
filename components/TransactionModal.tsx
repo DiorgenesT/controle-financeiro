@@ -629,26 +629,26 @@ export function TransactionModal({
                         <div className="grid grid-cols-2 gap-4 py-6">
                             <button
                                 onClick={() => handleTypeSelect("receita")}
-                                className="flex flex-col items-center gap-4 p-6 rounded-xl border-2 border-muted bg-muted/50 hover:border-green-500 hover:bg-green-500/10 transition-all group"
+                                className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] hover:shadow-emerald-500/30 group border-none"
                             >
-                                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                                    <TrendingUp className="w-8 h-8 text-green-400" />
+                                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                    <TrendingUp className="w-8 h-8 text-white" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-semibold text-foreground">Receita</p>
-                                    <p className="text-sm text-muted-foreground">Entrada de dinheiro</p>
+                                    <p className="font-bold text-lg">Receita</p>
+                                    <p className="text-sm text-emerald-100">Entrada de dinheiro</p>
                                 </div>
                             </button>
                             <button
                                 onClick={() => handleTypeSelect("despesa")}
-                                className="flex flex-col items-center gap-4 p-6 rounded-xl border-2 border-muted bg-muted/50 hover:border-red-500 hover:bg-red-500/10 transition-all group"
+                                className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/20 transition-all hover:scale-[1.02] hover:shadow-red-500/30 group border-none"
                             >
-                                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition-colors">
-                                    <TrendingDown className="w-8 h-8 text-red-400" />
+                                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                    <TrendingDown className="w-8 h-8 text-white" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-semibold text-foreground">Despesa</p>
-                                    <p className="text-sm text-muted-foreground">Saída de dinheiro</p>
+                                    <p className="font-bold text-lg">Despesa</p>
+                                    <p className="text-sm text-red-100">Saída de dinheiro</p>
                                 </div>
                             </button>
                         </div>
@@ -667,63 +667,63 @@ export function TransactionModal({
                         <div className="grid grid-cols-2 gap-3 py-4">
                             <button
                                 onClick={() => handlePaymentSelect("debit")}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-muted bg-muted/50 hover:border-emerald-500 hover:bg-emerald-500/10 transition-all"
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/20 border-none"
                             >
-                                <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                                    <Wallet className="w-6 h-6 text-emerald-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                    <Wallet className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-semibold text-foreground">Débito</p>
-                                    <p className="text-xs text-muted-foreground">Cartão de débito</p>
+                                    <p className="font-bold">Débito</p>
+                                    <p className="text-xs text-emerald-100">Cartão de débito</p>
                                 </div>
                             </button>
 
                             <button
                                 onClick={() => handlePaymentSelect("pix")}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-muted bg-muted/50 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all"
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/20 border-none"
                             >
-                                <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                                    <Smartphone className="w-6 h-6 text-cyan-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                    <Smartphone className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-semibold text-foreground">PIX</p>
-                                    <p className="text-xs text-muted-foreground">Transferência</p>
+                                    <p className="font-bold">PIX</p>
+                                    <p className="text-xs text-cyan-100">Transferência</p>
                                 </div>
                             </button>
 
                             <button
                                 onClick={() => handlePaymentSelect("credit")}
                                 disabled={creditCards.length === 0}
-                                className="flex items-center gap-4 p-4 rounded-xl border-2 border-muted bg-muted/50 hover:border-violet-500 hover:bg-violet-500/10 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/20 text-left disabled:opacity-50 disabled:cursor-not-allowed border-none"
                             >
-                                <div className="w-12 h-12 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                                    <CreditCard className="w-6 h-6 text-violet-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
+                                    <CreditCard className="w-6 h-6 text-white" />
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-foreground">Cartão de Crédito</p>
-                                    <p className="text-sm text-muted-foreground">Vai para a fatura</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold truncate">Cartão de Crédito</p>
+                                    <p className="text-sm text-violet-100 truncate">Vai para a fatura</p>
                                 </div>
                                 {creditCards.length === 0 && (
                                     <Link
                                         href="/cartoes"
                                         onClick={handleClose}
-                                        className="text-xs text-violet-400 hover:text-violet-300"
+                                        className="text-xs text-white/80 hover:text-white underline shrink-0"
                                     >
-                                        Criar cartão
+                                        Criar
                                     </Link>
                                 )}
                             </button>
 
                             <button
                                 onClick={() => handlePaymentSelect("boleto")}
-                                className="flex items-center gap-4 p-4 rounded-xl border-2 border-muted bg-muted/50 hover:border-orange-500 hover:bg-orange-500/10 transition-all text-left"
+                                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 text-left border-none"
                             >
-                                <div className="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                                    <Receipt className="w-6 h-6 text-orange-400" />
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
+                                    <Receipt className="w-6 h-6 text-white" />
                                 </div>
-                                <div>
-                                    <p className="font-semibold text-foreground">Boleto / Carnê</p>
-                                    <p className="text-sm text-muted-foreground">Pendente ou já pago</p>
+                                <div className="min-w-0">
+                                    <p className="font-bold truncate">Boleto / Carnê</p>
+                                    <p className="text-sm text-orange-100 truncate">Pendente ou pago</p>
                                 </div>
                             </button>
                         </div>

@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
         <div className="min-h-screen bg-background">
             <Sidebar />
-            <div className="pl-64 transition-all duration-300 peer-[[data-collapsed=true]]:pl-20">
+            <div className="pl-0 md:pl-64 transition-all duration-300 peer-[[data-collapsed=true]]:pl-20">
                 <main className="min-h-screen">
                     {children}
                 </main>

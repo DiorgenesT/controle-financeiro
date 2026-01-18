@@ -11,7 +11,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, Search, Settings, LogOut, User, CreditCard } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Menu, Bell, Search, Settings, LogOut, User, CreditCard } from "lucide-react";
+import { menuItems, bottomMenuItems } from "@/components/Sidebar";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { AlertTicker } from "@/components/AlertTicker";
@@ -24,6 +29,7 @@ interface HeaderProps {
 
 export function Header({ title }: HeaderProps) {
     const { user, signOut } = useAuth();
+    const pathname = usePathname();
 
     const getInitials = (name: string | null) => {
         if (!name) return "U";
@@ -36,11 +42,77 @@ export function Header({ title }: HeaderProps) {
     };
 
     return (
-        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-border bg-card/80 backdrop-blur-xl px-6">
-            {/* Esquerda - Título */}
-            <div className="flex items-center gap-4 w-1/4">
+        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-border bg-card/80 backdrop-blur-xl px-4 md:px-6">
+            {/* Esquerda - Menu Mobile e Título */}
+            <div className="flex items-center gap-4 w-1/4 md:w-1/4">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="md:hidden">
+                            <Menu className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-72 p-0 bg-sidebar border-r border-sidebar-border">
+                        <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+                        <div className="h-20 px-4 flex items-center border-b border-sidebar-border">
+                            <Link href="/dashboard" className="flex items-center gap-3 px-2 w-full justify-center">
+                                <div className="relative w-48 h-16">
+                                    <Image
+                                        src="/logo-new.png"
+                                        alt="Tudo Em Dia"
+                                        fill
+                                        className="object-contain"
+                                        priority
+                                    />
+                                </div>
+                            </Link>
+                        </div>
+                        <div className="flex flex-col h-[calc(100vh-5rem)]">
+                            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                                {menuItems.map((item) => {
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                                                isActive
+                                                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                                            )}
+                                        >
+                                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
+                                            <span className="font-medium">{item.title}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                            <div className="p-3 space-y-1 border-t border-sidebar-border">
+                                {bottomMenuItems.map((item) => {
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                                                isActive
+                                                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                                            )}
+                                        >
+                                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
+                                            <span className="font-medium">{item.title}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+
                 {title && (
-                    <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+                    <h1 className="text-xl font-semibold text-foreground hidden md:block">{title}</h1>
                 )}
             </div>
 

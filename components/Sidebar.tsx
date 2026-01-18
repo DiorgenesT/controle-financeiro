@@ -27,7 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
-const menuItems = [
+export const menuItems = [
     {
         title: "Dashboard",
         href: "/dashboard",
@@ -70,7 +70,7 @@ const menuItems = [
     },
 ];
 
-const bottomMenuItems = [
+export const bottomMenuItems = [
     {
         title: "Categorias",
         href: "/categorias",
@@ -104,7 +104,7 @@ export function Sidebar() {
 
     return (
         <aside
-            className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border flex flex-col"
+            className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border flex-col"
         >
             {/* Header - mesma altura do Header principal (h-20) */}
             <div className="h-20 px-4 flex items-center border-b border-sidebar-border">
