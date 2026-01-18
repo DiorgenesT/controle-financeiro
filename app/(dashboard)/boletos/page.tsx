@@ -511,7 +511,7 @@ export default function BoletosPage() {
                 </div>
 
                 {/* Dica para criar boleto */}
-                <div className="flex items-center justify-between bg-muted/30 border border-border border-dashed rounded-xl px-4 py-3">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-muted/30 border border-border border-dashed rounded-xl px-4 py-3 gap-4 md:gap-0">
                     <div className="flex items-center gap-3 text-muted-foreground">
                         <Barcode className="w-5 h-5" />
                         <span className="text-sm">Para adicionar um novo boleto, crie uma transação com método de pagamento &quot;Boleto&quot;</span>

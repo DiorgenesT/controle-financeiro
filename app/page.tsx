@@ -426,23 +426,23 @@ export default function Home() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative z-10" ref={heroRef}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto px-4 md:px-0">
             <div className="hero-animate inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
               <Star className="w-4 h-4" />
               Oferta de Lançamento
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight">
+            <h1 className="text-4xl md:text-7xl font-bold leading-tight tracking-tight">
               <span className="hero-animate inline-block">Mantenha </span>{" "}
               <span className="brand-text inline-block text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 animate-gradient-x pb-2">
                 Tudo em Dia
               </span>
             </h1>
-            <p className="hero-animate mt-6 text-xl text-zinc-600 leading-relaxed">
+            <p className="hero-animate mt-6 text-lg md:text-xl text-zinc-600 leading-relaxed">
               Gerencie receitas, despesas e metas em um só lugar.
               Interface moderna, gráficos inteligentes e insights para você
               alcançar a liberdade financeira.
             </p>
-            <div className="hero-animate mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="hero-animate mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
               <a
                 href="#pricing"
                 className="cta-glow w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-lg shadow-xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 hover:scale-105 hover:-translate-y-1"
@@ -457,9 +457,11 @@ export default function Home() {
                 Conhecer Recursos
               </a>
             </div>
-            <p className="hero-animate mt-4 text-sm text-zinc-500">
-              ✓ Acesso imediato &nbsp;&nbsp; ✓ Cancele quando quiser &nbsp;&nbsp; ✓ Suporte incluído
-            </p>
+            <div className="hero-animate mt-6 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 text-sm text-zinc-500">
+              <span className="flex items-center gap-1"><Check className="w-4 h-4 text-emerald-500" /> Acesso imediato</span>
+              <span className="flex items-center gap-1"><Check className="w-4 h-4 text-emerald-500" /> Cancele quando quiser</span>
+              <span className="flex items-center gap-1"><Check className="w-4 h-4 text-emerald-500" /> Suporte incluído</span>
+            </div>
           </div>
 
           {/* Dashboard Preview */}

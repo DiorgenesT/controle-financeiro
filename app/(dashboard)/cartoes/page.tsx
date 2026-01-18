@@ -249,7 +249,7 @@ export default function CartoesPage() {
 
             <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
                     <div>
                         <p className="text-muted-foreground">
                             Gerencie seus cartões de crédito e faturas
