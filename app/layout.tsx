@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   description: "Sistema de controle financeiro pessoal com relatórios, metas e insights automáticos.",
   keywords: ["finanças", "controle financeiro", "dinheiro", "orçamento", "metas financeiras", "tudo em dia"],
   authors: [{ name: "Tudo Em Dia" }],
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.png",
+  },
   openGraph: {
     title: "Tudo Em Dia | Controle Financeiro Inteligente",
     description: "Sistema de controle financeiro pessoal com relatórios, metas e insights automáticos.",
