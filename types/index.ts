@@ -6,7 +6,8 @@ export interface User {
     photoURL: string | null;
     isFirstAccess: boolean;
     createdAt: Date;
-    subscriptionStatus: 'active' | 'inactive' | 'trial' | 'expired';
+    subscriptionStatus: 'active' | 'inactive' | 'trial' | 'expired' | 'canceled';
+    subscriptionEnd?: Date;
     stripeCustomerId?: string;
 }
 

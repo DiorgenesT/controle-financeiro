@@ -48,6 +48,30 @@ export default function Home() {
 
   const ctaRef = useRef<HTMLDivElement>(null);
 
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Erro ao iniciar pagamento. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Erro ao iniciar pagamento. Tente novamente.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const dashboardImages = [
     { src: "/dashboard-light.jpg", alt: "Dashboard Light Mode", label: "Tema Claro" },
@@ -424,9 +448,9 @@ export default function Home() {
           </Link>
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-zinc-600 hover:text-emerald-600 transition-colors">Recursos</a>
-            <a href="#pricing" className="text-zinc-600 hover:text-emerald-600 transition-colors">Preços</a>
-            <a href="#testimonials" className="text-zinc-600 hover:text-emerald-600 transition-colors">Depoimentos</a>
+            <a href="#features" className="text-zinc-600 hover:text-emerald-600 transition-colors cursor-pointer">Recursos</a>
+            <a href="#pricing" className="text-zinc-600 hover:text-emerald-600 transition-colors cursor-pointer">Preços</a>
+            <a href="#testimonials" className="text-zinc-600 hover:text-emerald-600 transition-colors cursor-pointer">Depoimentos</a>
           </nav>
 
           {/* Desktop Actions */}
@@ -731,9 +755,13 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10">
-                  Quero Organizar Minha Vida
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                <Button
+                  onClick={handleCheckout}
+                  disabled={checkoutLoading}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
+                  {!checkoutLoading && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>
               </div>
             </div>
@@ -865,9 +893,9 @@ export default function Home() {
               © 2026 Tudo Em Dia. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <a href="#" className="hover:text-zinc-900 transition-colors">Termos</a>
-              <a href="#" className="hover:text-zinc-900 transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-zinc-900 transition-colors">Suporte</a>
+              <a href="#" className="hover:text-zinc-900 transition-colors cursor-pointer">Termos</a>
+              <a href="#" className="hover:text-zinc-900 transition-colors cursor-pointer">Privacidade</a>
+              <a href="mailto:contato@tatudoemdia.com.br" className="hover:text-zinc-900 transition-colors cursor-pointer">Suporte</a>
             </div>
           </div>
         </div>

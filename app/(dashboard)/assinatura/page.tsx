@@ -128,56 +128,11 @@ export default function AssinaturaPage() {
                     </div>
                 </div>
 
-                {/* Payment Info */}
-                <Card className="bg-card border-border">
-                    <CardHeader>
-                        <CardTitle className="text-foreground flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-emerald-500" />
-                            Método de Pagamento
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                            Gerencie suas formas de pagamento
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-lg bg-muted/50 border border-dashed border-border gap-4">
-                            <div className="flex items-center gap-4 w-full sm:w-auto">
-                                <div className="w-12 h-8 rounded bg-muted flex items-center justify-center shrink-0">
-                                    <CreditCard className="w-5 h-5 text-muted-foreground" />
-                                </div>
-                                <div>
-                                    <p className="text-muted-foreground font-medium">Nenhum método cadastrado</p>
-                                    <p className="text-xs text-muted-foreground">Adicione para renovar automaticamente</p>
-                                </div>
-                            </div>
-                            <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/20 whitespace-nowrap">
-                                Quero Acesso Anual
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Billing History */}
-                <Card className="bg-card border-border">
-                    <CardHeader>
-                        <CardTitle className="text-foreground flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-emerald-500" />
-                            Histórico de Cobrança
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-center py-8">
-                            <p className="text-muted-foreground">Nenhuma cobrança ainda</p>
-                            <p className="text-sm text-muted-foreground mt-1">O histórico aparecerá aqui após sua primeira assinatura</p>
-                        </div>
-                    </CardContent>
-                </Card>
-
                 {/* Help */}
                 <div className="text-center">
                     <p className="text-muted-foreground">
                         Precisa de ajuda?{" "}
-                        <a href="#" className="text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1">
+                        <a href="mailto:contato@tatudoemdia.com.br" className="text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1 cursor-pointer">
                             Fale conosco <ExternalLink className="w-3 h-3" />
                         </a>
                     </p>

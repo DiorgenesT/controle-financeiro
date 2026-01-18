@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo } from "react";
 import { User as FirebaseUser } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -12,6 +12,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     isFirstAccess: boolean;
+    isSubscriptionValid: boolean;
     signOut: () => Promise<void>;
     refreshUser: () => Promise<void>;
 }
@@ -25,6 +26,17 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
 
     if (docSnap.exists()) {
         const data = docSnap.data();
+
+        // Parse subscriptionEnd from Firestore
+        let subscriptionEnd: Date | undefined;
+        if (data.subscriptionEnd) {
+            if (typeof data.subscriptionEnd === 'string') {
+                subscriptionEnd = new Date(data.subscriptionEnd);
+            } else if (data.subscriptionEnd?.toDate) {
+                subscriptionEnd = data.subscriptionEnd.toDate();
+            }
+        }
+
         return {
             uid: fbUser.uid,
             email: data.email || fbUser.email || "",
@@ -33,6 +45,7 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
             isFirstAccess: data.isFirstAccess ?? true,
             createdAt: data.createdAt?.toDate() || new Date(),
             subscriptionStatus: data.subscriptionStatus || "active",
+            subscriptionEnd,
             stripeCustomerId: data.stripeCustomerId,
         };
     }
@@ -63,6 +76,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [isFirstAccess, setIsFirstAccess] = useState(false);
+
+    // Check if subscription is valid
+    const isSubscriptionValid = useMemo(() => {
+        if (!user) return false;
+
+        // If status is not active, subscription is invalid
+        if (user.subscriptionStatus !== 'active') return false;
+
+        // If there's an end date, check if it's in the future
+        if (user.subscriptionEnd) {
+            return new Date() < user.subscriptionEnd;
+        }
+
+        // If no end date and status is active, consider valid (legacy users)
+        return true;
+    }, [user]);
 
     const refreshUser = async () => {
         if (firebaseUser) {
@@ -120,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 user,
                 loading,
                 isFirstAccess,
+                isSubscriptionValid,
                 signOut,
                 refreshUser,
             }}

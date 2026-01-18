@@ -417,6 +417,32 @@ export default function ConfiguracoesPage() {
                     </CardContent>
                 </Card>
 
+                {/* Support Section */}
+                <Card className="bg-card border-border">
+                    <CardHeader>
+                        <CardTitle className="text-foreground flex items-center gap-2">
+                            <Mail className="w-5 h-5 text-emerald-400" />
+                            Suporte
+                        </CardTitle>
+                        <CardDescription className="text-muted-foreground">
+                            Precisa de ajuda? Entre em contato
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                            <div>
+                                <p className="font-medium text-foreground">Email de Contato</p>
+                                <p className="text-sm text-muted-foreground">contato@tatudoemdia.com.br</p>
+                            </div>
+                            <a href="mailto:contato@tatudoemdia.com.br">
+                                <Button variant="outline" className="border-emerald-500 text-emerald-500 hover:bg-emerald-500/10">
+                                    Enviar Email
+                                </Button>
+                            </a>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Danger Zone */}
                 <Card className="bg-red-950/10 border-red-900/50">
                     <CardHeader>

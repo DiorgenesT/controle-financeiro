@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const router = useRouter();
-    const { user, loading, isFirstAccess } = useAuth();
+    const { user, loading, isFirstAccess, isSubscriptionValid } = useAuth();
 
     useEffect(() => {
         if (!loading) {
@@ -16,9 +16,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 router.push("/login");
             } else if (isFirstAccess) {
                 router.push("/alterar-senha");
+            } else if (!isSubscriptionValid) {
+                router.push("/assinatura-expirada");
             }
         }
-    }, [user, loading, isFirstAccess, router]);
+    }, [user, loading, isFirstAccess, isSubscriptionValid, router]);
 
     // Loading state
     if (loading) {
@@ -33,7 +35,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     // Redirect states
-    if (!user || isFirstAccess) {
+    if (!user || isFirstAccess || !isSubscriptionValid) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
