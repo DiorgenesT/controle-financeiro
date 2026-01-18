@@ -171,7 +171,7 @@ export default function CategoriasPage() {
 
             <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
                     <div>
                         <p className="text-muted-foreground">
                             Gerencie suas categorias para organizar transações
@@ -180,7 +180,7 @@ export default function CategoriasPage() {
 
                     <Button
                         onClick={openNewDialog}
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
+                        className="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Nova Categoria
@@ -367,8 +367,8 @@ export default function CategoriasPage() {
                                                 >
                                                     <Icon className="w-5 h-5 text-white" />
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <span className="text-foreground text-sm block truncate">{cat.name}</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <span className="text-foreground text-sm block whitespace-normal break-words leading-tight">{cat.name}</span>
                                                     {cat.isDefault && (
                                                         <span className="text-xs text-muted-foreground">Padrão</span>
                                                     )}
@@ -453,8 +453,8 @@ export default function CategoriasPage() {
                                                 >
                                                     <Icon className="w-5 h-5 text-white" />
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <span className="text-foreground text-sm block truncate">{cat.name}</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <span className="text-foreground text-sm block whitespace-normal break-words leading-tight">{cat.name}</span>
                                                     {cat.isDefault && (
                                                         <span className="text-xs text-muted-foreground">Padrão</span>
                                                     )}

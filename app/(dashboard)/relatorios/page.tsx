@@ -33,6 +33,14 @@ import { usePeople } from "@/hooks/usePeople";
 import { startOfMonth, endOfMonth, subMonths, addMonths, format, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useTheme } from "next-themes";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 const COLORS = [
     "#10B981", // Emerald
@@ -75,6 +83,7 @@ export default function RelatoriosPage() {
     const isDark = resolvedTheme === 'dark';
     const gridColor = isDark ? '#27272a' : '#e5e7eb';
     const axisColor = isDark ? '#71717a' : '#6b7280';
+    const [activeTab, setActiveTab] = useState("visao-geral");
 
     // Processamento de dados
     const today = new Date();
@@ -232,8 +241,24 @@ export default function RelatoriosPage() {
                 </div>
 
                 {/* Charts */}
-                <Tabs defaultValue="visao-geral" className="space-y-4">
-                    <TabsList className="bg-muted/50 border border-input p-1 h-auto">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+                    {/* Mobile Tab Selector */}
+                    <div className="md:hidden w-full">
+                        <Select value={activeTab} onValueChange={setActiveTab}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione a visualização" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="visao-geral">Visão Geral</SelectItem>
+                                <SelectItem value="categorias">Por Categoria</SelectItem>
+                                <SelectItem value="usuarios">Por Usuário</SelectItem>
+                                <SelectItem value="evolucao">Evolução Patrimonial</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Desktop Tab List */}
+                    <TabsList className="hidden md:flex bg-muted/50 border border-input p-1 h-auto">
                         <TabsTrigger
                             value="visao-geral"
                             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"

@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
             <div className="p-6 space-y-6">
                 {/* Greeting */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
                     <div>
                         <h2 className="text-2xl font-bold text-foreground">
                             {greeting()}, {user?.displayName?.split(" ")[0] || "Usuário"}!
@@ -95,7 +95,7 @@ export default function DashboardPage() {
                     </div>
                     <Button
                         onClick={() => setShowModal(true)}
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
+                        className="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Nova Transação
