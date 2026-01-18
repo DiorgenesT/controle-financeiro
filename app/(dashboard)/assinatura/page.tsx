@@ -69,9 +69,23 @@ export default function AssinaturaPage() {
                                         <CheckCircle className="w-4 h-4" />
                                         <span className="font-medium">Plano Ativo</span>
                                     </div>
-                                    <p className="text-sm text-white/80 mt-1">
-                                        Acesso completo a todos os recursos
-                                    </p>
+                                    {user?.subscriptionEnd && (
+                                        <div className="flex items-center gap-2 text-sm text-white/80 mt-1">
+                                            <Calendar className="w-4 h-4" />
+                                            <span>
+                                                Expira em: {new Intl.DateTimeFormat("pt-BR", {
+                                                    day: "2-digit",
+                                                    month: "long",
+                                                    year: "numeric"
+                                                }).format(user.subscriptionEnd)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {!user?.subscriptionEnd && (
+                                        <p className="text-sm text-white/80 mt-1">
+                                            Acesso completo a todos os recursos
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         </div>
