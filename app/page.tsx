@@ -21,7 +21,11 @@ import {
   ArrowUpRight,
   CreditCard,
   CircleDollarSign,
-  Menu
+  Menu,
+  Sparkles,
+  MessageSquare,
+  LogIn,
+  CheckCircle
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -435,26 +439,68 @@ export default function Home() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 border-l border-emerald-500/20">
                 <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
-                <nav className="flex flex-col gap-6 mt-8">
-                  <a href="#features" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Recursos</a>
-                  <a href="#pricing" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Preços</a>
-                  <a href="#testimonials" className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors">Depoimentos</a>
-                  <hr className="border-zinc-200" />
-                  <Link
-                    href="/login"
-                    className="text-lg font-medium text-zinc-600 hover:text-emerald-600 transition-colors"
-                  >
-                    Já sou cliente
-                  </Link>
-                  <a
-                    href="#pricing"
-                    className="w-full text-center px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all"
-                  >
-                    Assinar Agora
-                  </a>
-                </nav>
+
+                <div className="flex flex-col h-full bg-background/95 backdrop-blur-xl">
+                  {/* Header with Logo */}
+                  <div className="p-6 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-emerald-500/10 p-2 rounded-lg">
+                        <CircleDollarSign className="h-6 w-6 text-emerald-500" />
+                      </div>
+                      <span className="text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                        Tudo Em Dia
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <nav className="flex-1 flex flex-col gap-2 p-6 overflow-y-auto">
+                    <a
+                      href="#features"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all group"
+                    >
+                      <Sparkles className="w-5 h-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                      <span className="font-medium">Recursos</span>
+                    </a>
+
+                    <a
+                      href="#pricing"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all group"
+                    >
+                      <CreditCard className="w-5 h-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                      <span className="font-medium">Preços</span>
+                    </a>
+
+                    <a
+                      href="#testimonials"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all group"
+                    >
+                      <MessageSquare className="w-5 h-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                      <span className="font-medium">Depoimentos</span>
+                    </a>
+                  </nav>
+
+                  {/* Footer Actions */}
+                  <div className="p-6 border-t border-border/50 space-y-4 bg-muted/30">
+                    <Link
+                      href="/login"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 text-zinc-600 font-medium transition-all"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Já sou cliente
+                    </Link>
+
+                    <a
+                      href="#pricing"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] transition-all"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Assinar Agora
+                    </a>
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
