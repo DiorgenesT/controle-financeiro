@@ -86,7 +86,7 @@ export function ForecastCard() {
     if (loading) return <div className="h-[200px] bg-muted/50 rounded-xl animate-pulse border border-border" />;
 
     return (
-        <Card className="bg-card border-border h-full flex flex-col">
+        <Card className="bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full">
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4" />

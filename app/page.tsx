@@ -641,7 +641,8 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6 relative z-10" ref={featuresRef}>
+      {/* Features Section */}
+      <section id="features" className="py-24 px-6 relative z-10 scroll-mt-24" ref={featuresRef}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -673,7 +674,8 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 px-6 relative z-10" ref={pricingRef}>
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 px-6 relative z-10 scroll-mt-24" ref={pricingRef}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -686,67 +688,84 @@ export default function Home() {
           </div>
 
           <div className="max-w-md mx-auto" style={{ perspective: "1000px" }}>
-            {/* Lifetime Plan */}
-            <div className="pricing-card p-10 rounded-3xl bg-white/80 backdrop-blur-xl border-2 border-emerald-500/20 relative hover:border-emerald-500/50 transition-all hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2" style={{ transformStyle: "preserve-3d" }}>
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold shadow-lg shadow-emerald-500/30 text-white tracking-wide">
-                Oferta Única
+            {/* Annual Plan - Premium Design */}
+            <div className="relative p-1 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 whitespace-nowrap z-10">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                Melhor Escolha
               </div>
-              <h3 className="text-3xl font-bold text-center">Vitalício</h3>
-              <p className="text-6xl font-bold mt-6 text-center">
-                R$ <span className="price-value" data-value="67.00">67,00</span>
-              </p>
-              <p className="text-zinc-500 text-center mt-2 font-medium">Pagamento único. Sem mensalidades.</p>
 
-              <ul className="mt-8 space-y-4">
-                {[
-                  "Acesso vitalício ao sistema",
-                  "Todas as atualizações futuras",
-                  "Sem taxas recorrentes",
-                  "Transações e metas ilimitadas",
-                  "Relatórios avançados",
-                  "Suporte prioritário"
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-zinc-700">
-                    <Check className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="#"
-                className="mt-8 block w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-emerald-500/30 text-center"
-              >
-                Quero Acesso Vitalício
-              </a>
-              <p className="text-xs text-zinc-500 text-center mt-3">
-                Acesso imediato após a confirmação do pagamento
-              </p>
+              <div className="relative p-8 bg-white rounded-xl h-full flex flex-col overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                <div className="mb-8 text-center relative z-10">
+                  <h3 className="text-3xl font-bold text-zinc-800">Anual</h3>
+                  <p className="text-emerald-600 font-medium mt-2">Economize 58%</p>
+                  <div className="mt-6 flex items-center justify-center gap-2">
+                    <span className="text-zinc-400 line-through text-lg">R$ 159,90</span>
+                    <div className="flex flex-col items-start">
+                      <span className="text-5xl font-bold text-zinc-900 tracking-tight">R$ 67,90</span>
+                      <span className="text-zinc-500 text-sm font-medium">/ano</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-2">Equivalente a R$ 5,65/mês</p>
+                </div>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent mb-8"></div>
+
+                <ul className="space-y-4 mb-8 flex-1 relative z-10">
+                  {[
+                    "Acesso ilimitado ao sistema",
+                    "Gestão completa de contas",
+                    "Metas e objetivos financeiros",
+                    "Relatórios avançados",
+                    "Suporte prioritário VIP"
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <span className="text-zinc-700 font-medium">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10">
+                  Quero Organizar Minha Vida
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
             </div>
+            <p className="text-xs text-zinc-500 text-center mt-3">
+              Acesso imediato após a confirmação do pagamento
+            </p>
           </div>
+        </div>
 
-          {/* Como funciona */}
-          <div className="mt-16 text-center">
-            <h3 className="text-2xl font-semibold mb-8">Como funciona?</h3>
-            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">1</div>
-                <p className="text-zinc-600 font-medium">Escolha seu plano e realize a compra</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">2</div>
-                <p className="text-zinc-600 font-medium">Receba seu login e senha por email</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">3</div>
-                <p className="text-zinc-600 font-medium">Acesse e comece a organizar suas finanças</p>
-              </div>
+        {/* Como funciona */}
+        <div className="mt-16 text-center">
+          <h3 className="text-2xl font-semibold mb-8">Como funciona?</h3>
+          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">1</div>
+              <p className="text-zinc-600 font-medium">Escolha seu plano e realize a compra</p>
+            </div>
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">2</div>
+              <p className="text-zinc-600 font-medium">Receba seu login e senha por email</p>
+            </div>
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">3</div>
+              <p className="text-zinc-600 font-medium">Acesse e comece a organizar suas finanças</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 px-6 relative z-10" ref={testimonialsRef}>
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-24 px-6 relative z-10 scroll-mt-24" ref={testimonialsRef}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -780,10 +799,10 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* CTA Section */}
-      <section className="py-24 px-6 relative z-10" ref={ctaRef}>
+      < section className="py-24 px-6 relative z-10" ref={ctaRef} >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="cta-animate text-4xl md:text-5xl font-bold">
             Pronto para manter tudo em dia?
@@ -799,10 +818,10 @@ export default function Home() {
             <ArrowRight className="w-6 h-6" />
           </a>
         </div>
-      </section>
+      </section >
 
       {/* FAQ Section */}
-      <section className="py-24 px-6 relative z-10">
+      < section className="py-24 px-6 relative z-10" >
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Perguntas Frequentes</h2>
           <div className="space-y-4">
@@ -826,10 +845,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-200/60 bg-white/40 backdrop-blur-md relative z-10">
+      < footer className="py-12 px-6 border-t border-zinc-200/60 bg-white/40 backdrop-blur-md relative z-10" >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -852,7 +871,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+      </footer >
+    </div >
   );
 }

@@ -89,7 +89,7 @@ export function SmartInsightsCard() {
     const currentInsight = insights[currentIndex];
 
     return (
-        <Card className="h-full flex flex-col relative overflow-hidden group border-none shadow-lg bg-gradient-to-br from-indigo-600 to-purple-700 transition-all duration-500 hover:shadow-purple-500/20 hover:scale-[1.02]">
+        <Card className="h-full flex flex-col relative overflow-hidden group border-none shadow-lg bg-gradient-to-br from-indigo-600 to-purple-700 transition-all duration-500 hover:shadow-purple-500/20 hover:scale-[1.02] min-w-0 w-full">
             {/* Noise Texture Overlay */}
             <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
 

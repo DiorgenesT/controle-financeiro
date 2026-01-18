@@ -21,18 +21,19 @@ export default function AssinaturaPage() {
 
     const plans = [
         {
-            name: "Vitalício",
-            price: 67.00,
-            period: "/único",
-            popular: true,
+            id: "anual",
+            name: "Anual",
+            price: "R$ 67,90",
+            period: "/ano",
+            description: "Para quem quer economizar",
             features: [
-                "Acesso vitalício ao sistema",
-                "Sem mensalidades ou taxas extras",
-                "Todas as atualizações futuras incluídas",
-                "Transações e metas ilimitadas",
-                "Relatórios avançados e exportação",
-                "Suporte prioritário vitalício"
+                "Acesso anual ao sistema",
+                "Todas as funcionalidades",
+                "Atualizações incluídas",
+                "Suporte prioritário",
+                "Sem taxas escondidas"
             ],
+            popular: true,
         }
     ];
 
@@ -97,7 +98,7 @@ export default function AssinaturaPage() {
                                     <CardTitle className="text-foreground">{plan.name}</CardTitle>
                                     <CardDescription className="text-muted-foreground">
                                         <span className="text-3xl font-bold text-foreground">
-                                            R$ {plan.price.toFixed(2).replace(".", ",")}
+                                            {plan.price}
                                         </span>
                                         <span className="text-muted-foreground">{plan.period}</span>
                                     </CardDescription>
@@ -139,18 +140,18 @@ export default function AssinaturaPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-dashed border-border">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-8 rounded bg-muted flex items-center justify-center">
+                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-lg bg-muted/50 border border-dashed border-border gap-4">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                                <div className="w-12 h-8 rounded bg-muted flex items-center justify-center shrink-0">
                                     <CreditCard className="w-5 h-5 text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <p className="text-muted-foreground">Nenhum método de pagamento cadastrado</p>
-                                    <p className="text-sm text-muted-foreground">Adicione um cartão para renovar automaticamente</p>
+                                    <p className="text-muted-foreground font-medium">Nenhum método cadastrado</p>
+                                    <p className="text-xs text-muted-foreground">Adicione para renovar automaticamente</p>
                                 </div>
                             </div>
-                            <Button variant="outline" className="border-emerald-500 text-emerald-500 hover:bg-emerald-500/10">
-                                Adicionar Cartão
+                            <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+                                Quero Acesso Anual
                             </Button>
                         </div>
                     </CardContent>

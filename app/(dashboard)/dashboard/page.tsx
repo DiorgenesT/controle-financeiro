@@ -257,9 +257,9 @@ export default function DashboardPage() {
 
 
 
-                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 items-start">
+                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 items-start w-full min-w-0 overflow-hidden">
                     {/* 1. Transações Recentes (Compacto) */}
-                    <Card className="bg-card border-border h-full flex flex-col">
+                    <Card className="bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full">
                         <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
                             <div>
                                 <CardTitle className="text-foreground text-base">Recentes</CardTitle>
