@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -45,7 +45,21 @@ export default function Home() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
   const testimonialsRef = useRef<HTMLDivElement>(null);
+
   const ctaRef = useRef<HTMLDivElement>(null);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const dashboardImages = [
+    { src: "/dashboard-light.jpg", alt: "Dashboard Light Mode", label: "Tema Claro" },
+    { src: "/dashboard-dark.jpg", alt: "Dashboard Dark Mode", label: "Tema Escuro" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % dashboardImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const features = [
     {
@@ -549,16 +563,77 @@ export default function Home() {
           </div>
 
           {/* Dashboard Preview */}
-          <div className="hero-animate mt-20 relative perspective-1000">
+          <div className="hero-animate mt-20 relative perspective-1000 max-w-5xl mx-auto">
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-transparent to-transparent z-10" />
-            <div className="rounded-3xl border border-white/60 bg-white/40 backdrop-blur-md p-4 shadow-2xl shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-700 transform hover:rotate-x-2">
-              <div className="rounded-2xl bg-white/80 h-96 flex items-center justify-center border border-white/50 shadow-inner">
-                <div className="text-center">
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/30">
-                    <BarChart3 className="w-12 h-12 text-white" />
-                  </div>
-                  <p className="text-zinc-500 font-medium tracking-wide">Preview do Dashboard</p>
+
+            <div className="relative rounded-3xl border border-white/60 bg-white/40 backdrop-blur-md p-2 md:p-4 shadow-2xl shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-700 transform hover:-translate-y-2">
+              {/* Spacer Image to define container height */}
+              <Image
+                src="/dashboard-light.jpg"
+                alt="Spacer"
+                width={1200}
+                height={675}
+                className="w-full h-auto opacity-0 pointer-events-none"
+                priority
+              />
+
+              <div className={`absolute inset-0 p-2 md:p-4 transition-opacity duration-1000 ${currentImageIndex === 0 ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
+                <Image
+                  src="/dashboard-light.jpg"
+                  alt="Dashboard Light Mode"
+                  width={1200}
+                  height={675}
+                  className="rounded-2xl shadow-inner border border-zinc-100 w-full h-full"
+                  priority
+                />
+                <div className="absolute bottom-6 right-6 px-4 py-2 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold flex items-center gap-2 shadow-lg">
+                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                  Tema Claro
                 </div>
+              </div>
+              <div className={`absolute inset-0 p-2 md:p-4 transition-opacity duration-1000 ${currentImageIndex === 1 ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
+                <Image
+                  src="/dashboard-dark.jpg"
+                  alt="Dashboard Dark Mode"
+                  width={1200}
+                  height={675}
+                  className="rounded-2xl shadow-inner border border-zinc-100 w-full h-full"
+                />
+                <div className="absolute bottom-6 right-6 px-4 py-2 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold flex items-center gap-2 shadow-lg">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  Tema Escuro
+                </div>
+              </div>
+            </div>
+
+            {/* Background Image (Tilted) - Switches between Dark/Light */}
+            <div className="absolute top-4 -right-4 md:top-8 md:-right-12 w-full md:w-[90%] rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-emerald-500/20 transform rotate-3 opacity-90 hidden md:block -z-10">
+              {/* Spacer for background */}
+              <Image
+                src="/dashboard-dark.jpg"
+                alt="Spacer"
+                width={1200}
+                height={675}
+                className="w-full h-auto opacity-0 pointer-events-none"
+              />
+
+              <div className={`absolute inset-0 transition-opacity duration-1000 ${currentImageIndex === 0 ? "opacity-100" : "opacity-0"}`}>
+                <Image
+                  src="/dashboard-dark.jpg"
+                  alt="Dashboard Dark Mode"
+                  width={1200}
+                  height={675}
+                  className="rounded-3xl opacity-80 w-full h-full"
+                />
+              </div>
+              <div className={`absolute inset-0 transition-opacity duration-1000 ${currentImageIndex === 1 ? "opacity-100" : "opacity-0"}`}>
+                <Image
+                  src="/dashboard-light.jpg"
+                  alt="Dashboard Light Mode"
+                  width={1200}
+                  height={675}
+                  className="rounded-3xl opacity-80 w-full h-full"
+                />
               </div>
             </div>
           </div>
@@ -583,14 +658,14 @@ export default function Home() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="feature-card p-8 rounded-3xl bg-white/60 backdrop-blur-lg border border-white/60 shadow-lg shadow-zinc-200/50 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 transition-all group hover:-translate-y-2"
+                className="feature-card p-8 rounded-3xl bg-white/60 backdrop-blur-lg border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 group hover:-translate-y-4 hover:scale-105 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-600 hover:shadow-2xl hover:shadow-emerald-500/50 hover:border-transparent"
                 style={{ transformStyle: "preserve-3d" }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner">
-                  <feature.icon className="w-8 h-8 text-emerald-600" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-6 transition-all duration-500 shadow-inner group-hover:scale-110 group-hover:bg-white group-hover:shadow-lg group-hover:rotate-6">
+                  <feature.icon className="w-8 h-8 text-emerald-600 transition-colors duration-500 group-hover:text-emerald-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-zinc-800 group-hover:text-emerald-600 transition-colors">{feature.title}</h3>
-                <p className="text-zinc-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-3 text-zinc-800 transition-colors duration-500 group-hover:text-white">{feature.title}</h3>
+                <p className="text-zinc-600 leading-relaxed transition-colors duration-500 group-hover:text-emerald-50">{feature.description}</p>
               </div>
             ))}
           </div>

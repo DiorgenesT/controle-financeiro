@@ -32,10 +32,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCategories, Category } from "@/lib/categories";
 import { getIconById } from "@/lib/icons";
 import { TransactionModal } from "@/components/TransactionModal";
+import { formatTransactionDescription } from "@/lib/utils";
 import { toast } from "sonner";
 
 const formatCurrency = (value: number) => {
@@ -59,6 +61,7 @@ type FilterType = "todas" | "receita" | "despesa";
 export default function TransacoesPage() {
     const { user } = useAuth();
     const { transactions, loading, remove } = useTransactions();
+    const { accounts } = useAccounts();
     const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<typeof transactions[0] | undefined>(undefined);
@@ -83,42 +86,45 @@ export default function TransacoesPage() {
         fetchCategories();
     }, [user?.uid]);
 
-    // Filtrar transações por mês, ano e tipo
-    const filteredTransactions = useMemo(() => {
+    // Transações do mês (para os cards) - ignora filtro de tipo e busca
+    const allMonthTransactions = useMemo(() => {
         return transactions.filter(t => {
             const date = new Date(t.date);
             const matchMonth = date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
-            const matchType = filterType === "todas" || t.type === filterType;
-            const matchSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase());
 
             // Filtros de visibilidade (ocultar crédito e boletos pendentes)
             if (t.paymentMethod === "credit") return false;
             if (t.paymentMethod === "boleto" && t.boletoStatus === "pending") return false;
 
-            return matchMonth && matchType && matchSearch;
+            return matchMonth;
         });
-    }, [transactions, selectedMonth, selectedYear, filterType, searchTerm]);
+    }, [transactions, selectedMonth, selectedYear]);
 
-    // Calcular totais do mês (apenas efetivados)
+    // Filtrar transações para a lista (aplica tipo e busca)
+    const filteredTransactions = useMemo(() => {
+        return allMonthTransactions.filter(t => {
+            const matchType = filterType === "todas" || t.type === filterType;
+            const matchSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchType && matchSearch;
+        });
+    }, [allMonthTransactions, filterType, searchTerm]);
+
+    // Calcular totais do mês (usando allMonthTransactions)
     const monthTotals = useMemo(() => {
-        const receitas = filteredTransactions
+        const receitas = allMonthTransactions
             .filter(t => t.type === "receita" && t.category !== "Transferência")
             .reduce((sum, t) => sum + t.amount, 0);
 
-        const despesas = filteredTransactions
+        const despesas = allMonthTransactions
             .filter(t => {
                 if (t.type !== "despesa") return false;
                 if (t.category === "Transferência") return false;
-                // Ignorar cartão de crédito (só conta no pagamento da fatura)
-                if (t.paymentMethod === "credit") return false;
-                // Ignorar boleto pendente
-                if (t.paymentMethod === "boleto" && t.boletoStatus === "pending") return false;
                 return true;
             })
             .reduce((sum, t) => sum + t.amount, 0);
 
         return { receitas, despesas, saldo: receitas - despesas };
-    }, [filteredTransactions]);
+    }, [allMonthTransactions]);
 
     const getCategoryByName = (categoryName: string) => {
         return categories.find(c =>
@@ -377,28 +383,30 @@ export default function TransacoesPage() {
                                     return (
                                         <div
                                             key={transaction.id}
-                                            className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all group"
+                                            className="flex items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all group"
                                         >
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 mr-2">
                                                 <div
-                                                    className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-lg ${isReceita
+                                                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shadow-lg shrink-0 ${isReceita
                                                         ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20'
                                                         : 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/20'
                                                         }`}
                                                 >
-                                                    <Icon className="w-6 h-6 text-white" />
+                                                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-foreground text-lg">{transaction.description}</p>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-sm text-muted-foreground flex items-center">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-bold text-foreground text-sm sm:text-lg truncate leading-tight mb-1">
+                                                        {formatTransactionDescription(transaction, accounts)}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-[10px] sm:text-sm text-muted-foreground flex items-center shrink-0">
                                                             <Calendar className="w-3 h-3 mr-1" />
                                                             {formatDate(transaction.date)}
                                                         </span>
                                                         {transaction.paymentMethod && !isReceita && (
-                                                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground px-2 py-0.5 rounded-md bg-muted border border-border">
+                                                            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground px-1.5 py-0.5 rounded-md bg-muted border border-border shrink-0">
                                                                 {getPaymentIcon(transaction)}
-                                                                <span>
+                                                                <span className="hidden sm:inline">
                                                                     {transaction.paymentMethod === "credit" && "Crédito"}
                                                                     {transaction.paymentMethod === "debit" && "Débito"}
                                                                     {transaction.paymentMethod === "pix" && "PIX"}
@@ -407,20 +415,20 @@ export default function TransacoesPage() {
                                                             </span>
                                                         )}
                                                         {transaction.boletoStatus === "pending" && (
-                                                            <Badge className="bg-yellow-500 text-white border-none text-xs">
+                                                            <Badge className="bg-yellow-500 text-white border-none text-[10px] sm:text-xs shrink-0 px-1.5 py-0">
                                                                 Pendente
                                                             </Badge>
                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-4 shrink-0">
                                                 <div className="text-right">
-                                                    <span className={`text-lg font-bold ${isReceita ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                    <span className={`text-sm sm:text-lg font-bold ${isReceita ? 'text-emerald-600' : 'text-red-600'}`}>
                                                         {isReceita ? '+' : '-'}{formatCurrency(transaction.amount)}
                                                     </span>
                                                     {showInstallments && (
-                                                        <p className="text-xs text-muted-foreground">
+                                                        <p className="text-[10px] sm:text-xs text-muted-foreground">
                                                             {transaction.installmentNumber}/{transaction.installments}
                                                         </p>
                                                     )}
@@ -430,7 +438,7 @@ export default function TransacoesPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>

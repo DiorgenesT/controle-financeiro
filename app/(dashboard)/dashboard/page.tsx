@@ -29,6 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useGoals } from "@/hooks/useGoals";
+import { formatTransactionDescription } from "@/lib/utils";
 import Link from "next/link";
 
 const formatCurrency = (value: number) => {
@@ -305,7 +306,7 @@ export default function DashboardPage() {
                                                     key={transaction.id}
                                                     className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-muted/50 transition-colors group"
                                                 >
-                                                    <div className="flex items-center gap-2.5 overflow-hidden">
+                                                    <div className="flex items-center gap-2.5 overflow-hidden min-w-0 flex-1">
                                                         <div
                                                             className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 ${isReceita
                                                                 ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
@@ -319,7 +320,7 @@ export default function DashboardPage() {
                                                             )}
                                                         </div>
                                                         <p className="text-[11px] font-medium text-foreground truncate">
-                                                            {transaction.description}
+                                                            {formatTransactionDescription(transaction, accounts)}
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-2 shrink-0">
