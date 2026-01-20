@@ -12,15 +12,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        // 1. Create customer first
-        const customer = await abacatePay.customer.create({
-            email: email,
-            name: email.split("@")[0],
-            cellphone: "11999999999", // Placeholder - required by AbacatePay
-            taxId: "00000000000", // Placeholder CPF - required by AbacatePay
-        });
-
-        // 2. Create billing with customerId
+        // Create billing directly - AbacatePay will collect customer data on their checkout page
         const billing = await abacatePay.billing.create({
             frequency: "ONE_TIME",
             methods: ["PIX"],
@@ -35,8 +27,9 @@ export async function POST(request: NextRequest) {
             ],
             returnUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
             completionUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
-            customerId: customer.id,
         });
+
+        console.log("AbacatePay billing created:", billing);
 
         return NextResponse.json({ url: billing.url });
     } catch (error) {

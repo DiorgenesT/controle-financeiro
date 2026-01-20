@@ -14,20 +14,6 @@ interface CreateBillingParams {
     products: Product[];
     returnUrl: string;
     completionUrl: string;
-    customerId: string;
-}
-
-interface CreateCustomerParams {
-    email: string;
-    name: string;
-    cellphone?: string;
-    taxId?: string;
-}
-
-interface Customer {
-    id: string;
-    email: string;
-    name: string;
 }
 
 interface Billing {
@@ -40,6 +26,8 @@ async function apiRequest<T>(endpoint: string, data: object): Promise<T> {
         throw new Error("Missing ABACATEPAY_API_KEY");
     }
 
+    console.log("AbacatePay Request:", endpoint, JSON.stringify(data));
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: "POST",
         headers: {
@@ -50,9 +38,9 @@ async function apiRequest<T>(endpoint: string, data: object): Promise<T> {
     });
 
     const responseData = await response.json();
+    console.log("AbacatePay Response:", JSON.stringify(responseData));
 
     if (!response.ok || !responseData.success) {
-        console.error("AbacatePay Error:", JSON.stringify(responseData));
         throw new Error(responseData.error || `AbacatePay API Error: ${response.status}`);
     }
 
@@ -60,11 +48,6 @@ async function apiRequest<T>(endpoint: string, data: object): Promise<T> {
 }
 
 export const abacatePay = {
-    customer: {
-        create: async (data: CreateCustomerParams): Promise<Customer> => {
-            return apiRequest<Customer>("/customer/create", data);
-        }
-    },
     billing: {
         create: async (data: CreateBillingParams): Promise<Billing> => {
             return apiRequest<Billing>("/billing/create", data);
