@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
             email: email,
             name: email.split("@")[0],
             cellphone: "11999999999", // Placeholder - required by AbacatePay
+            taxId: "00000000000", // Placeholder CPF - required by AbacatePay
         });
 
         // 2. Create billing with customerId
