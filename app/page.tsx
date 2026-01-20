@@ -80,14 +80,7 @@ export default function Home() {
 
 
 
-  <Button
-    onClick={handleCheckout}
-    disabled={checkoutLoading || !email}
-    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
-    {!checkoutLoading && <ArrowRight className="w-5 h-5 ml-2" />}
-  </Button>
+
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const dashboardImages = [
