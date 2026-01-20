@@ -6,14 +6,19 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { email } = body;
 
-        // Get the origin for redirect URLs
         const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tatudoemdia.com.br";
 
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        // Create a billing (cobrança) - without customer, AbacatePay will ask for it
+        // 1. Create customer first
+        const customer = await abacatePay.customer.create({
+            email: email,
+            name: email.split("@")[0],
+        });
+
+        // 2. Create billing with customerId
         const billing = await abacatePay.billing.create({
             frequency: "ONE_TIME",
             methods: ["PIX"],
@@ -22,12 +27,13 @@ export async function POST(request: NextRequest) {
                     externalId: "plano-anual",
                     name: "Plano Anual - Tudo Em Dia",
                     quantity: 1,
-                    price: 6790, // R$ 67,90 in cents
+                    price: 6790,
                     description: "Acesso anual ao sistema de controle financeiro",
                 },
             ],
             returnUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
             completionUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
+            customerId: customer.id,
         });
 
         return NextResponse.json({ url: billing.url });

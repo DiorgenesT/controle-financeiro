@@ -4,7 +4,7 @@ interface Product {
     externalId: string;
     name: string;
     quantity: number;
-    price: number; // in cents
+    price: number;
     description?: string;
 }
 
@@ -14,33 +14,60 @@ interface CreateBillingParams {
     products: Product[];
     returnUrl: string;
     completionUrl: string;
-    customerId?: string;
+    customerId: string;
+}
+
+interface CreateCustomerParams {
+    email: string;
+    name: string;
+    cellphone?: string;
+    taxId?: string;
+}
+
+interface Customer {
+    id: string;
+    email: string;
+    name: string;
+}
+
+interface Billing {
+    id: string;
+    url: string;
+}
+
+async function apiRequest<T>(endpoint: string, data: object): Promise<T> {
+    if (!process.env.ABACATEPAY_API_KEY) {
+        throw new Error("Missing ABACATEPAY_API_KEY");
+    }
+
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${process.env.ABACATEPAY_API_KEY}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok || !responseData.success) {
+        console.error("AbacatePay Error:", JSON.stringify(responseData));
+        throw new Error(responseData.error || `AbacatePay API Error: ${response.status}`);
+    }
+
+    return responseData.data;
 }
 
 export const abacatePay = {
+    customer: {
+        create: async (data: CreateCustomerParams): Promise<Customer> => {
+            return apiRequest<Customer>("/customer/create", data);
+        }
+    },
     billing: {
-        create: async (data: CreateBillingParams): Promise<{ id: string; url: string }> => {
-            if (!process.env.ABACATEPAY_API_KEY) {
-                throw new Error("Missing ABACATEPAY_API_KEY");
-            }
-
-            const response = await fetch(`${BASE_URL}/billing/create`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${process.env.ABACATEPAY_API_KEY}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            const responseData = await response.json();
-
-            if (!response.ok) {
-                console.error("AbacatePay Error Response:", JSON.stringify(responseData));
-                throw new Error(responseData.error || responseData.message || `AbacatePay API Error: ${response.status}`);
-            }
-
-            return responseData.data || responseData;
+        create: async (data: CreateBillingParams): Promise<Billing> => {
+            return apiRequest<Billing>("/billing/create", data);
         }
     }
 };
