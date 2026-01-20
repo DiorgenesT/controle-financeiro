@@ -53,8 +53,8 @@ export default function Home() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!email) {
-      alert("Por favor, digite seu email para continuar.");
+    if (!email || !name) {
+      alert("Por favor, preencha seu nome e email para continuar.");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function Home() {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, name }),
       });
       const data = await response.json();
       if (data.url) {
