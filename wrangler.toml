@@ -1,4 +1,4 @@
-name = "tudo-em-dia"
+name = "controle-financeiro"
 main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat_v2"]
