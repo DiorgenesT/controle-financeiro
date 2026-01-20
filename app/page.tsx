@@ -48,15 +48,20 @@ export default function Home() {
 
   const ctaRef = useRef<HTMLDivElement>(null);
 
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
   const handleCheckout = async () => {
+    if (!email) {
+      alert("Por favor, digite seu email para continuar.");
+      return;
+    }
+
     setCheckoutLoading(true);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ email }),
       });
       const data = await response.json();
       if (data.url) {
@@ -71,6 +76,17 @@ export default function Home() {
       setCheckoutLoading(false);
     }
   };
+
+
+
+  <Button
+    onClick={handleCheckout}
+    disabled={checkoutLoading || !email}
+    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
+    {!checkoutLoading && <ArrowRight className="w-5 h-5 ml-2" />}
+  </Button>
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const dashboardImages = [
@@ -755,9 +771,23 @@ export default function Home() {
                   ))}
                 </ul>
 
+                <div className="mb-4">
+                  <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1">
+                    Seu melhor email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                  />
+                </div>
+
                 <Button
                   onClick={handleCheckout}
-                  disabled={checkoutLoading}
+                  disabled={checkoutLoading || !email}
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
