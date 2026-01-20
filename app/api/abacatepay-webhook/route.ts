@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminFirestore, generateRandomPassword } from "@/lib/firebase-admin";
+import { firebaseAuthRest, firestoreRest, generateRandomPassword } from "@/lib/firebase-edge";
 
 export const runtime = 'edge';
 
@@ -19,30 +19,29 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: "No customer email" }, { status: 400 });
             }
 
-            const auth = adminAuth();
-            const firestore = adminFirestore();
-
             // Check if user already exists
-            let user;
+            let userId: string;
             let tempPassword = "";
             let isNewUser = false;
 
-            try {
-                user = await auth.getUserByEmail(customerEmail);
-                console.log("User already exists:", user.uid);
-            } catch {
+            const existingUser = await firebaseAuthRest.getUserByEmail(customerEmail);
+
+            if (existingUser) {
+                userId = existingUser.uid;
+                console.log("User already exists:", userId);
+            } else {
                 // User doesn't exist, create new one
                 isNewUser = true;
                 tempPassword = generateRandomPassword();
 
-                user = await auth.createUser({
+                const newUser = await firebaseAuthRest.createUser({
                     email: customerEmail,
                     password: tempPassword,
-                    emailVerified: true,
                     displayName: data.customer.name || customerEmail.split("@")[0],
                 });
 
-                console.log("Created new user:", user.uid);
+                userId = newUser.uid;
+                console.log("Created new user:", userId);
             }
 
             // Calculate subscription end date (1 year from now)
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
             subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + 1);
 
             // Save subscription data to Firestore
-            await firestore.collection("users").doc(user.uid).set({
+            await firestoreRest.setDocument("users", userId, {
                 email: customerEmail,
                 abacatePayBillingId: billingId,
                 subscriptionStatus: "active",
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
                 subscriptionEnd: subscriptionEnd.toISOString(),
                 updatedAt: new Date().toISOString(),
                 requirePasswordChange: isNewUser,
-            }, { merge: true });
+            });
 
             // Send welcome email only for new users
             if (isNewUser && tempPassword) {
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
                 console.log("Welcome email sent to:", customerEmail);
             }
 
-            return NextResponse.json({ received: true, userId: user.uid });
+            return NextResponse.json({ received: true, userId });
         }
 
         return NextResponse.json({ received: true });
