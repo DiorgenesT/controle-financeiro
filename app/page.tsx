@@ -49,6 +49,7 @@ export default function Home() {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   const [email, setEmail] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleCheckout = async () => {
     if (!email) {
