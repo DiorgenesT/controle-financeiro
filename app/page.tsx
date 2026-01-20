@@ -3,8 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   TrendingUp,
   Target,
@@ -30,7 +28,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
-gsap.registerPlugin(ScrollTrigger);
+// GSAP will be dynamically imported in useEffect to avoid Cloudflare Workers eval issues
 
 // Finance-themed SVG Components replaced with Lucide Icons
 // Finance-themed SVG Components replaced with Lucide Icons
@@ -140,245 +138,240 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Hero animations - More impactful
-      if (heroRef.current) {
-        const tl = gsap.timeline();
+    // Dynamically import GSAP to avoid Cloudflare Workers eval issues
+    const loadGSAP = async () => {
+      const gsapModule = await import("gsap");
+      const gsap = gsapModule.default;
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
 
-        // Staggered entrance with scale and rotation
-        tl.fromTo(
-          heroRef.current.querySelectorAll(".hero-animate"),
-          { opacity: 0, y: 80, scale: 0.9 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            stagger: 0.2,
-            ease: "power4.out"
-          }
-        );
+      const ctx = gsap.context(() => {
+        // Hero animations - More impactful
+        if (heroRef.current) {
+          const tl = gsap.timeline();
 
-        // Brand text impact animation - Smooth Blur Reveal
-        tl.fromTo(
-          heroRef.current.querySelector(".brand-text"),
-          { opacity: 0, scale: 1.2, filter: "blur(12px)" },
-          {
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: 1.5,
-            ease: "power3.out"
-          },
-          "-=0.6"
-        );
-
-        // Scroll Parallax Effect (Wrapper)
-        const scrollWrappers = document.querySelectorAll(".scroll-icon-wrapper");
-        scrollWrappers.forEach((wrapper, i) => {
-          const speed = parseFloat(wrapper.getAttribute("data-speed") || "1");
-          gsap.to(wrapper, {
-            y: 300 * speed, // Move down significantly on scroll
-            ease: "none",
-            scrollTrigger: {
-              trigger: "body",
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 1
-            }
-          });
-        });
-
-        // Mouse Parallax Effect (Inner Icon)
-        const icons = document.querySelectorAll(".floating-icon");
-
-        const handleMouseMove = (e: MouseEvent) => {
-          const mouseX = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
-          const mouseY = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
-
-          icons.forEach((icon, index) => {
-            const depth = (index + 1) * 15; // Slightly reduced depth for mouse to avoid conflict
-            gsap.to(icon, {
-              x: mouseX * depth,
-              y: mouseY * depth,
+          // Staggered entrance with scale and rotation
+          tl.fromTo(
+            heroRef.current.querySelectorAll(".hero-animate"),
+            { opacity: 0, y: 80, scale: 0.9 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
               duration: 1,
-              ease: "power2.out"
+              stagger: 0.2,
+              ease: "power4.out"
+            }
+          );
+
+          // Brand text impact animation - Smooth Blur Reveal
+          tl.fromTo(
+            heroRef.current.querySelector(".brand-text"),
+            { opacity: 0, scale: 1.2, filter: "blur(12px)" },
+            {
+              opacity: 1,
+              scale: 1,
+              filter: "blur(0px)",
+              duration: 1.5,
+              ease: "power3.out"
+            },
+            "-=0.6"
+          );
+
+          // Scroll Parallax Effect (Wrapper)
+          const scrollWrappers = document.querySelectorAll(".scroll-icon-wrapper");
+          scrollWrappers.forEach((wrapper) => {
+            const speed = parseFloat(wrapper.getAttribute("data-speed") || "1");
+            gsap.to(wrapper, {
+              y: 300 * speed,
+              ease: "none",
+              scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1
+              }
             });
           });
-        };
 
-        window.addEventListener("mousemove", handleMouseMove);
+          // Mouse Parallax Effect (Inner Icon)
+          const icons = document.querySelectorAll(".floating-icon");
 
-        // Continuous Floating Animation (Inner Icon - Bobbing)
-        icons.forEach((icon, index) => {
-          const randomDuration = 3 + Math.random() * 2;
-          const randomY = 10 + Math.random() * 10;
+          const handleMouseMove = (e: MouseEvent) => {
+            const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
 
-          // We use yPercent here to avoid conflict with the 'y' tween from mouse parallax if possible,
-          // but since mouse parallax uses 'y' pixels, we can just mix them if we are careful.
-          // Actually, best to use yoyo on the same property might be tricky if mouse overwrites.
-          // To be safe, let's animate 'rotation' and 'scale' for bobbing, or use a separate timeline.
-          // Or simpler: just let them overwrite? No.
-          // Solution: Mouse moves 'x' and 'y'. Bobbing moves 'y'.
-          // GSAP can combine them if we use 'y' for one and 'yPercent' for another? No.
-          // Let's use 'y' for mouse and 'rotation' for bobbing to be safe, 
-          // OR rely on the fact that mouse is user-interaction and bobbing is ambient.
-          // Better: Mouse moves X/Y. Bobbing moves Rotation and Scale slightly.
+            icons.forEach((icon, index) => {
+              const depth = (index + 1) * 15;
+              gsap.to(icon, {
+                x: mouseX * depth,
+                y: mouseY * depth,
+                duration: 1,
+                ease: "power2.out"
+              });
+            });
+          };
 
-          gsap.to(icon, {
-            rotation: Math.random() * 15 - 7.5,
-            scale: 1.1,
-            duration: randomDuration,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: index * 0.5
+          window.addEventListener("mousemove", handleMouseMove);
+
+          // Continuous Floating Animation (Inner Icon - Bobbing)
+          icons.forEach((icon, index) => {
+            const randomDuration = 3 + Math.random() * 2;
+
+            gsap.to(icon, {
+              rotation: Math.random() * 15 - 7.5,
+              scale: 1.1,
+              duration: randomDuration,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: index * 0.5
+            });
           });
-        });
+        }
 
-        // Cleanup mouse listener on revert
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-      }
+        // Features scroll animation - Cascade effect
+        if (featuresRef.current) {
+          const cards = featuresRef.current.querySelectorAll(".feature-card");
 
-      // Features scroll animation - Cascade effect
-      if (featuresRef.current) {
-        const cards = featuresRef.current.querySelectorAll(".feature-card");
-
-        gsap.fromTo(
-          cards,
-          {
-            opacity: 0,
-            y: 100,
-            scale: 0.8,
-            rotationY: 15
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationY: 0,
-            duration: 0.8,
-            stagger: {
-              each: 0.15,
-              from: "start"
-            },
-            ease: "back.out(1.4)",
-            scrollTrigger: {
-              trigger: featuresRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none"
-            }
-          }
-        );
-      }
-
-      // Pricing scroll animation - Dramatic entrance
-      if (pricingRef.current) {
-        const pricingCards = pricingRef.current.querySelectorAll(".pricing-card");
-
-        gsap.fromTo(
-          pricingCards,
-          {
-            opacity: 0,
-            y: 80,
-            scale: 0.7,
-            rotationX: -20
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationX: 0,
-            duration: 1,
-            stagger: 0.3,
-            ease: "elastic.out(1, 0.8)",
-            scrollTrigger: {
-              trigger: pricingRef.current,
-              start: "top 80%",
-              toggleActions: "play none none none"
-            }
-          }
-        );
-
-        // Price number counter animation
-        const priceElements = pricingRef.current.querySelectorAll(".price-value");
-        priceElements.forEach((el) => {
-          const finalValue = parseFloat(el.getAttribute("data-value") || "0");
           gsap.fromTo(
-            el,
-            { textContent: "0" },
+            cards,
             {
-              textContent: finalValue,
-              duration: 2,
-              ease: "power2.out",
-              snap: { textContent: 0.01 },
+              opacity: 0,
+              y: 100,
+              scale: 0.8,
+              rotationY: 15
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotationY: 0,
+              duration: 0.8,
+              stagger: {
+                each: 0.15,
+                from: "start"
+              },
+              ease: "back.out(1.4)",
+              scrollTrigger: {
+                trigger: featuresRef.current,
+                start: "top 85%",
+                toggleActions: "play none none none"
+              }
+            }
+          );
+        }
+
+        // Pricing scroll animation - Dramatic entrance
+        if (pricingRef.current) {
+          const pricingCards = pricingRef.current.querySelectorAll(".pricing-card");
+
+          gsap.fromTo(
+            pricingCards,
+            {
+              opacity: 0,
+              y: 80,
+              scale: 0.7,
+              rotationX: -20
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotationX: 0,
+              duration: 1,
+              stagger: 0.3,
+              ease: "elastic.out(1, 0.8)",
               scrollTrigger: {
                 trigger: pricingRef.current,
                 start: "top 80%",
                 toggleActions: "play none none none"
-              },
-              onUpdate: function () {
-                const val = parseFloat(String(gsap.getProperty(el, "textContent")));
-                el.textContent = val.toFixed(2).replace(".", ",");
               }
             }
           );
-        });
-      }
 
-      // Testimonials scroll animation - Slide in from sides
-      if (testimonialsRef.current) {
-        const testimonialCards = testimonialsRef.current.querySelectorAll(".testimonial-card");
+          // Price number counter animation
+          const priceElements = pricingRef.current.querySelectorAll(".price-value");
+          priceElements.forEach((el) => {
+            const finalValue = parseFloat(el.getAttribute("data-value") || "0");
+            gsap.fromTo(
+              el,
+              { textContent: "0" },
+              {
+                textContent: finalValue,
+                duration: 2,
+                ease: "power2.out",
+                snap: { textContent: 0.01 },
+                scrollTrigger: {
+                  trigger: pricingRef.current,
+                  start: "top 80%",
+                  toggleActions: "play none none none"
+                },
+                onUpdate: function () {
+                  const val = parseFloat(String(gsap.getProperty(el, "textContent")));
+                  el.textContent = val.toFixed(2).replace(".", ",");
+                }
+              }
+            );
+          });
+        }
 
-        testimonialCards.forEach((card, index) => {
-          const direction = index % 2 === 0 ? -100 : 100;
+        // Testimonials scroll animation - Slide in from sides
+        if (testimonialsRef.current) {
+          const testimonialCards = testimonialsRef.current.querySelectorAll(".testimonial-card");
+
+          testimonialCards.forEach((card, index) => {
+            const direction = index % 2 === 0 ? -100 : 100;
+            gsap.fromTo(
+              card,
+              {
+                opacity: 0,
+                x: direction,
+                scale: 0.9
+              },
+              {
+                opacity: 1,
+                x: 0,
+                scale: 1,
+                duration: 0.8,
+                delay: index * 0.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: testimonialsRef.current,
+                  start: "top 80%",
+                  toggleActions: "play none none none"
+                }
+              }
+            );
+          });
+        }
+
+        // CTA Section animation
+        if (ctaRef.current) {
           gsap.fromTo(
-            card,
-            {
-              opacity: 0,
-              x: direction,
-              scale: 0.9
-            },
+            ctaRef.current.querySelectorAll(".cta-animate"),
+            { opacity: 0, y: 60, scale: 0.95 },
             {
               opacity: 1,
-              x: 0,
+              y: 0,
               scale: 1,
               duration: 0.8,
-              delay: index * 0.2,
+              stagger: 0.2,
               ease: "power3.out",
               scrollTrigger: {
-                trigger: testimonialsRef.current,
-                start: "top 80%",
+                trigger: ctaRef.current,
+                start: "top 85%",
                 toggleActions: "play none none none"
               }
             }
           );
-        });
-      }
+        }
+      });
 
-      // CTA Section animation
-      if (ctaRef.current) {
-        gsap.fromTo(
-          ctaRef.current.querySelectorAll(".cta-animate"),
-          { opacity: 0, y: 60, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: ctaRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none"
-            }
-          }
-        );
-      }
-    });
+      return () => ctx.revert();
+    };
 
-    return () => ctx.revert();
+    loadGSAP();
   }, []);
 
   return (
