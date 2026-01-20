@@ -37,8 +37,9 @@ export const abacatePay = {
             });
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({ message: "Unknown error" }));
-                throw new Error(error.message || `AbacatePay Error: ${response.statusText}`);
+                const errorBody = await response.json().catch(() => ({ message: "Unknown error" }));
+                console.error("AbacatePay API Error:", JSON.stringify(errorBody, null, 2));
+                throw new Error(JSON.stringify(errorBody));
             }
 
             return response.json();
