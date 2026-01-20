@@ -1,36 +1,25 @@
 const BASE_URL = "https://api.abacatepay.com/v1";
 
-interface CreateBillingParams {
-    frequency: "ONE_TIME";
-    methods: ["PIX"];
-    products: Array<{
-        externalId: string;
-        name: string;
-        quantity: number;
-        price: number; // in cents
-        description: string;
-    }>;
-    returnUrl: string;
-    completionUrl: string;
-    customer: {
-        email: string;
-        name: string;
-        taxId: string;
-    };
+interface Product {
+    externalId: string;
+    name: string;
+    quantity: number;
+    price: number; // in cents
+    description?: string;
 }
 
-interface AbacatePayResponse {
-    data: {
-        id: string;
-        url: string;
-        // add other fields as needed
-    };
-    error?: string;
+interface CreateBillingParams {
+    frequency: "ONE_TIME";
+    methods: string[];
+    products: Product[];
+    returnUrl: string;
+    completionUrl: string;
+    customerId?: string;
 }
 
 export const abacatePay = {
     billing: {
-        create: async (data: CreateBillingParams) => {
+        create: async (data: CreateBillingParams): Promise<{ id: string; url: string }> => {
             if (!process.env.ABACATEPAY_API_KEY) {
                 throw new Error("Missing ABACATEPAY_API_KEY");
             }
@@ -44,13 +33,14 @@ export const abacatePay = {
                 body: JSON.stringify(data),
             });
 
+            const responseData = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `AbacatePay API Error: ${response.statusText}`);
+                console.error("AbacatePay Error Response:", JSON.stringify(responseData));
+                throw new Error(responseData.error || responseData.message || `AbacatePay API Error: ${response.status}`);
             }
 
-            const responseData = await response.json();
-            return responseData.data;
+            return responseData.data || responseData;
         }
     }
 };

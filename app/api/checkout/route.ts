@@ -7,13 +7,13 @@ export async function POST(request: NextRequest) {
         const { email } = body;
 
         // Get the origin for redirect URLs
-        const origin = request.headers.get("origin") || "https://tatudoemdia.com.br";
+        const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tatudoemdia.com.br";
 
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        // Create a billing (cobrança)
+        // Create a billing (cobrança) - without customer, AbacatePay will ask for it
         const billing = await abacatePay.billing.create({
             frequency: "ONE_TIME",
             methods: ["PIX"],
@@ -26,13 +26,8 @@ export async function POST(request: NextRequest) {
                     description: "Acesso anual ao sistema de controle financeiro",
                 },
             ],
-            returnUrl: `${origin}/sucesso`,
-            completionUrl: `${origin}/sucesso`,
-            customer: {
-                email: email,
-                name: email.split("@")[0], // Fallback name
-                taxId: "00000000000", // Placeholder CPF
-            },
+            returnUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
+            completionUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
         });
 
         return NextResponse.json({ url: billing.url });
