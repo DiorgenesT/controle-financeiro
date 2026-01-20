@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-12-15.clover",
-});
+import { abacatePay } from "@/lib/abacatepay";
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,30 +9,38 @@ export async function POST(request: NextRequest) {
         // Get the origin for redirect URLs
         const origin = request.headers.get("origin") || "https://tatudoemdia.com.br";
 
-        // Create Stripe Checkout Session
-        const session = await stripe.checkout.sessions.create({
-            mode: "payment",
-            // Stripe will automatically show all enabled payment methods
-            line_items: [
+        if (!email) {
+            return NextResponse.json({ error: "Email is required" }, { status: 400 });
+        }
+
+        // Create a billing (cobrança)
+        const billing = await abacatePay.billing.create({
+            frequency: "ONE_TIME",
+            methods: ["PIX"],
+            products: [
                 {
-                    price: process.env.STRIPE_PRICE_ID!,
+                    externalId: "plano-anual",
+                    name: "Plano Anual - Tudo Em Dia",
                     quantity: 1,
+                    price: 6790, // R$ 67,90 in cents
+                    description: "Acesso anual ao sistema de controle financeiro",
                 },
             ],
-            customer_email: email || undefined,
-            success_url: `${origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${origin}/#pricing`,
-            metadata: {
-                source: "landing_page",
+            returnUrl: `${origin}/sucesso`,
+            completionUrl: `${origin}/sucesso`,
+            customer: {
+                email: email,
+                name: email.split("@")[0], // Fallback name
+                taxId: "00000000000", // Placeholder CPF
             },
         });
 
-        return NextResponse.json({ url: session.url });
+        return NextResponse.json({ url: billing.url });
     } catch (error) {
-        console.error("Erro ao criar sessão de checkout:", error);
+        console.error("AbacatePay Checkout Error:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         return NextResponse.json(
-            { error: "Erro ao criar sessão de pagamento", details: errorMessage },
+            { error: "Erro ao criar cobrança", details: errorMessage },
             { status: 500 }
         );
     }
