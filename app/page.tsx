@@ -68,11 +68,11 @@ export default function Home() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Erro ao iniciar pagamento. Tente novamente.");
+        alert(`Erro: ${data.details || data.error || "Erro desconhecido"}`);
       }
     } catch (error) {
       console.error("Checkout error:", error);
-      alert("Erro ao iniciar pagamento. Tente novamente.");
+      alert("Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
       setCheckoutLoading(false);
     }
