@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
         const customer = await abacatePay.customer.create({
             email: email,
             name: email.split("@")[0],
+            cellphone: "11999999999", // Placeholder - required by AbacatePay
         });
 
         // 2. Create billing with customerId
