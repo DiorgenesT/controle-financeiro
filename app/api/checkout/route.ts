@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { email } = body;
+        const { email, name } = body;
 
-        if (!email) {
-            return NextResponse.json({ error: "Email is required" }, { status: 400 });
+        if (!email || !name) {
+            return NextResponse.json({ error: "Email and Name are required" }, { status: 400 });
         }
 
         const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tatudoemdia.com.br";
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
             completionUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
             customer: {
                 email: email,
+                name: name,
             },
         }, apiKey);
 

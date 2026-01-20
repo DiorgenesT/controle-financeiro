@@ -49,6 +49,7 @@ export default function Home() {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -765,23 +766,38 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <div className="mb-4">
-                  <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1">
-                    Seu melhor email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                  />
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-zinc-700 mb-1">
+                      Seu nome completo
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      placeholder="João Silva"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1">
+                      Seu melhor email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                    />
+                  </div>
                 </div>
 
                 <Button
                   onClick={handleCheckout}
-                  disabled={checkoutLoading || !email}
+                  disabled={checkoutLoading || !email || !name}
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
