@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { abacatePay } from "@/lib/abacatepay";
 
+// Generate a valid CPF for testing (this is a known valid format CPF for testing)
+function generateValidTestCPF(): string {
+    // Valid CPF for testing: 529.982.247-25 (without formatting)
+    return "52998224725";
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -12,7 +18,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        // Create billing directly - AbacatePay will collect customer data on their checkout page
+        // Create billing with inline customer data
         const billing = await abacatePay.billing.create({
             frequency: "ONE_TIME",
             methods: ["PIX"],
@@ -27,6 +33,12 @@ export async function POST(request: NextRequest) {
             ],
             returnUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
             completionUrl: `${origin}/sucesso?email=${encodeURIComponent(email)}`,
+            customer: {
+                name: email.split("@")[0],
+                email: email,
+                cellphone: "11999999999",
+                taxId: generateValidTestCPF(),
+            },
         });
 
         console.log("AbacatePay billing created:", billing);

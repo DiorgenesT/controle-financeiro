@@ -8,12 +8,20 @@ interface Product {
     description?: string;
 }
 
+interface CustomerData {
+    name: string;
+    email: string;
+    cellphone: string;
+    taxId: string;
+}
+
 interface CreateBillingParams {
     frequency: "ONE_TIME";
     methods: string[];
     products: Product[];
     returnUrl: string;
     completionUrl: string;
+    customer: CustomerData;
 }
 
 interface Billing {
