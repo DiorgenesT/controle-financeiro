@@ -1,6 +1,8 @@
 name = "tudo-em-dia"
+main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-NEXT_PUBLIC_APP_URL = "https://tatudoemdia.com.br"
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
