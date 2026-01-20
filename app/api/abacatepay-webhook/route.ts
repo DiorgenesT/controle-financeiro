@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminFirestore, generateRandomPassword } from "@/lib/firebase-admin";
 
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();

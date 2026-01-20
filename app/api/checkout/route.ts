@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { abacatePay } from "@/lib/abacatepay";
 
+export const runtime = 'edge';
+
 // Generate a valid CPF for testing (this is a known valid format CPF for testing)
 function generateValidTestCPF(): string {
     // Valid CPF for testing: 529.982.247-25 (without formatting)
