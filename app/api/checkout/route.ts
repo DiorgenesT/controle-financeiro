@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { email, name } = body;
+        const { email, name, cellphone } = body;
 
-        if (!email || !name) {
-            return NextResponse.json({ error: "Email and Name are required" }, { status: 400 });
+        if (!email || !name || !cellphone) {
+            return NextResponse.json({ error: "Email, Name and Cellphone are required" }, { status: 400 });
         }
 
         const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tatudoemdia.com.br";
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
             customer: {
                 email: email,
                 name: name,
+                cellphone: cellphone,
             },
         }, apiKey);
 
