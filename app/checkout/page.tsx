@@ -10,6 +10,7 @@ export default function CheckoutPage() {
     const [email, setEmail] = useState("");
     const [cpf, setCpf] = useState("");
     const [phone, setPhone] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState("PIX");
     const [loading, setLoading] = useState(false);
 
     const handleCheckout = async (e: React.FormEvent) => {
@@ -20,7 +21,7 @@ export default function CheckoutPage() {
             const response = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, cpf, phone }),
+                body: JSON.stringify({ name, email, cpf, phone, paymentMethod }),
             });
 
             const data = await response.json();
@@ -103,16 +104,54 @@ export default function CheckoutPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-zinc-700 mb-1">Celular</label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                required
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                                placeholder="(11) 99999-9999"
-                            />
+                            <div>
+                                <label htmlFor="phone" className="block text-sm font-medium text-zinc-700 mb-1">Celular</label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    required
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                                    placeholder="(11) 99999-9999"
+                                />
+                            </div>
+
+                            <div className="mt-4"> {/* Added margin top for spacing */}
+                                <label className="block text-sm font-medium text-zinc-700 mb-2">Forma de Pagamento</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod("PIX")}
+                                        className={`px-4 py-3 rounded-xl border font-medium transition-all ${paymentMethod === "PIX"
+                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-2 ring-emerald-500/20"
+                                            : "border-zinc-200 hover:border-emerald-200 hover:bg-zinc-50 text-zinc-600"
+                                            }`}
+                                    >
+                                        Pix
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod("CREDIT_CARD")}
+                                        className={`px-4 py-3 rounded-xl border font-medium transition-all ${paymentMethod === "CREDIT_CARD"
+                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-2 ring-emerald-500/20"
+                                            : "border-zinc-200 hover:border-emerald-200 hover:bg-zinc-50 text-zinc-600"
+                                            }`}
+                                    >
+                                        Cartão
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod("BOLETO")}
+                                        className={`px-4 py-3 rounded-xl border font-medium transition-all ${paymentMethod === "BOLETO"
+                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-2 ring-emerald-500/20"
+                                            : "border-zinc-200 hover:border-emerald-200 hover:bg-zinc-50 text-zinc-600"
+                                            }`}
+                                    >
+                                        Boleto
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <Button
