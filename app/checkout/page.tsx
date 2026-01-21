@@ -117,7 +117,7 @@ export default function CheckoutPage() {
                                 />
                             </div>
 
-                            <div className="mt-4"> {/* Added margin top for spacing */}
+                            <div className="mt-4">
                                 <label className="block text-sm font-medium text-zinc-700 mb-2">Forma de Pagamento</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <button
@@ -151,6 +151,8 @@ export default function CheckoutPage() {
                                         Boleto
                                     </button>
                                 </div>
+
+
                             </div>
                         </div>
 

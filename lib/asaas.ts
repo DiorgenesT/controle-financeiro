@@ -1,6 +1,12 @@
 const ASAAS_API_URL = process.env.ASAAS_API_URL || "https://api.asaas.com/v3";
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY;
 
+console.log("Asaas Config:", {
+    URL: ASAAS_API_URL,
+    KeyLength: ASAAS_API_KEY?.length,
+    KeyStart: ASAAS_API_KEY?.substring(0, 10)
+});
+
 interface Customer {
     id?: string;
     name: string;
@@ -16,6 +22,8 @@ interface Payment {
     dueDate: string;
     description?: string;
     externalReference?: string;
+    installmentCount?: number;
+    installmentValue?: number;
 }
 
 export const asaas = {
