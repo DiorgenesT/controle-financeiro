@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import CookieConsent from "@/components/CookieConsent";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -750,10 +751,10 @@ export default function Home() {
                       alert("Erro ao iniciar pagamento. Tente novamente.");
                     }
                   }}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 flex items-center justify-center"
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-12 text-base font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 flex items-center justify-center gap-2"
                 >
-                  Quero Organizar Minha Vida
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  Começar Agora
+                  <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -830,13 +831,22 @@ export default function Home() {
           <p className="cta-animate mt-6 text-xl text-zinc-600">
             Junte-se a milhares de pessoas que já transformaram sua vida financeira.
           </p>
-          <a
-            href="#pricing"
-            className="cta-animate cta-glow mt-10 inline-flex items-center gap-2 px-12 py-6 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl shadow-2xl shadow-emerald-500/40 transition-all hover:scale-105 hover:-translate-y-1"
+          <button
+            onClick={async () => {
+              try {
+                const response = await fetch("/api/checkout", { method: "POST" });
+                const data = await response.json();
+                if (data.url) window.location.href = data.url;
+              } catch (error) {
+                console.error("Checkout error:", error);
+                alert("Erro ao iniciar pagamento. Tente novamente.");
+              }
+            }}
+            className="cta-animate cta-glow mt-10 inline-flex items-center gap-2 px-12 py-6 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl shadow-2xl shadow-emerald-500/40 transition-all hover:scale-105 hover:-translate-y-1 cursor-pointer"
           >
             Assinar Agora
             <ArrowRight className="w-6 h-6" />
-          </a>
+          </button>
         </div>
       </section >
 
@@ -885,13 +895,16 @@ export default function Home() {
               © 2026 Tudo Em Dia. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <a href="#" className="hover:text-zinc-900 transition-colors cursor-pointer">Termos</a>
-              <a href="#" className="hover:text-zinc-900 transition-colors cursor-pointer">Privacidade</a>
+              <Link href="/termos" className="hover:text-zinc-900 transition-colors cursor-pointer">Termos de Uso</Link>
+              <Link href="/privacidade" className="hover:text-zinc-900 transition-colors cursor-pointer">Privacidade</Link>
               <a href="mailto:contato@tatudoemdia.com.br" className="hover:text-zinc-900 transition-colors cursor-pointer">Suporte</a>
             </div>
           </div>
         </div>
       </footer >
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </div >
   );
 }

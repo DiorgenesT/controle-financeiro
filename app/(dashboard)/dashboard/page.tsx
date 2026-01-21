@@ -74,6 +74,7 @@ export default function DashboardPage() {
             if (t.paymentMethod === "boleto" && t.boletoStatus === "pending") return false;
             return true;
         })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Ordenar por data de lançamento
         .slice(0, 5);
     const economia = totalReceitas > 0 ? ((totalReceitas - totalDespesas) / totalReceitas * 100) : 0;
 
