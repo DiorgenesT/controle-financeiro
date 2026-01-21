@@ -6,19 +6,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
-        const { name, email, cpf, phone, paymentMethod } = body;
-
-        // Map frontend payment method to Stripe payment method types
-        let paymentMethods: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] = [];
-
-        if (paymentMethod === "PIX") paymentMethods = ["pix"];
-        else if (paymentMethod === "CREDIT_CARD") paymentMethods = ["card"];
-        else if (paymentMethod === "BOLETO") paymentMethods = ["boleto"];
-        else paymentMethods = ["card", "pix", "boleto"]; // Default fallback
-
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: paymentMethods,
+            payment_method_types: ["card", "boleto"],
             line_items: [
                 {
                     price_data: {
@@ -34,9 +23,11 @@ export async function POST(request: NextRequest) {
             ],
             mode: 'payment',
             success_url: `${request.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${request.headers.get('origin')}/checkout`,
-            customer_email: email,
+            cancel_url: `${request.headers.get('origin')}/`,
             phone_number_collection: {
+                enabled: true,
+            },
+            tax_id_collection: {
                 enabled: true,
             },
             payment_method_options: {
@@ -45,11 +36,6 @@ export async function POST(request: NextRequest) {
                         enabled: true,
                     },
                 },
-            },
-            metadata: {
-                customer_name: name,
-                customer_cpf: cpf,
-                customer_phone: phone,
             },
         });
 

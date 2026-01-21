@@ -445,12 +445,21 @@ export default function Home() {
             >
               Já sou cliente
             </Link>
-            <a
-              href="#pricing"
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/checkout", { method: "POST" });
+                  const data = await response.json();
+                  if (data.url) window.location.href = data.url;
+                } catch (error) {
+                  console.error("Checkout error:", error);
+                  alert("Erro ao iniciar pagamento. Tente novamente.");
+                }
+              }}
               className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40"
             >
               Assinar Agora
-            </a>
+            </button>
           </div>
 
           {/* Mobile Menu */}
@@ -549,13 +558,22 @@ export default function Home() {
               alcançar a liberdade financeira.
             </p>
             <div className="hero-animate mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-              <a
-                href="#pricing"
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/checkout", { method: "POST" });
+                    const data = await response.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch (error) {
+                    console.error("Checkout error:", error);
+                    alert("Erro ao iniciar pagamento. Tente novamente.");
+                  }
+                }}
                 className="cta-glow w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-lg shadow-xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 hover:scale-105 hover:-translate-y-1"
               >
                 Ver Planos
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </button>
               <a
                 href="#features"
                 className="w-full sm:w-auto px-8 py-4 rounded-full bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-semibold text-lg transition-all text-center hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1"
@@ -739,14 +757,22 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <Link href="/checkout" className="w-full">
-                  <Button
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10"
-                  >
-                    Quero Organizar Minha Vida
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch("/api/checkout", { method: "POST" });
+                      const data = await response.json();
+                      if (data.url) window.location.href = data.url;
+                    } catch (error) {
+                      console.error("Checkout error:", error);
+                      alert("Erro ao iniciar pagamento. Tente novamente.");
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 flex items-center justify-center"
+                >
+                  Quero Organizar Minha Vida
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
               </div>
             </div>
             <p className="text-xs text-zinc-500 text-center mt-3">
