@@ -64,7 +64,7 @@ export default function Home() {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, cellphone }),
       });
       const data = await response.json();
       if (data.url) {
