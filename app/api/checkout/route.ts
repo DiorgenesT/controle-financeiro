@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         // Create billing
         const billing = await abacatePay.billing.create({
             frequency: "ONE_TIME",
-            methods: ["PIX", "CREDIT_CARD", "BOLETO"],
+            methods: ["PIX"],
             products: [
                 {
                     externalId: "plano-anual",
