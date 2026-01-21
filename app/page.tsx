@@ -50,11 +50,12 @@ export default function Home() {
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [cellphone, setCellphone] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!email || !name) {
-      alert("Por favor, preencha seu nome e email para continuar.");
+    if (!email || !name || !cellphone) {
+      alert("Por favor, preencha todos os campos para continuar.");
       return;
     }
 
