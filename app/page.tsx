@@ -380,37 +380,37 @@ export default function Home() {
       {/* Finance-themed Floating SVG Decorations - Clean Style */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="scroll-icon-wrapper absolute top-[15%] left-[5%]" data-speed="1.2">
-          <FloatingIcon className="floating-icon w-24 h-24 opacity-40 text-amber-500">
+          <FloatingIcon className="floating-icon w-24 h-24 opacity-20 text-amber-500">
             <Coins className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
 
         <div className="scroll-icon-wrapper absolute top-[10%] right-[10%]" data-speed="0.8">
-          <FloatingIcon className="floating-icon w-32 h-32 opacity-30 text-emerald-500">
+          <FloatingIcon className="floating-icon w-32 h-32 opacity-10 text-emerald-500">
             <TrendingUp className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
 
         <div className="scroll-icon-wrapper absolute top-[40%] right-[5%]" data-speed="1.3">
-          <FloatingIcon className="floating-icon w-24 h-24 opacity-30 text-emerald-600">
+          <FloatingIcon className="floating-icon w-24 h-24 opacity-10 text-emerald-600">
             <CircleDollarSign className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
 
         <div className="scroll-icon-wrapper absolute top-[45%] left-[8%]" data-speed="1.5">
-          <FloatingIcon className="floating-icon w-28 h-28 opacity-20 text-blue-500">
+          <FloatingIcon className="floating-icon w-28 h-28 opacity-5 text-blue-500">
             <Wallet className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
 
         <div className="scroll-icon-wrapper absolute top-[75%] right-[15%]" data-speed="1.1">
-          <FloatingIcon className="floating-icon w-24 h-24 opacity-30 text-teal-500">
+          <FloatingIcon className="floating-icon w-24 h-24 opacity-10 text-teal-500">
             <ArrowUpRight className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
 
         <div className="scroll-icon-wrapper absolute bottom-[15%] left-[12%]" data-speed="0.9">
-          <FloatingIcon className="floating-icon w-32 h-32 opacity-20 text-pink-500">
+          <FloatingIcon className="floating-icon w-32 h-32 opacity-5 text-pink-500">
             <PiggyBank className="w-full h-full drop-shadow-lg" />
           </FloatingIcon>
         </div>
@@ -445,21 +445,12 @@ export default function Home() {
             >
               Já sou cliente
             </Link>
-            <button
-              onClick={async () => {
-                try {
-                  const response = await fetch("/api/checkout", { method: "POST" });
-                  const data = await response.json();
-                  if (data.url) window.location.href = data.url;
-                } catch (error) {
-                  console.error("Checkout error:", error);
-                  alert("Erro ao iniciar pagamento. Tente novamente.");
-                }
-              }}
+            <a
+              href="#pricing"
               className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40"
             >
               Assinar Agora
-            </button>
+            </a>
           </div>
 
           {/* Mobile Menu */}
@@ -542,8 +533,8 @@ export default function Home() {
       <section className="pt-32 pb-20 px-6 relative z-10" ref={heroRef}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto px-4 md:px-0">
-            <div className="hero-animate inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
-              <Star className="w-4 h-4" />
+            <div className="hero-animate inline-flex items-center gap-2 px-6 py-2 rounded-full bg-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-500/30 mb-6 animate-pulse">
+              <Star className="w-5 h-5 fill-yellow-300 text-yellow-300" />
               Oferta de Lançamento
             </div>
             <h1 className="text-4xl md:text-7xl font-bold leading-tight tracking-tight">
@@ -558,22 +549,13 @@ export default function Home() {
               alcançar a liberdade financeira.
             </p>
             <div className="hero-animate mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/checkout", { method: "POST" });
-                    const data = await response.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch (error) {
-                    console.error("Checkout error:", error);
-                    alert("Erro ao iniciar pagamento. Tente novamente.");
-                  }
-                }}
+              <a
+                href="#pricing"
                 className="cta-glow w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-lg shadow-xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 hover:scale-105 hover:-translate-y-1"
               >
                 Ver Planos
                 <ArrowRight className="w-5 h-5" />
-              </button>
+              </a>
               <a
                 href="#features"
                 className="w-full sm:w-auto px-8 py-4 rounded-full bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-semibold text-lg transition-all text-center hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1"
@@ -705,11 +687,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold">
-              Preços{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">simples e acessíveis</span>
+              Plano{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Único e Completo</span>
             </h2>
             <p className="mt-4 text-zinc-600 max-w-2xl mx-auto text-lg">
-              Escolha o plano que melhor se adapta às suas necessidades.
+              Tudo o que você precisa em um único pacote.
             </p>
           </div>
 
