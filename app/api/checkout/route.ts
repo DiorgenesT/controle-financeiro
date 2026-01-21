@@ -10,14 +10,7 @@ export async function POST(request: NextRequest) {
             payment_method_types: ["card", "boleto"],
             line_items: [
                 {
-                    price_data: {
-                        currency: 'brl',
-                        product_data: {
-                            name: 'Plano Anual - Tudo Em Dia',
-                            description: 'Acesso completo por 1 ano',
-                        },
-                        unit_amount: 6790, // R$ 67,90
-                    },
+                    price: 'price_1Sr2A617VQOiz1AV6DiTrA8P',
                     quantity: 1,
                 },
             ],
