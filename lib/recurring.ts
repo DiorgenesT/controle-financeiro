@@ -175,15 +175,69 @@ export async function checkRecurringStatus(userId: string): Promise<PendingRecur
 
 export async function processRecurringTransaction(userId: string, recurring: RecurringTransaction, actualValue?: number): Promise<string> {
     const today = new Date();
+    const amount = actualValue !== undefined ? actualValue : recurring.amount;
 
-    // Criar a transação real
+    // Se for cartão de crédito, usar lógica específica
+    if (recurring.paymentMethod === "credit" && recurring.creditCardId) {
+        const { getCreditCards, getOrCreateInvoice, updateInvoiceTotal, getInvoiceMonthYear } = await import("./creditCards");
+
+        const cards = await getCreditCards(userId);
+        const card = cards.find(c => c.id === recurring.creditCardId);
+
+        if (!card) {
+            throw new Error("Cartão não encontrado");
+        }
+
+        // Calcular mês/ano da fatura baseado na data atual e dia de fechamento
+        const { month, year } = getInvoiceMonthYear(today, card.closingDay, 0);
+
+        // Buscar ou criar fatura do mês
+        const invoice = await getOrCreateInvoice(
+            card.id,
+            userId,
+            month,
+            year,
+            card.closingDay,
+            card.dueDay
+        );
+
+        // Criar transação no cartão
+        const transactionData: Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt"> = {
+            type: "despesa",
+            amount,
+            category: recurring.category,
+            description: recurring.description,
+            date: invoice.dueDate || new Date(year, month - 1, card.dueDay),
+            paymentMethod: "credit",
+            creditCardId: card.id,
+            invoiceId: invoice.id,
+            purchaseDate: today,
+            recurringTransactionId: recurring.id,
+            personId: recurring.personId,
+        };
+
+        const id = await addTransaction(userId, transactionData);
+
+        // Atualizar total da fatura
+        await updateInvoiceTotal(invoice.id, amount, "add");
+
+        // Atualizar lastProcessedDate
+        await updateRecurringTransaction(recurring.id, {
+            lastProcessedDate: today
+        });
+
+        return id;
+    }
+
+    // Lógica padrão (débito/pix)
     const transactionData: Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt"> = {
         type: recurring.type,
-        amount: actualValue !== undefined ? actualValue : recurring.amount,
+        amount,
         category: recurring.category,
         description: recurring.description,
         date: today,
-        paymentMethod: recurring.type === "despesa" ? "debit" : undefined, // Default to debit for expenses
+        paymentMethod: recurring.paymentMethod || (recurring.type === "despesa" ? "debit" : undefined),
+        accountId: recurring.accountId,
         recurringTransactionId: recurring.id,
         personId: recurring.personId,
     };

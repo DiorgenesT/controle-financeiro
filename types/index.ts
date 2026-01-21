@@ -111,6 +111,12 @@ export interface RecurringTransaction {
     day: number;
     active: boolean;
     personId?: string | null;
+
+    // Forma de pagamento (para despesas)
+    paymentMethod?: 'debit' | 'credit' | 'boleto' | 'pix';
+    accountId?: string;       // Para débito/pix/boleto
+    creditCardId?: string;    // Para cartão de crédito
+
     createdAt: Date;
     updatedAt?: Date;
     lastProcessedDate?: Date;

@@ -19,11 +19,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, CreditCard, Wallet } from "lucide-react";
 import { RecurringTransaction } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { addRecurringTransaction, updateRecurringTransaction, updateFutureLinkedTransactions } from "@/lib/recurring";
 import { getCategories, Category } from "@/lib/categories";
+import { getCreditCards, CreditCard as CreditCardType } from "@/lib/creditCards";
+import { getAccounts, Account } from "@/lib/accounts";
 import { usePeople } from "@/hooks/usePeople";
 import { getIconById } from "@/lib/icons";
 import { toast } from "sonner";
@@ -40,6 +42,8 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
     const { people } = usePeople();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [creditCards, setCreditCards] = useState<CreditCardType[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
 
     const [formData, setFormData] = useState({
         description: "",
@@ -47,16 +51,18 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
         type: "despesa" as "receita" | "despesa",
         category: "",
         day: "5",
-        personId: "family", // "family" or personId
+        personId: "family",
+        paymentMethod: "debit" as "debit" | "credit" | "boleto" | "pix",
+        creditCardId: "",
+        accountId: "",
     });
 
     const [editingId, setEditingId] = useState<string | null>(null);
 
     useEffect(() => {
         if (open) {
-            loadCategories();
+            loadData();
             if (initialData) {
-                console.log("Setting editing data:", initialData);
                 setEditingId(initialData.id);
                 setFormData({
                     description: initialData.description,
@@ -65,9 +71,11 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                     category: initialData.category,
                     day: initialData.day.toString(),
                     personId: initialData.personId || "family",
+                    paymentMethod: initialData.paymentMethod || "debit",
+                    creditCardId: initialData.creditCardId || "",
+                    accountId: initialData.accountId || "",
                 });
             } else {
-                console.log("Setting new data mode");
                 setEditingId(null);
                 setFormData({
                     description: "",
@@ -76,22 +84,50 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                     category: "",
                     day: "5",
                     personId: "family",
+                    paymentMethod: "debit",
+                    creditCardId: "",
+                    accountId: "",
                 });
             }
         }
     }, [open, initialData]);
 
-    const loadCategories = async () => {
+    const loadData = async () => {
         if (!user?.uid) return;
-        const cats = await getCategories(user.uid);
+        const [cats, cards, accs] = await Promise.all([
+            getCategories(user.uid),
+            getCreditCards(user.uid),
+            getAccounts(user.uid),
+        ]);
         setCategories(cats);
+        setCreditCards(cards);
+        setAccounts(accs);
+
+        // Definir primeira conta/cartão como padrão se disponível
+        if (accs.length > 0 && !formData.accountId) {
+            const defaultAcc = accs.find(a => a.isDefault) || accs[0];
+            setFormData(prev => ({ ...prev, accountId: defaultAcc.id }));
+        }
+        if (cards.length > 0 && !formData.creditCardId) {
+            setFormData(prev => ({ ...prev, creditCardId: cards[0].id }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user?.uid) return;
 
-        console.log("RecurringModal handleSubmit", { initialData, formData });
+        // Validações
+        if (formData.type === "despesa") {
+            if (formData.paymentMethod === "credit" && !formData.creditCardId) {
+                toast.error("Selecione um cartão");
+                return;
+            }
+            if (formData.paymentMethod === "debit" && !formData.accountId && accounts.length > 0) {
+                toast.error("Selecione uma conta");
+                return;
+            }
+        }
 
         setLoading(true);
         try {
@@ -103,6 +139,12 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                 day: parseInt(formData.day),
                 personId: formData.personId === "family" ? null : formData.personId,
                 active: true,
+                // Campos de pagamento (apenas para despesas)
+                ...(formData.type === "despesa" && {
+                    paymentMethod: formData.paymentMethod,
+                    creditCardId: formData.paymentMethod === "credit" ? formData.creditCardId : undefined,
+                    accountId: formData.paymentMethod === "debit" ? formData.accountId : undefined,
+                }),
             };
 
             if (editingId) {
@@ -214,6 +256,82 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             </Select>
                         </div>
                     </div>
+
+                    {/* Forma de pagamento - apenas para despesas */}
+                    {formData.type === "despesa" && (
+                        <div className="space-y-3">
+                            <Label>Forma de Pagamento</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, paymentMethod: "debit" })}
+                                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "debit"
+                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                        : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600"
+                                        }`}
+                                >
+                                    <Wallet className="w-4 h-4" />
+                                    <span className="text-sm font-medium">Débito/PIX</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, paymentMethod: "credit" })}
+                                    disabled={creditCards.length === 0}
+                                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "credit"
+                                        ? "border-purple-500 bg-purple-500/10 text-purple-400"
+                                        : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600"
+                                        } ${creditCards.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <CreditCard className="w-4 h-4" />
+                                    <span className="text-sm font-medium">Cartão</span>
+                                </button>
+                            </div>
+
+                            {/* Seletor de cartão */}
+                            {formData.paymentMethod === "credit" && creditCards.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-400">Cartão</Label>
+                                    <Select
+                                        value={formData.creditCardId}
+                                        onValueChange={(v) => setFormData({ ...formData, creditCardId: v })}
+                                    >
+                                        <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                            <SelectValue placeholder="Selecione o cartão" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            {creditCards.map((card) => (
+                                                <SelectItem key={card.id} value={card.id}>
+                                                    {card.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+
+                            {/* Seletor de conta para débito */}
+                            {formData.paymentMethod === "debit" && accounts.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-400">Conta</Label>
+                                    <Select
+                                        value={formData.accountId}
+                                        onValueChange={(v) => setFormData({ ...formData, accountId: v })}
+                                    >
+                                        <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                            <SelectValue placeholder="Selecione a conta" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            {accounts.map((acc) => (
+                                                <SelectItem key={acc.id} value={acc.id}>
+                                                    {acc.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label>Atribuir a</Label>

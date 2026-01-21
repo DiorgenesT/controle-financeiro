@@ -530,15 +530,11 @@ export function TransactionModal({
                         toast.success("Despesa no cartão atualizada!");
                     } else {
                         const card = creditCards.find(c => c.id === formData.creditCardId)!;
-                        const numInstallments = parseInt(formData.installments) || 1;
-                        const installmentAmount = amount / numInstallments;
-                        let firstTransactionId: string | undefined;
 
-                        // Criar transação para cada parcela
-                        for (let i = 0; i < numInstallments; i++) {
-                            const { month, year } = getInvoiceMonthYear(purchaseDate, card.closingDay, i);
-
-                            // Buscar ou criar fatura do mês
+                        // === DESPESA FIXA NO CARTÃO ===
+                        if (formData.installments === "fixed") {
+                            // 1. Criar transação do mês atual na fatura
+                            const { month, year } = getInvoiceMonthYear(purchaseDate, card.closingDay, 0);
                             const invoice = await getOrCreateInvoice(
                                 card.id,
                                 user!.uid,
@@ -548,47 +544,104 @@ export function TransactionModal({
                                 card.dueDay
                             );
 
-                            const description = numInstallments > 1
-                                ? `${formData.description} (${i + 1}/${numInstallments})`
-                                : formData.description;
-
-                            // Data da parcela = data de vencimento da fatura
                             const installmentDate = invoice.dueDate || new Date(year, month - 1, card.dueDay);
 
-                            const transactionData: Parameters<typeof add>[0] = {
+                            // Criar a transação do mês atual
+                            await add({
                                 type: "despesa",
-                                description,
-                                amount: installmentAmount,
+                                description: formData.description,
+                                amount,
                                 category: selectedCategory?.name || formData.category,
                                 date: installmentDate,
                                 paymentMethod: "credit",
                                 creditCardId: card.id,
                                 invoiceId: invoice.id,
-                                installments: numInstallments,
-                                installmentNumber: i + 1,
                                 personId: formData.personId === "family" ? null : formData.personId,
-                                totalAmount: amount,
                                 purchaseDate: purchaseDate,
-                            };
-
-                            // Só adiciona parentTransactionId se não for a primeira parcela
-                            if (i > 0 && firstTransactionId) {
-                                transactionData.parentTransactionId = firstTransactionId;
-                            }
-
-                            const transactionId = await add(transactionData);
-
-                            if (i === 0) firstTransactionId = transactionId;
+                                isRecurring: true,
+                            });
 
                             // Atualizar total da fatura
-                            await updateInvoiceTotal(invoice.id, installmentAmount, "add");
-                        }
+                            await updateInvoiceTotal(invoice.id, amount, "add");
 
-                        toast.success(
-                            numInstallments > 1
-                                ? `Compra parcelada em ${numInstallments}x adicionada!`
-                                : "Despesa no cartão adicionada!"
-                        );
+                            // 2. Criar recorrência para os próximos meses
+                            await addRecurringTransaction(user!.uid, {
+                                type: "despesa",
+                                description: formData.description,
+                                amount,
+                                category: selectedCategory?.name || formData.category,
+                                day: purchaseDate.getDate(),
+                                active: true,
+                                personId: formData.personId === "family" ? null : formData.personId,
+                                paymentMethod: "credit",
+                                creditCardId: card.id,
+                                lastProcessedDate: new Date(), // Marca como já processado este mês
+                            });
+
+                            toast.success("Despesa fixa no cartão criada! Será lançada todo mês automaticamente.");
+                        }
+                        // === PARCELAMENTO NORMAL ===
+                        else {
+                            const numInstallments = parseInt(formData.installments) || 1;
+                            const installmentAmount = amount / numInstallments;
+                            let firstTransactionId: string | undefined;
+
+                            // Criar transação para cada parcela
+                            for (let i = 0; i < numInstallments; i++) {
+                                const { month, year } = getInvoiceMonthYear(purchaseDate, card.closingDay, i);
+
+                                // Buscar ou criar fatura do mês
+                                const invoice = await getOrCreateInvoice(
+                                    card.id,
+                                    user!.uid,
+                                    month,
+                                    year,
+                                    card.closingDay,
+                                    card.dueDay
+                                );
+
+                                const description = numInstallments > 1
+                                    ? `${formData.description} (${i + 1}/${numInstallments})`
+                                    : formData.description;
+
+                                // Data da parcela = data de vencimento da fatura
+                                const installmentDate = invoice.dueDate || new Date(year, month - 1, card.dueDay);
+
+                                const transactionData: Parameters<typeof add>[0] = {
+                                    type: "despesa",
+                                    description,
+                                    amount: installmentAmount,
+                                    category: selectedCategory?.name || formData.category,
+                                    date: installmentDate,
+                                    paymentMethod: "credit",
+                                    creditCardId: card.id,
+                                    invoiceId: invoice.id,
+                                    installments: numInstallments,
+                                    installmentNumber: i + 1,
+                                    personId: formData.personId === "family" ? null : formData.personId,
+                                    totalAmount: amount,
+                                    purchaseDate: purchaseDate,
+                                };
+
+                                // Só adiciona parentTransactionId se não for a primeira parcela
+                                if (i > 0 && firstTransactionId) {
+                                    transactionData.parentTransactionId = firstTransactionId;
+                                }
+
+                                const transactionId = await add(transactionData);
+
+                                if (i === 0) firstTransactionId = transactionId;
+
+                                // Atualizar total da fatura
+                                await updateInvoiceTotal(invoice.id, installmentAmount, "add");
+                            }
+
+                            toast.success(
+                                numInstallments > 1
+                                    ? `Compra parcelada em ${numInstallments}x adicionada!`
+                                    : "Despesa no cartão adicionada!"
+                            );
+                        }
                     }
                 }
             }
@@ -986,19 +1039,41 @@ export function TransactionModal({
 
                                     <div className="space-y-2">
                                         <Label className="text-muted-foreground">Parcelas</Label>
-                                        <Input
-                                            type="number"
-                                            min="1"
-                                            value={formData.installments}
-                                            onChange={(e) => setFormData({ ...formData, installments: e.target.value })}
-                                            className="bg-muted/50 border-input text-foreground"
-                                        />
-                                        {(parseInt(formData.installments) || 1) > 1 && formData.amount && (
+                                        <div className="flex gap-2">
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                value={formData.installments === "fixed" ? "" : formData.installments}
+                                                onChange={(e) => setFormData({ ...formData, installments: e.target.value || "1" })}
+                                                disabled={formData.installments === "fixed"}
+                                                placeholder="1"
+                                                className="bg-muted/50 border-input text-foreground flex-1"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({
+                                                    ...formData,
+                                                    installments: formData.installments === "fixed" ? "1" : "fixed"
+                                                })}
+                                                className={`px-3 py-2 rounded-md border text-sm font-medium flex items-center gap-1.5 transition-all ${formData.installments === "fixed"
+                                                        ? "border-purple-500 bg-purple-500/20 text-purple-400"
+                                                        : "border-input bg-muted/50 text-muted-foreground hover:border-purple-400 hover:text-purple-400"
+                                                    }`}
+                                            >
+                                                🔄 Fixa
+                                            </button>
+                                        </div>
+                                        {formData.installments !== "fixed" && (parseInt(formData.installments) || 1) > 1 && formData.amount && (
                                             <p className="text-sm text-muted-foreground">
                                                 {parseInt(formData.installments) || 1}x de{" "}
                                                 <span className="text-foreground font-medium">
                                                     R$ {(parseFloat(formData.amount) / (parseInt(formData.installments) || 1)).toFixed(2)}
                                                 </span>
+                                            </p>
+                                        )}
+                                        {formData.installments === "fixed" && (
+                                            <p className="text-sm text-purple-400">
+                                                💡 Será lançado automaticamente todo mês na fatura
                                             </p>
                                         )}
                                     </div>

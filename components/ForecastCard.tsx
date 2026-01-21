@@ -37,8 +37,9 @@ export function ForecastCard() {
                 .reduce((acc, t) => acc + t.amount, 0);
 
             // 2. Despesas Fixas (Baseado nas regras de recorrência ativas)
+            // NOTA: Excluir recorrências no cartão, pois já estão nas faturas
             const fixedExpenses = recurring
-                .filter(t => t.type === 'despesa' && t.active)
+                .filter(t => t.type === 'despesa' && t.active && t.paymentMethod !== 'credit')
                 .reduce((acc, t) => acc + t.amount, 0);
 
             // 3. Boletos Parcelados / Futuros do Próximo Mês
