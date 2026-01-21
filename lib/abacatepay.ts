@@ -4,7 +4,7 @@ interface Customer {
     email: string;
     name?: string;
     cellphone?: string;
-    taxId?: string;
+    taxId: string;
 }
 
 interface BillingProduct {

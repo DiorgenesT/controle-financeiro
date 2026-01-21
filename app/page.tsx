@@ -51,10 +51,11 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [cellphone, setCellphone] = useState("");
+  const [taxId, setTaxId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!email || !name || !cellphone) {
+    if (!email || !name || !cellphone || !taxId) {
       alert("Por favor, preencha todos os campos para continuar.");
       return;
     }
@@ -64,7 +65,7 @@ export default function Home() {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, cellphone }),
+        body: JSON.stringify({ email, name, cellphone, taxId }),
       });
       const data = await response.json();
       if (data.url) {
@@ -807,11 +808,24 @@ export default function Home() {
                       className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="taxId" className="block text-sm font-medium text-zinc-700 mb-1">
+                      Seu CPF
+                    </label>
+                    <input
+                      type="text"
+                      id="taxId"
+                      placeholder="000.000.000-00"
+                      value={taxId}
+                      onChange={(e) => setTaxId(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                    />
+                  </div>
                 </div>
 
                 <Button
                   onClick={handleCheckout}
-                  disabled={checkoutLoading || !email || !name || !cellphone}
+                  disabled={checkoutLoading || !email || !name || !cellphone || !taxId}
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {checkoutLoading ? "Carregando..." : "Quero Organizar Minha Vida"}
