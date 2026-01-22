@@ -73,11 +73,21 @@ export async function updateAccountBalance(
     operation: "add" | "subtract"
 ): Promise<void> {
     const docRef = doc(db, "accounts", accountId);
-    const value = operation === "add" ? amount : -amount;
-    await updateDoc(docRef, {
-        balance: increment(value),
-        updatedAt: serverTimestamp(),
-    });
+
+    // Buscar saldo atual para aplicar arredondamento no resultado final
+    const docSnap = await getDocs(query(collection(db, "accounts"), where("__name__", "==", accountId)));
+
+    if (!docSnap.empty) {
+        const currentBalance = docSnap.docs[0].data().balance || 0;
+        const newBalance = operation === "add"
+            ? currentBalance + amount
+            : currentBalance - amount;
+
+        await updateDoc(docRef, {
+            balance: Math.round(newBalance * 100) / 100, // Arredondar resultado final
+            updatedAt: serverTimestamp(),
+        });
+    }
 }
 
 // Desmarcar todas as contas padrão de um usuário

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { FeatureCard } from "@/components/FeatureCard";
 import CookieConsent from "@/components/CookieConsent";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -664,19 +665,14 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
             {features.map((feature, index) => (
-              <div
+              <FeatureCard
                 key={index}
-                className="feature-card p-8 rounded-3xl bg-white/60 backdrop-blur-lg border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 group hover:-translate-y-4 hover:scale-105 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-600 hover:shadow-2xl hover:shadow-emerald-500/50 hover:border-transparent"
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-6 transition-all duration-500 shadow-inner group-hover:scale-110 group-hover:bg-white group-hover:shadow-lg group-hover:rotate-6">
-                  <feature.icon className="w-8 h-8 text-emerald-600 transition-colors duration-500 group-hover:text-emerald-600" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-zinc-800 transition-colors duration-500 group-hover:text-white">{feature.title}</h3>
-                <p className="text-zinc-600 leading-relaxed transition-colors duration-500 group-hover:text-emerald-50">{feature.description}</p>
-              </div>
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
             ))}
           </div>
         </div>
@@ -698,15 +694,15 @@ export default function Home() {
 
           <div className="max-w-md mx-auto" style={{ perspective: "1000px" }}>
             {/* Annual Plan - Premium Design */}
-            <div className="relative p-1 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20">
+            <div className="relative p-1 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-emerald-500/40">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 whitespace-nowrap z-10">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 Melhor Escolha
               </div>
 
-              <div className="relative p-8 bg-white rounded-xl h-full flex flex-col overflow-hidden">
+              <div className="relative p-8 bg-white rounded-xl h-full flex flex-col overflow-hidden group">
                 {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-500/10 transition-colors duration-500"></div>
 
                 <div className="mb-8 text-center relative z-10">
                   <h3 className="text-3xl font-bold text-zinc-800">Anual</h3>
@@ -732,7 +728,7 @@ export default function Home() {
                     "Suporte prioritário VIP"
                   ].map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-emerald-200 transition-colors duration-300">
                         <Check className="w-4 h-4 text-emerald-600" />
                       </div>
                       <span className="text-zinc-700 font-medium">{feature}</span>
@@ -768,16 +764,16 @@ export default function Home() {
         <div className="mt-16 text-center">
           <h3 className="text-2xl font-semibold mb-8">Como funciona?</h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">1</div>
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 hover:-translate-y-2 hover:bg-white hover:shadow-xl hover:shadow-emerald-500/20 hover:border-emerald-500/30 group">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">1</div>
               <p className="text-zinc-600 font-medium">Escolha seu plano e realize a compra</p>
             </div>
-            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">2</div>
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 hover:-translate-y-2 hover:bg-white hover:shadow-xl hover:shadow-emerald-500/20 hover:border-emerald-500/30 group">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">2</div>
               <p className="text-zinc-600 font-medium">Receba seu login e senha por email</p>
             </div>
-            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:bg-white/80 transition-all hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30">3</div>
+            <div className="p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 hover:-translate-y-2 hover:bg-white hover:shadow-xl hover:shadow-emerald-500/20 hover:border-emerald-500/30 group">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-lg shadow-emerald-500/30 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">3</div>
               <p className="text-zinc-600 font-medium">Acesse e comece a organizar suas finanças</p>
             </div>
           </div>
@@ -799,7 +795,7 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="testimonial-card p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 transition-all hover:-translate-y-2"
+                className="testimonial-card p-8 rounded-3xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-zinc-200/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-emerald-500/20 hover:border-emerald-500/40 group"
               >
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -808,7 +804,7 @@ export default function Home() {
                 </div>
                 <p className="text-zinc-600 mb-6 text-lg">&quot;{testimonial.content}&quot;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/30">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/30 transition-transform duration-500 group-hover:scale-110">
                     {testimonial.avatar}
                   </div>
                   <div>

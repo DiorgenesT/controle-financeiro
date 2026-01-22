@@ -9,6 +9,7 @@ import {
     where,
     orderBy,
     serverTimestamp,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { CreditCard, CreditCardInvoice } from "@/types";
@@ -54,8 +55,37 @@ export async function updateCreditCard(
     });
 }
 
-export async function deleteCreditCard(cardId: string): Promise<void> {
-    await deleteDoc(doc(db, "creditCards", cardId));
+export async function deleteCreditCard(cardId: string, userId: string): Promise<void> {
+    const batch = writeBatch(db);
+
+    // 1. Deletar o cartão
+    const cardRef = doc(db, "creditCards", cardId);
+    batch.delete(cardRef);
+
+    // 2. Buscar e deletar todas as faturas do cartão
+    const invoicesQuery = query(
+        collection(db, "invoices"),
+        where("creditCardId", "==", cardId),
+        where("userId", "==", userId)
+    );
+    const invoicesSnapshot = await getDocs(invoicesQuery);
+    invoicesSnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+
+    // 3. Buscar e deletar todas as transações do cartão
+    const transactionsQuery = query(
+        collection(db, "transactions"),
+        where("creditCardId", "==", cardId),
+        where("userId", "==", userId)
+    );
+    const transactionsSnapshot = await getDocs(transactionsQuery);
+    transactionsSnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+
+    // Commit do batch
+    await batch.commit();
 }
 
 // ============ FATURAS ============
@@ -161,7 +191,7 @@ export async function updateInvoiceTotal(
         const newTotal = operation === "add" ? currentTotal + amount : currentTotal - amount;
 
         await updateDoc(docRef, {
-            totalAmount: Math.max(0, newTotal),
+            totalAmount: Math.round(Math.max(0, newTotal) * 100) / 100,
         });
     }
 }

@@ -157,12 +157,7 @@ export function Header({ title }: HeaderProps) {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem asChild>
-                            <Link href="/configuracoes" className="flex items-center cursor-pointer text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
-                                <User className="mr-2 h-4 w-4" />
-                                <span>Meu Perfil</span>
-                            </Link>
-                        </DropdownMenuItem>
+
                         <DropdownMenuItem asChild>
                             <Link href="/assinatura" className="flex items-center cursor-pointer text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
                                 <CreditCard className="mr-2 h-4 w-4" />

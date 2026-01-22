@@ -12,6 +12,7 @@ import { addTransaction } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBankByCode } from "@/lib/banks";
 import { getIconById } from "@/lib/icons";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 interface PayInvoiceModalProps {
     isOpen: boolean;
@@ -105,20 +106,16 @@ export function PayInvoiceModal({
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
+
+
                     <div className="space-y-2">
                         <Label>Valor do Pagamento</Label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">R$</span>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                className="pl-10 bg-zinc-800/50 border-zinc-700 text-white"
-                                placeholder="0,00"
-                                required
-                            />
-                        </div>
+                        <CurrencyInput
+                            value={amount}
+                            onChange={(val) => setAmount(val)}
+                            className="bg-zinc-800/50 border-zinc-700 text-white"
+                            required
+                        />
                         <p className="text-xs text-zinc-500">
                             Total da fatura: {formatCurrency(invoice.totalAmount)}
                         </p>

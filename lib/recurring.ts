@@ -1,10 +1,169 @@
 import { db } from "./firebase";
-import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, Timestamp, documentId } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, Timestamp, documentId, runTransaction } from "firebase/firestore";
 import { RecurringTransaction, Transaction } from "@/types";
 import { addTransaction } from "./firestore";
 import { updateAccountBalance } from "./accounts";
+import { roundCurrency } from "./utils";
 
 const COLLECTION = "recurring_transactions";
+
+export async function processRecurringTransaction(userId: string, recurring: RecurringTransaction, actualValue?: number): Promise<string> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // =================================================================
+    // PATH 1: Credit Card (Hybrid: Atomic Lock + Standard Processing)
+    // =================================================================
+    if (recurring.paymentMethod === "credit" && recurring.creditCardId) {
+        // 1. Atomic Lock (Prevent double processing)
+        await runTransaction(db, async (transaction) => {
+            const recurringRef = doc(db, COLLECTION, recurring.id);
+            const recurringDoc = await transaction.get(recurringRef);
+
+            if (!recurringDoc.exists()) throw new Error("Transação recorrente não encontrada.");
+
+            const currentRecurring = recurringDoc.data() as RecurringTransaction;
+
+            // Check Idempotency
+            if (currentRecurring.lastProcessedDate) {
+                const lastProcessed = currentRecurring.lastProcessedDate instanceof Timestamp
+                    ? currentRecurring.lastProcessedDate.toDate()
+                    : new Date(currentRecurring.lastProcessedDate);
+
+                if (lastProcessed.getMonth() === today.getMonth() && lastProcessed.getFullYear() === today.getFullYear()) {
+                    throw new Error("Esta transação já foi processada este mês.");
+                }
+            }
+
+            // Update lastProcessedDate immediately to "lock" it
+            transaction.update(recurringRef, {
+                lastProcessedDate: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        });
+
+        // 2. Heavy Lifting (Invoice logic)
+        try {
+            const { getCreditCards, getOrCreateInvoice, updateInvoiceTotal, getInvoiceMonthYear } = await import("./creditCards");
+
+            const cards = await getCreditCards(userId);
+            const card = cards.find(c => c.id === recurring.creditCardId);
+            if (!card) throw new Error("Cartão não encontrado");
+
+            const { month, year } = getInvoiceMonthYear(today, card.closingDay, 0);
+            const invoice = await getOrCreateInvoice(card.id, userId, month, year, card.closingDay, card.dueDay);
+
+            const amount = actualValue !== undefined ? actualValue : recurring.amount;
+            const transactionData: any = {
+                userId,
+                type: "despesa",
+                amount,
+                category: recurring.category,
+                description: recurring.description,
+                date: invoice.dueDate || new Date(year, month - 1, card.dueDay),
+                paymentMethod: "credit",
+                creditCardId: card.id,
+                invoiceId: invoice.id,
+                purchaseDate: today,
+                recurringTransactionId: recurring.id,
+                personId: recurring.personId,
+                createdAt: serverTimestamp(),
+                isRecurring: true
+            };
+
+            const id = await addTransaction(userId, transactionData);
+            await updateInvoiceTotal(invoice.id, amount, "add");
+            return id;
+
+        } catch (error) {
+            console.error("Erro ao processar cartão após lock:", error);
+            // Note: The transaction is already "locked" for the month. 
+            // User might need to manually reset or we accept this safety margin.
+            throw error;
+        }
+    }
+
+    // =================================================================
+    // PATH 2: Account/Standard (Fully Atomic)
+    // =================================================================
+    try {
+        const result = await runTransaction(db, async (transaction) => {
+            // 1. Ler a transação recorrente
+            const recurringRef = doc(db, COLLECTION, recurring.id);
+            const recurringDoc = await transaction.get(recurringRef);
+
+            if (!recurringDoc.exists()) throw new Error("Transação recorrente não encontrada.");
+
+            const currentRecurring = recurringDoc.data() as RecurringTransaction;
+
+            // Verificar idempotência
+            if (currentRecurring.lastProcessedDate) {
+                const lastProcessed = currentRecurring.lastProcessedDate instanceof Timestamp
+                    ? currentRecurring.lastProcessedDate.toDate()
+                    : new Date(currentRecurring.lastProcessedDate);
+
+                if (lastProcessed.getMonth() === today.getMonth() && lastProcessed.getFullYear() === today.getFullYear()) {
+                    throw new Error("Esta transação já foi processada este mês.");
+                }
+            }
+
+            // 2. Preparar dados da nova transação
+            const amount = actualValue !== undefined ? actualValue : recurring.amount;
+            const newTransactionRef = doc(collection(db, "transactions"));
+
+            const transactionData: any = {
+                userId,
+                type: recurring.type,
+                amount: amount,
+                category: recurring.category,
+                description: recurring.description,
+                date: Timestamp.fromDate(new Date()),
+                createdAt: serverTimestamp(),
+                isRecurring: true,
+                recurringTransactionId: recurring.id,
+            };
+
+            if (recurring.paymentMethod) transactionData.paymentMethod = recurring.paymentMethod;
+            if (recurring.accountId) transactionData.accountId = recurring.accountId;
+            if (recurring.personId) transactionData.personId = recurring.personId;
+
+            // 3. Ler e Atualizar Conta (se aplicável)
+            if (recurring.accountId && (recurring.type === 'despesa' || recurring.type === 'receita')) {
+                const accountRef = doc(db, "accounts", recurring.accountId);
+                const accountDoc = await transaction.get(accountRef);
+
+                if (accountDoc.exists()) {
+                    const currentBalance = accountDoc.data().balance || 0;
+                    const newBalance = recurring.type === 'receita'
+                        ? currentBalance + amount
+                        : currentBalance - amount;
+
+                    transaction.update(accountRef, {
+                        balance: roundCurrency(newBalance),
+                        updatedAt: serverTimestamp()
+                    });
+                }
+            }
+
+            // 4. Criar a Transação
+            transaction.set(newTransactionRef, transactionData);
+
+            // 5. Atualizar a Transação Recorrente
+            transaction.update(recurringRef, {
+                lastProcessedDate: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+
+            return newTransactionRef.id;
+        });
+
+        return result;
+
+    } catch (error) {
+        console.error("Erro ao processar transação recorrente:", error);
+        throw error;
+    }
+}
 
 export async function getRecurringTransactions(userId: string): Promise<RecurringTransaction[]> {
     const q = query(collection(db, COLLECTION), where("userId", "==", userId));
@@ -98,7 +257,7 @@ export async function updateFutureLinkedTransactions(userId: string, recurringId
         if (data.amount !== undefined && data.amount !== currentData.amount) {
             updateData.amount = data.amount;
 
-            const diff = data.amount - currentData.amount;
+            const diff = roundCurrency(data.amount - currentData.amount);
 
             // Só atualiza saldo se tiver conta vinculada e for do tipo que afeta saldo
             if (currentData.accountId) {
@@ -171,83 +330,4 @@ export async function checkRecurringStatus(userId: string): Promise<PendingRecur
 
     // Ordenar por urgência (mais urgente primeiro)
     return pending.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
-}
-
-export async function processRecurringTransaction(userId: string, recurring: RecurringTransaction, actualValue?: number): Promise<string> {
-    const today = new Date();
-    const amount = actualValue !== undefined ? actualValue : recurring.amount;
-
-    // Se for cartão de crédito, usar lógica específica
-    if (recurring.paymentMethod === "credit" && recurring.creditCardId) {
-        const { getCreditCards, getOrCreateInvoice, updateInvoiceTotal, getInvoiceMonthYear } = await import("./creditCards");
-
-        const cards = await getCreditCards(userId);
-        const card = cards.find(c => c.id === recurring.creditCardId);
-
-        if (!card) {
-            throw new Error("Cartão não encontrado");
-        }
-
-        // Calcular mês/ano da fatura baseado na data atual e dia de fechamento
-        const { month, year } = getInvoiceMonthYear(today, card.closingDay, 0);
-
-        // Buscar ou criar fatura do mês
-        const invoice = await getOrCreateInvoice(
-            card.id,
-            userId,
-            month,
-            year,
-            card.closingDay,
-            card.dueDay
-        );
-
-        // Criar transação no cartão
-        const transactionData: Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt"> = {
-            type: "despesa",
-            amount,
-            category: recurring.category,
-            description: recurring.description,
-            date: invoice.dueDate || new Date(year, month - 1, card.dueDay),
-            paymentMethod: "credit",
-            creditCardId: card.id,
-            invoiceId: invoice.id,
-            purchaseDate: today,
-            recurringTransactionId: recurring.id,
-            personId: recurring.personId,
-        };
-
-        const id = await addTransaction(userId, transactionData);
-
-        // Atualizar total da fatura
-        await updateInvoiceTotal(invoice.id, amount, "add");
-
-        // Atualizar lastProcessedDate
-        await updateRecurringTransaction(recurring.id, {
-            lastProcessedDate: today
-        });
-
-        return id;
-    }
-
-    // Lógica padrão (débito/pix)
-    const transactionData: Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt"> = {
-        type: recurring.type,
-        amount,
-        category: recurring.category,
-        description: recurring.description,
-        date: today,
-        paymentMethod: recurring.paymentMethod || (recurring.type === "despesa" ? "debit" : undefined),
-        accountId: recurring.accountId,
-        recurringTransactionId: recurring.id,
-        personId: recurring.personId,
-    };
-
-    const id = await addTransaction(userId, transactionData);
-
-    // Atualizar lastProcessedDate
-    await updateRecurringTransaction(recurring.id, {
-        lastProcessedDate: today
-    });
-
-    return id;
 }

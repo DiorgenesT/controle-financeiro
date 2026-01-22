@@ -35,3 +35,7 @@ export function formatTransactionDescription(transaction: Transaction, accounts:
 
   return transaction.description;
 }
+
+export function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}

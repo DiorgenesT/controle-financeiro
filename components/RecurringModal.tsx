@@ -29,6 +29,7 @@ import { getAccounts, Account } from "@/lib/accounts";
 import { usePeople } from "@/hooks/usePeople";
 import { getIconById } from "@/lib/icons";
 import { toast } from "sonner";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 interface RecurringModalProps {
     open: boolean;
@@ -222,11 +223,9 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Valor</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <CurrencyInput
                                 value={formData.amount}
-                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                onChange={(val) => setFormData({ ...formData, amount: val })}
                                 className="bg-zinc-800 border-zinc-700"
                                 required
                             />

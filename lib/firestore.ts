@@ -168,7 +168,7 @@ export async function deleteGoal(goalId: string): Promise<void> {
 
 export async function updateUserProfile(
     userId: string,
-    data: { displayName?: string; photoURL?: string }
+    data: { displayName?: string; photoURL?: string; settings?: any }
 ): Promise<void> {
     const docRef = doc(db, "users", userId);
     await updateDoc(docRef, data);

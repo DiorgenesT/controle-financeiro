@@ -1,4 +1,9 @@
 // Tipos do sistema
+export interface UserSettings {
+    budgetAlerts: boolean;
+    goalReminders: boolean;
+}
+
 export interface User {
     uid: string;
     email: string;
@@ -9,6 +14,7 @@ export interface User {
     subscriptionStatus: 'active' | 'inactive' | 'trial' | 'expired' | 'canceled';
     subscriptionEnd?: Date;
     stripeCustomerId?: string;
+    settings?: UserSettings;
 }
 
 // ============ CONTAS BANCÁRIAS ============

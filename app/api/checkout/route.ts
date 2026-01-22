@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
             payment_method_types: ["card", "boleto"],
             line_items: [
                 {
-                    price: 'price_1Sr2A617VQOiz1AV6DiTrA8P',
+                    price: process.env.STRIPE_PRICE_ID,
                     quantity: 1,
                 },
             ],
@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
                     installments: {
                         enabled: true,
                     },
+                },
+                boleto: {
+                    expires_after_days: 3,
                 },
             },
         });

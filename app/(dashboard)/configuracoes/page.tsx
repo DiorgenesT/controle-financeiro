@@ -56,6 +56,44 @@ export default function ConfiguracoesPage() {
     const [resetPassword, setResetPassword] = useState("");
     const [resetting, setResetting] = useState(false);
 
+    // Estado para configurações de notificação
+    const [budgetAlerts, setBudgetAlerts] = useState(user?.settings?.budgetAlerts ?? true);
+    const [goalReminders, setGoalReminders] = useState(user?.settings?.goalReminders ?? true);
+
+    useEffect(() => {
+        if (user?.settings) {
+            setBudgetAlerts(user.settings.budgetAlerts);
+            setGoalReminders(user.settings.goalReminders);
+        }
+    }, [user?.settings]);
+
+    const handleToggleSettings = async (setting: 'budgetAlerts' | 'goalReminders') => {
+        if (!user?.uid) return;
+
+        const newValue = setting === 'budgetAlerts' ? !budgetAlerts : !goalReminders;
+
+        // Atualiza estado local imediatamente para feedback visual
+        if (setting === 'budgetAlerts') setBudgetAlerts(newValue);
+        else setGoalReminders(newValue);
+
+        try {
+            await updateUserProfile(user.uid, {
+                settings: {
+                    budgetAlerts: setting === 'budgetAlerts' ? newValue : budgetAlerts,
+                    goalReminders: setting === 'goalReminders' ? newValue : goalReminders
+                }
+            });
+            await refreshUser();
+            toast.success("Configuração atualizada!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao atualizar configuração");
+            // Reverte em caso de erro
+            if (setting === 'budgetAlerts') setBudgetAlerts(!newValue);
+            else setGoalReminders(!newValue);
+        }
+    };
+
     const handleResetData = async () => {
         if (!resetPassword) {
             toast.error("Digite sua senha para confirmar");
@@ -345,8 +383,16 @@ export default function ConfiguracoesPage() {
                                 <p className="font-medium text-foreground">Alertas de Orçamento</p>
                                 <p className="text-sm text-muted-foreground">Receba alertas quando estiver próximo do limite</p>
                             </div>
-                            <Button variant="outline" size="sm" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20">
-                                Ativado
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleSettings('budgetAlerts')}
+                                className={budgetAlerts
+                                    ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
+                                    : "border-input text-muted-foreground hover:bg-accent hover:text-foreground"
+                                }
+                            >
+                                {budgetAlerts ? "Ativado" : "Desativado"}
                             </Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -354,17 +400,16 @@ export default function ConfiguracoesPage() {
                                 <p className="font-medium text-foreground">Lembretes de Metas</p>
                                 <p className="text-sm text-muted-foreground">Receba lembretes sobre suas metas financeiras</p>
                             </div>
-                            <Button variant="outline" size="sm" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20">
-                                Ativado
-                            </Button>
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                            <div>
-                                <p className="font-medium text-foreground">Relatórios Semanais</p>
-                                <p className="text-sm text-muted-foreground">Receba um resumo semanal por email</p>
-                            </div>
-                            <Button variant="outline" size="sm" className="border-input text-muted-foreground hover:bg-accent hover:text-foreground">
-                                Desativado
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleSettings('goalReminders')}
+                                className={goalReminders
+                                    ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
+                                    : "border-input text-muted-foreground hover:bg-accent hover:text-foreground"
+                                }
+                            >
+                                {goalReminders ? "Ativado" : "Desativado"}
                             </Button>
                         </div>
                     </CardContent>
@@ -404,14 +449,6 @@ export default function ConfiguracoesPage() {
                                 >
                                     Escuro
                                 </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setTheme("system")}
-                                    className={`border-input ${theme === 'system' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
-                                >
-                                    Sistema
-                                </Button>
                             </div>
                         </div>
                     </CardContent>
@@ -444,28 +481,28 @@ export default function ConfiguracoesPage() {
                 </Card>
 
                 {/* Danger Zone */}
-                <Card className="bg-red-950/10 border-red-900/50">
+                <Card className="bg-red-500/10 border-red-500/50">
                     <CardHeader>
-                        <CardTitle className="text-red-400 flex items-center gap-2">
+                        <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5" />
                             Zona de Perigo
                         </CardTitle>
-                        <CardDescription className="text-red-400/60">
+                        <CardDescription className="text-red-600/80 dark:text-red-400/80">
                             Ações irreversíveis
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-900/30 bg-red-950/20">
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/20 bg-red-500/5">
                             <div>
-                                <h4 className="text-red-200 font-medium">Resetar Dados</h4>
-                                <p className="text-sm text-red-400/60">
+                                <h4 className="text-red-700 dark:text-red-300 font-medium">Resetar Dados</h4>
+                                <p className="text-sm text-red-600/80 dark:text-red-400/80">
                                     Apaga todas as transações, contas e configurações.
                                 </p>
                             </div>
                             <Button
                                 variant="destructive"
                                 onClick={() => setShowResetModal(true)}
-                                className="bg-red-900 hover:bg-red-800 text-red-100 border border-red-800"
+                                className="bg-red-600 hover:bg-red-700 text-white border border-red-600 font-medium"
                             >
                                 Resetar Tudo
                             </Button>

@@ -549,8 +549,6 @@ export default function ContasPage() {
                         <CardTitle className="text-foreground flex items-center gap-2">
                             <Building className="w-5 h-5 text-emerald-400" />
                             Suas Contas
-                            <Building className="w-5 h-5 text-emerald-400" />
-                            Suas Contas
                             <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
                                 {accounts.length}
                             </Badge>
@@ -595,7 +593,7 @@ export default function ContasPage() {
                                             }}
                                         >
                                             {account.isDefault && (
-                                                <Badge className="absolute top-2 right-2 bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                                                <Badge className="absolute top-4 right-14 bg-white/20 text-white border-white/30 backdrop-blur-sm">
                                                     <Star className="w-3 h-3 mr-1 fill-white" />
                                                     Padrão
                                                 </Badge>

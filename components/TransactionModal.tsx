@@ -49,6 +49,8 @@ import { addTransaction, getGoals, updateGoal } from "@/lib/firestore";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Repeat } from "lucide-react";
+import { roundCurrency } from "@/lib/utils";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 interface TransactionModalProps {
     open: boolean;
@@ -583,7 +585,7 @@ export function TransactionModal({
                         // === PARCELAMENTO NORMAL ===
                         else {
                             const numInstallments = parseInt(formData.installments) || 1;
-                            const installmentAmount = amount / numInstallments;
+                            const installmentAmount = roundCurrency(amount / numInstallments);
                             let firstTransactionId: string | undefined;
 
                             // Criar transação para cada parcela
@@ -882,13 +884,9 @@ export function TransactionModal({
                                             : "Valor"
                                         }
                                     </Label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        placeholder="0,00"
+                                    <CurrencyInput
                                         value={formData.amount}
-                                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                        onChange={(val) => setFormData({ ...formData, amount: val })}
                                         className="bg-muted/50 border-input text-foreground"
                                         required
                                     />
@@ -1044,10 +1042,10 @@ export function TransactionModal({
                                                 type="number"
                                                 min="1"
                                                 value={formData.installments === "fixed" ? "" : formData.installments}
-                                                onChange={(e) => setFormData({ ...formData, installments: e.target.value || "1" })}
+                                                onChange={(e) => setFormData({ ...formData, installments: e.target.value })}
                                                 disabled={formData.installments === "fixed"}
                                                 placeholder="1"
-                                                className="bg-muted/50 border-input text-foreground flex-1"
+                                                className="bg-muted/50 border-input text-foreground flex-1 shadow-none"
                                             />
                                             <button
                                                 type="button"
@@ -1056,8 +1054,8 @@ export function TransactionModal({
                                                     installments: formData.installments === "fixed" ? "1" : "fixed"
                                                 })}
                                                 className={`px-3 py-2 rounded-md border text-sm font-medium flex items-center gap-1.5 transition-all ${formData.installments === "fixed"
-                                                        ? "border-purple-500 bg-purple-500/20 text-purple-400"
-                                                        : "border-input bg-muted/50 text-muted-foreground hover:border-purple-400 hover:text-purple-400"
+                                                    ? "border-purple-500 bg-purple-500/20 text-purple-400"
+                                                    : "border-input bg-muted/50 text-muted-foreground hover:border-purple-400 hover:text-purple-400"
                                                     }`}
                                             >
                                                 🔄 Fixa

@@ -47,6 +47,7 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
             subscriptionStatus: data.subscriptionStatus || "active",
             subscriptionEnd,
             stripeCustomerId: data.stripeCustomerId,
+            settings: data.settings || { budgetAlerts: true, goalReminders: true },
         };
     }
 
@@ -58,6 +59,7 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
         isFirstAccess: true,
         createdAt: new Date(),
         subscriptionStatus: "active",
+        settings: { budgetAlerts: true, goalReminders: true },
     };
 
     await setDoc(docRef, {

@@ -8,6 +8,8 @@ import { signIn } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail, Lock, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
+import { verifyRecaptcha } from "@/app/actions/verifyRecaptcha";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -44,12 +46,28 @@ export default function LoginPage() {
         return () => card.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
+    const { executeRecaptcha } = useGoogleReCaptcha();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
         try {
+            if (!executeRecaptcha) {
+                console.warn("Recaptcha not ready");
+                // Continue anyway to not block user if recaptcha fails to load
+            } else {
+                const token = await executeRecaptcha("login");
+                const verification = await verifyRecaptcha(token);
+
+                if (!verification.success) {
+                    setError("Falha na verificação de segurança. Tente novamente.");
+                    setLoading(false);
+                    return;
+                }
+            }
+
             await signIn(email, password);
         } catch (err: unknown) {
             console.error(err);

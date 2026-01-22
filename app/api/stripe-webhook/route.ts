@@ -35,11 +35,14 @@ export async function POST(request: NextRequest) {
             try {
                 // 1. Check if user exists in Firebase
                 let userRecord;
+                let isNewUser = false;
+
                 try {
                     userRecord = await adminAuth().getUserByEmail(email);
                     console.log(`User already exists: ${email}`);
                 } catch (error) {
                     // User does not exist, create new user
+                    isNewUser = true;
                     const password = generateRandomPassword();
 
                     userRecord = await adminAuth().createUser({
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
 
                     // 2. Send Welcome Email with Credentials
                     await resend.emails.send({
-                        from: 'Tudo Em Dia <nao-responda@tudoemdia.app>', // Update with your verified domain
+                        from: 'Tudo Em Dia <nao-responda@tudoemdia.app>',
                         to: email,
                         subject: 'Bem-vindo ao Tudo Em Dia! Seu acesso chegou.',
                         html: `
@@ -76,8 +79,16 @@ export async function POST(request: NextRequest) {
                     console.log(`Welcome email sent to: ${email}`);
                 }
 
-                // Optional: Store subscription info in Firestore (e.g., status: 'active', stripeCustomerId: session.customer)
-                // await adminFirestore().collection('users').doc(userRecord.uid).set({ ... }, { merge: true });
+                // 3. Update User Subscription Status (For both new and existing users)
+                const { adminFirestore } = await import("@/lib/firebase-admin");
+                await adminFirestore().collection('users').doc(userRecord.uid).set({
+                    subscriptionStatus: 'active',
+                    stripeCustomerId: session.customer as string,
+                    updatedAt: new Date(),
+                    ...(isNewUser && { createdAt: new Date(), isFirstAccess: true })
+                }, { merge: true });
+
+                console.log(`Updated subscription for user: ${userRecord.uid}`);
 
             } catch (error) {
                 console.error("Error processing webhook:", error);

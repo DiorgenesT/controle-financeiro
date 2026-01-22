@@ -195,10 +195,11 @@ export default function CartoesPage() {
     };
 
     const handleDelete = async (id: string) => {
+        if (!user?.uid) return;
         if (!confirm("Tem certeza que deseja excluir este cartão?")) return;
 
         try {
-            await deleteCreditCard(id);
+            await deleteCreditCard(id, user.uid);
             toast.success("Cartão removido!");
             fetchCards();
         } catch (error) {
