@@ -379,7 +379,7 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
+                                                        className="md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
                                                     >
                                                         <MoreHorizontal className="w-4 h-4" />
                                                     </Button>
@@ -465,7 +465,7 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
+                                                        className="md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
                                                     >
                                                         <MoreHorizontal className="w-4 h-4" />
                                                     </Button>

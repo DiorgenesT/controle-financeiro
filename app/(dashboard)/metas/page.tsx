@@ -109,6 +109,7 @@ export default function MetasPage() {
         icon: "target",
         linkedAccountId: "none"
     });
+    const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
 
     const fetchGoals = useCallback(async () => {
         if (!user?.uid) return;
@@ -140,6 +141,19 @@ export default function MetasPage() {
         return item?.icon || Target;
     };
 
+    const handleEditClick = (goal: Goal) => {
+        setNewMeta({
+            title: goal.title,
+            description: goal.description || "",
+            targetAmount: goal.targetAmount.toString(),
+            deadline: goal.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : "",
+            icon: goal.icon || "target",
+            linkedAccountId: goal.linkedAccountId || "none"
+        });
+        setEditingGoalId(goal.id);
+        setIsDialogOpen(true);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user?.uid) return;
@@ -149,22 +163,31 @@ export default function MetasPage() {
             const goalData: any = {
                 title: newMeta.title,
                 targetAmount: parseFloat(newMeta.targetAmount),
-                currentAmount: 0,
                 deadline: new Date(newMeta.deadline),
                 icon: newMeta.icon,
             };
 
             if (newMeta.linkedAccountId && newMeta.linkedAccountId !== "none") {
                 goalData.linkedAccountId = newMeta.linkedAccountId;
+            } else {
+                goalData.linkedAccountId = null;
             }
 
             if (newMeta.description && newMeta.description.trim()) {
                 goalData.description = newMeta.description.trim();
+            } else {
+                goalData.description = "";
             }
 
-            await addGoal(user.uid, goalData);
+            if (editingGoalId) {
+                await updateGoal(editingGoalId, goalData);
+                toast.success("Meta atualizada com sucesso!");
+            } else {
+                goalData.currentAmount = 0;
+                await addGoal(user.uid, goalData);
+                toast.success("Meta criada com sucesso!");
+            }
 
-            toast.success("Meta criada com sucesso!");
             setIsDialogOpen(false);
             setNewMeta({
                 title: "",
@@ -174,10 +197,11 @@ export default function MetasPage() {
                 icon: "target",
                 linkedAccountId: "none"
             });
+            setEditingGoalId(null);
             fetchGoals();
         } catch (error) {
             console.error(error);
-            toast.error("Erro ao criar meta");
+            toast.error("Erro ao salvar meta");
         } finally {
             setSaving(false);
         }
@@ -225,54 +249,37 @@ export default function MetasPage() {
             return;
         }
 
+        if (addValueDialog.sourceAccountId === "none") {
+            toast.error("Selecione uma conta de origem");
+            return;
+        }
+
         setSaving(true);
         try {
-            // Se tiver conta de origem selecionada e for diferente da conta vinculada
-            if (addValueDialog.sourceAccountId !== "none" &&
-                addValueDialog.sourceAccountId !== goal.linkedAccountId) {
+            const sourceAccount = accounts.find(a => a.id === addValueDialog.sourceAccountId);
+            const targetAccount = accounts.find(a => a.id === goal.linkedAccountId);
 
-                const sourceAccount = accounts.find(a => a.id === addValueDialog.sourceAccountId);
-                const targetAccount = accounts.find(a => a.id === goal.linkedAccountId);
+            if (sourceAccount) {
+                // 1. Saída da conta de origem
+                await addTransaction(user.uid, {
+                    type: "despesa",
+                    amount: value,
+                    category: "Transferência", // Idealmente buscar ID da categoria
+                    description: `Transferência para meta: ${goal.title}`,
+                    date: new Date(),
+                    paymentMethod: "debit",
+                    accountId: sourceAccount.id,
+                    isRecurring: false
+                });
+                await updateAccountBalance(sourceAccount.id, value, "subtract");
 
-                if (sourceAccount) {
-                    // 1. Saída da conta de origem
-                    await addTransaction(user.uid, {
-                        type: "despesa",
-                        amount: value,
-                        category: "Transferência", // Idealmente buscar ID da categoria
-                        description: `Transferência para meta: ${goal.title}`,
-                        date: new Date(),
-                        paymentMethod: "debit",
-                        accountId: sourceAccount.id,
-                        isRecurring: false
-                    });
-                    await updateAccountBalance(sourceAccount.id, value, "subtract");
-
-                    // 2. Entrada na conta vinculada (se existir)
-                    if (targetAccount) {
-                        await addTransaction(user.uid, {
-                            type: "receita",
-                            amount: value,
-                            category: "Transferência",
-                            description: `Recebido de: ${sourceAccount.name} (Meta)`,
-                            date: new Date(),
-                            paymentMethod: "debit",
-                            accountId: targetAccount.id,
-                            isRecurring: false
-                        });
-                        await updateAccountBalance(targetAccount.id, value, "add");
-                    }
-                }
-            } else if (goal.linkedAccountId) {
-                // Se não selecionou origem, mas tem conta vinculada, apenas atualiza saldo da vinculada (depósito direto)
-                // Assumindo que o dinheiro "apareceu" lá (ex: depósito)
-                const targetAccount = accounts.find(a => a.id === goal.linkedAccountId);
+                // 2. Entrada na conta vinculada (se existir)
                 if (targetAccount) {
                     await addTransaction(user.uid, {
                         type: "receita",
                         amount: value,
-                        category: "Investimentos",
-                        description: `Depósito para meta: ${goal.title}`,
+                        category: "Transferência",
+                        description: `Recebido de: ${sourceAccount.name} (Meta)`,
                         date: new Date(),
                         paymentMethod: "debit",
                         accountId: targetAccount.id,
@@ -320,7 +327,20 @@ export default function MetasPage() {
                         </p>
                     </div>
 
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                        setIsDialogOpen(open);
+                        if (!open) {
+                            setEditingGoalId(null);
+                            setNewMeta({
+                                title: "",
+                                description: "",
+                                targetAmount: "",
+                                deadline: "",
+                                icon: "target",
+                                linkedAccountId: "none"
+                            });
+                        }
+                    }}>
                         <DialogTrigger asChild>
                             <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25">
                                 <Plus className="w-4 h-4 mr-2" />
@@ -329,7 +349,7 @@ export default function MetasPage() {
                         </DialogTrigger>
                         <DialogContent className="bg-background border-border">
                             <DialogHeader>
-                                <DialogTitle className="text-foreground">Criar Nova Meta</DialogTitle>
+                                <DialogTitle className="text-foreground">{editingGoalId ? "Editar Meta" : "Criar Nova Meta"}</DialogTitle>
                                 <DialogDescription className="text-muted-foreground">
                                     Defina um objetivo financeiro para alcançar
                                 </DialogDescription>
@@ -405,7 +425,28 @@ export default function MetasPage() {
                                     <Label className="text-muted-foreground">Conta Vinculada (Opcional)</Label>
                                     <Select
                                         value={newMeta.linkedAccountId}
-                                        onValueChange={(value) => setNewMeta({ ...newMeta, linkedAccountId: value })}
+                                        onValueChange={(value) => {
+                                            if (value === "none") {
+                                                setNewMeta({ ...newMeta, linkedAccountId: value });
+                                                return;
+                                            }
+                                            const selectedAccount = accounts.find(a => a.id === value);
+                                            if (selectedAccount) {
+                                                if (selectedAccount.type === 'emergency') {
+                                                    toast.warning("Contas de Reserva de Emergência não podem ser vinculadas a metas.", {
+                                                        description: "Por favor, crie uma nova conta específica para esta meta."
+                                                    });
+                                                    return;
+                                                }
+                                                if (selectedAccount.isDefault) {
+                                                    toast.warning("A conta padrão não pode ser vinculada a metas.", {
+                                                        description: "Por favor, crie uma nova conta específica para esta meta."
+                                                    });
+                                                    return;
+                                                }
+                                                setNewMeta({ ...newMeta, linkedAccountId: value });
+                                            }
+                                        }}
                                     >
                                         <SelectTrigger className="bg-muted/50 border-input text-foreground">
                                             <SelectValue placeholder="Selecione uma conta" />
@@ -429,7 +470,7 @@ export default function MetasPage() {
                                     </Button>
                                     <Button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white">
                                         {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                        Criar Meta
+                                        {editingGoalId ? "Salvar Alterações" : "Criar Meta"}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -467,12 +508,13 @@ export default function MetasPage() {
                                             <SelectValue placeholder="Selecione a conta de origem" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-background border-border">
-                                            <SelectItem value="none" className="text-muted-foreground">Nenhuma (Apenas registrar)</SelectItem>
-                                            {accounts.map((account) => (
-                                                <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
-                                                    {account.name} ({formatCurrency(account.balance)})
-                                                </SelectItem>
-                                            ))}
+                                            {accounts
+                                                .filter(account => account.id !== addValueDialog.goal?.linkedAccountId)
+                                                .map((account) => (
+                                                    <SelectItem key={account.id} value={account.id} className="text-muted-foreground focus:bg-accent focus:text-foreground">
+                                                        {account.name} ({formatCurrency(account.balance)})
+                                                    </SelectItem>
+                                                ))}
                                         </SelectContent>
                                     </Select>
                                     <p className="text-xs text-muted-foreground">
@@ -593,7 +635,7 @@ export default function MetasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/70 hover:text-white hover:bg-white/20 h-8 w-8"
+                                                            className="md:opacity-0 md:group-hover:opacity-100 transition-opacity text-white/70 hover:text-white hover:bg-white/20 h-8 w-8"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
@@ -606,7 +648,10 @@ export default function MetasPage() {
                                                             <TrendingUp className="w-4 h-4 mr-2" />
                                                             Adicionar Valor
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-foreground hover:text-foreground focus:text-foreground focus:bg-accent">
+                                                        <DropdownMenuItem
+                                                            className="text-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
+                                                            onClick={() => handleEditClick(meta)}
+                                                        >
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Editar
                                                         </DropdownMenuItem>

@@ -208,7 +208,7 @@ export default function DespesasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                                            className="md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>

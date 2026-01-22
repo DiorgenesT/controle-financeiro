@@ -32,6 +32,7 @@ import {
     Star,
     Building,
     ArrowRightLeft,
+    Target,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -43,10 +44,11 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Account } from "@/lib/accounts";
 import { useAccounts } from "@/hooks/useAccounts";
-import { addTransaction } from "@/lib/firestore";
+import { addTransaction, getGoals } from "@/lib/firestore";
 import { BANKS, getBankByCode, ACCOUNT_TYPES, getAccountTypeLabel } from "@/lib/banks";
 import { getIconById } from "@/lib/icons";
 import { toast } from "sonner";
+import { Goal } from "@/types";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -58,6 +60,7 @@ const formatCurrency = (value: number) => {
 export default function ContasPage() {
     const { user } = useAuth();
     const { accounts, loading, createAccount, updateAccount, deleteAccount } = useAccounts();
+    const [goals, setGoals] = useState<Goal[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
     const [saving, setSaving] = useState(false);
@@ -77,6 +80,12 @@ export default function ContasPage() {
         date: new Date().toISOString().split("T")[0],
         description: "Transferência entre contas"
     });
+
+    useEffect(() => {
+        if (user?.uid) {
+            getGoals(user.uid).then(setGoals).catch(console.error);
+        }
+    }, [user?.uid]);
 
     const totalBalance = accounts.reduce((acc, a) => acc + a.balance, 0);
 
@@ -600,6 +609,12 @@ export default function ContasPage() {
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-medium text-white truncate">{account.name}</p>
                                                     <p className="text-xs text-white/80">{getAccountTypeLabel(account.type)}</p>
+                                                    {goals.find(g => g.linkedAccountId === account.id) && (
+                                                        <p className="text-xs text-emerald-200 mt-1 flex items-center gap-1">
+                                                            <Target className="w-3 h-3" />
+                                                            Meta: {goals.find(g => g.linkedAccountId === account.id)?.title}
+                                                        </p>
+                                                    )}
                                                     <p className="text-lg font-bold mt-2 text-white">
                                                         {formatCurrency(account.balance)}
                                                     </p>
@@ -609,7 +624,7 @@ export default function ContasPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="opacity-0 group-hover:opacity-100 text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
+                                                            className="md:opacity-0 md:group-hover:opacity-100 text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
                                                         >
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </Button>
