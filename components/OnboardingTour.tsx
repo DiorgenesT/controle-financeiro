@@ -31,6 +31,15 @@ export function OnboardingTour() {
                     },
                 },
                 {
+                    element: "#dashboard-market-ticker",
+                    popover: {
+                        title: "Mercado Global 🌎",
+                        description: "Fique por dentro das cotações do Dólar, Euro e Criptomoedas em tempo real. Informação essencial para suas decisões financeiras.",
+                        side: "bottom",
+                        align: "start",
+                    },
+                },
+                {
                     element: "#dashboard-balance-card",
                     popover: {
                         title: "Seu Patrimônio em Tempo Real",

@@ -110,7 +110,9 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Market Ticker */}
-                <MarketTicker />
+                <div id="dashboard-market-ticker">
+                    <MarketTicker />
+                </div>
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
