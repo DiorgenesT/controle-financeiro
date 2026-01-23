@@ -44,6 +44,7 @@ const formatDate = (date: Date) => {
 };
 
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { MarketTicker } from "@/components/MarketTicker";
 
 export default function DashboardPage() {
     const { user } = useAuth();
@@ -107,6 +108,9 @@ export default function DashboardPage() {
                         Nova Transação
                     </Button>
                 </div>
+
+                {/* Market Ticker */}
+                <MarketTicker />
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
