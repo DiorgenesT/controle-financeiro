@@ -339,3 +339,8 @@ input[type="number"] {
 .morph-transition {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Ocultar reCAPTCHA apenas quando a classe estiver presente no body */
+.hide-recaptcha .grecaptcha-badge {
+  visibility: hidden !important;
+}
