@@ -4,7 +4,17 @@ import * as admin from "firebase-admin";
 // The credentials are loaded from environment variables
 const getFirebaseAdmin = () => {
     if (admin.apps.length === 0) {
-        const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
+        let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+
+        if (privateKey) {
+            // Handle Vercel/Env newline escaping issues
+            privateKey = privateKey.replace(/\\n/g, '\n');
+
+            // Ensure headers are correct if they were stripped or malformed
+            if (!privateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+                privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`;
+            }
+        }
 
         admin.initializeApp({
             credential: admin.credential.cert({
