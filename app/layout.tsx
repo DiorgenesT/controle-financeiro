@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DisableInputScroll } from "@/components/DisableInputScroll";
 import "./globals.css";
+import "./driver-theme.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

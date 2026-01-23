@@ -48,6 +48,7 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
             subscriptionEnd,
             stripeCustomerId: data.stripeCustomerId,
             settings: data.settings || { budgetAlerts: true, goalReminders: true },
+            tutorialCompleted: data.tutorialCompleted ?? false,
         };
     }
 
@@ -60,6 +61,7 @@ async function getOrCreateUserData(fbUser: FirebaseUser): Promise<User> {
         createdAt: new Date(),
         subscriptionStatus: "active",
         settings: { budgetAlerts: true, goalReminders: true },
+        tutorialCompleted: false,
     };
 
     await setDoc(docRef, {

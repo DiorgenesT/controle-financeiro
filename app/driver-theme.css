@@ -1,0 +1,123 @@
+/* Custom Driver.js Theme */
+.driver-popover.driverjs-theme {
+    background-color: rgba(20, 20, 25, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 10px 30px -10px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(16, 185, 129, 0.1);
+    /* Emerald glow */
+    backdrop-filter: blur(12px);
+    padding: 0;
+    font-family: inherit;
+    max-width: 350px;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    padding: 20px 20px 10px 20px;
+    color: #ffffff;
+    /* Solid white to keep emojis colored */
+    border-bottom: none;
+}
+
+.driver-popover.driverjs-theme .driver-popover-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #94a3b8;
+    padding: 0 20px 40px 20px;
+    /* Increased bottom padding to 40px */
+    margin: 0;
+}
+
+.driver-popover.driverjs-theme .driver-popover-footer {
+    margin: 0;
+    padding: 15px 20px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.driver-popover.driverjs-theme button {
+    flex: 1;
+    text-align: center;
+    background-color: transparent;
+    color: #94a3b8;
+    border: 1px solid transparent;
+    text-shadow: none;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.driver-popover.driverjs-theme button:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.driver-popover.driverjs-theme button.driver-popover-next-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    text-shadow: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.driver-popover.driverjs-theme button.driver-popover-next-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.driver-popover.driverjs-theme button.driver-popover-prev-btn {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.driver-popover.driverjs-theme .driver-popover-progress-text {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Highlight overlay */
+.driver-overlay path {
+    fill: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Close button - Improved Visibility */
+.driver-popover.driverjs-theme .driver-popover-close-btn {
+    color: rgba(255, 255, 255, 0.8);
+    /* More visible white */
+    top: 15px;
+    right: 15px;
+    transition: all 0.2s;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    border: none;
+    z-index: 10;
+}
+
+.driver-popover.driverjs-theme .driver-popover-close-btn:hover {
+    color: #ffffff;
+    background-color: rgba(239, 68, 68, 0.8);
+    /* Red background on hover */
+    transform: scale(1.1);
+}

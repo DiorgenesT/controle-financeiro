@@ -43,6 +43,8 @@ const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR");
 };
 
+import { OnboardingTour } from "@/components/OnboardingTour";
+
 export default function DashboardPage() {
     const { user } = useAuth();
     const { transactions, totalReceitas, totalDespesas, loading } = useTransactions();
@@ -80,6 +82,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-background">
+            <OnboardingTour />
             <Header title="Dashboard" />
 
             <TransactionModal open={showModal} onOpenChange={setShowModal} />
@@ -96,6 +99,7 @@ export default function DashboardPage() {
                         </p>
                     </div>
                     <Button
+                        id="dashboard-new-transaction-btn"
                         onClick={() => setShowModal(true)}
                         className="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
                     >
@@ -106,7 +110,7 @@ export default function DashboardPage() {
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none overflow-hidden relative text-white shadow-lg shadow-emerald-500/20">
+                    <Card id="dashboard-balance-card" className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none overflow-hidden relative text-white shadow-lg shadow-emerald-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 relative">
                             <div className="space-y-1">
                                 <CardTitle className="text-sm font-medium text-white/80">
@@ -193,7 +197,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none overflow-hidden relative text-white shadow-lg shadow-green-500/20">
+                    <Card id="dashboard-receitas-card" className="bg-gradient-to-br from-green-500 to-green-700 border-none overflow-hidden relative text-white shadow-lg shadow-green-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
                             <CardTitle className="text-sm font-medium text-white/80">
                                 Receitas
@@ -219,7 +223,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-red-500 to-red-700 border-none overflow-hidden relative text-white shadow-lg shadow-red-500/20">
+                    <Card id="dashboard-despesas-card" className="bg-gradient-to-br from-red-500 to-red-700 border-none overflow-hidden relative text-white shadow-lg shadow-red-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
                             <CardTitle className="text-sm font-medium text-white/80">
                                 Despesas
@@ -245,7 +249,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <div className="h-full">
+                    <div id="dashboard-insights-carousel" className="h-full">
                         <InsightsCarousel
                             totalReceitas={totalReceitas}
                             totalDespesas={totalDespesas}
@@ -342,12 +346,12 @@ export default function DashboardPage() {
                     </Card>
 
                     {/* 2. Insights Inteligentes (IA) */}
-                    <div className="h-full">
+                    <div id="dashboard-ai-card" className="h-full">
                         <SmartInsightsCard />
                     </div>
 
                     {/* 3. Previsão */}
-                    <div className="h-full">
+                    <div id="dashboard-forecast-card" className="h-full">
                         <ForecastCard />
                     </div>
                 </div>

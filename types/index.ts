@@ -15,6 +15,7 @@ export interface User {
     subscriptionEnd?: Date;
     stripeCustomerId?: string;
     settings?: UserSettings;
+    tutorialCompleted?: boolean;
 }
 
 // ============ CONTAS BANCÁRIAS ============
