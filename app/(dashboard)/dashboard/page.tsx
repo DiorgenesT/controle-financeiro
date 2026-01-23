@@ -53,14 +53,6 @@ export default function DashboardPage() {
     const { goals, loading: loadingGoals } = useGoals();
     const [showModal, setShowModal] = useState(false);
 
-    // Ocultar reCAPTCHA badge apenas no Dashboard
-    useEffect(() => {
-        document.body.classList.add('hide-recaptcha');
-        return () => {
-            document.body.classList.remove('hide-recaptcha');
-        };
-    }, []);
-
     const saldoContas = accounts.reduce((acc, a) => acc + a.balance, 0);
 
     // Identificar contas vinculadas a metas

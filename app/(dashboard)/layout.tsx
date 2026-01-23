@@ -22,6 +22,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         }
     }, [user, loading, isFirstAccess, isSubscriptionValid, router]);
 
+    // Ocultar reCAPTCHA badge em todas as páginas do dashboard
+    useEffect(() => {
+        document.body.classList.add('hide-recaptcha');
+        return () => {
+            document.body.classList.remove('hide-recaptcha');
+        };
+    }, []);
+
     // Loading state
     if (loading) {
         return (
