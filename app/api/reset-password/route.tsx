@@ -6,6 +6,11 @@ import { ResetPasswordEmail } from "@/components/emails/ResetPasswordEmail";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
+    if (!process.env.RESEND_API_KEY) {
+        console.error("[ResetPassword] Missing RESEND_API_KEY");
+        return NextResponse.json({ error: "Configuration error" }, { status: 500 });
+    }
+
     try {
         const body = await request.json();
         const { email } = body;
@@ -23,7 +28,6 @@ export async function POST(request: NextRequest) {
             await adminAuth().getUserByEmail(email);
             userExists = true;
         } catch {
-            // Usuário não encontrado
             userExists = false;
         }
 
@@ -36,7 +40,6 @@ export async function POST(request: NextRequest) {
         }
 
         // Gerar link de reset de senha via Firebase
-        console.log("[ResetPassword] Generating reset link for:", email);
         const actionCodeSettings = {
             url: process.env.NEXT_PUBLIC_APP_URL
                 ? `${process.env.NEXT_PUBLIC_APP_URL}/login`
@@ -45,26 +48,27 @@ export async function POST(request: NextRequest) {
         };
 
         const resetLink = await adminAuth().generatePasswordResetLink(email, actionCodeSettings);
-        console.log("[ResetPassword] Reset link generated successfully");
 
         // Enviar email via Resend
-        console.log("[ResetPassword] Sending email via Resend...");
-        const { data, error } = await resend.emails.send({
-            from: "Tudo Em Dia <nao-responda@tatudoemdia.com.br>",
-            to: [email],
-            subject: "🔐 Recuperação de Senha - Tudo Em Dia",
-            react: <ResetPasswordEmail resetUrl={resetLink} email={email} />,
-        });
+        try {
+            const { data, error } = await resend.emails.send({
+                from: "Tudo Em Dia <nao-responda@tatudoemdia.com.br>",
+                to: [email],
+                subject: "🔐 Recuperação de Senha - Tudo Em Dia",
+                react: <ResetPasswordEmail resetUrl={resetLink} email={email} />,
+            });
 
-        if (error) {
-            console.error("[ResetPassword] Resend error:", error);
-            return NextResponse.json(
-                { error: "Falha ao enviar email de recuperação", details: error },
-                { status: 500 }
-            );
+            if (error) {
+                console.error("[ResetPassword] Resend API Error:", error);
+                return NextResponse.json(
+                    { error: "Falha ao enviar email de recuperação", details: error },
+                    { status: 500 }
+                );
+            }
+        } catch (resendError) {
+            console.error("[ResetPassword] Resend SDK Exception:", resendError);
+            throw resendError;
         }
-
-        console.log("[ResetPassword] Email sent successfully:", data?.id);
 
         return NextResponse.json(
             { message: "Se o email estiver cadastrado, você receberá um link de recuperação." },
