@@ -23,13 +23,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
+    console.log(`[Webhook] Received event: ${event.type}`);
+
     if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
+        console.log(`[Webhook] Processing session: ${session.id}`);
 
         const email = session.customer_details?.email;
         const name = session.customer_details?.name || "Cliente";
         const phone = session.customer_details?.phone;
-        const taxId = session.customer_details?.tax_ids?.[0]?.value; // CPF/CNPJ if collected
+
+        console.log(`[Webhook] Customer: ${email}, Name: ${name}`);
 
         if (email) {
             try {
@@ -39,9 +43,10 @@ export async function POST(request: NextRequest) {
 
                 try {
                     userRecord = await adminAuth().getUserByEmail(email);
-                    console.log(`User already exists: ${email}`);
+                    console.log(`[Webhook] User already exists: ${userRecord.uid}`);
                 } catch (error) {
                     // User does not exist, create new user
+                    console.log(`[Webhook] User not found, creating new user for ${email}...`);
                     isNewUser = true;
                     const password = generateRandomPassword();
 
@@ -54,10 +59,11 @@ export async function POST(request: NextRequest) {
                         disabled: false,
                     });
 
-                    console.log(`Created new user: ${userRecord.uid}`);
+                    console.log(`[Webhook] Created new user: ${userRecord.uid}`);
 
                     // 2. Send Welcome Email with Credentials
-                    await resend.emails.send({
+                    console.log(`[Webhook] Sending welcome email to ${email}...`);
+                    const emailResult = await resend.emails.send({
                         from: 'Tudo Em Dia <nao-responda@tudoemdia.app>',
                         to: email,
                         subject: 'Bem-vindo ao Tudo Em Dia! Seu acesso chegou.',
@@ -76,10 +82,11 @@ export async function POST(request: NextRequest) {
                             </div>
                         `,
                     });
-                    console.log(`Welcome email sent to: ${email}`);
+                    console.log(`[Webhook] Email sent result:`, emailResult);
                 }
 
-                // 3. Update User Subscription Status (For both new and existing users)
+                // 3. Update User Subscription Status
+                console.log(`[Webhook] Updating Firestore for user: ${userRecord.uid}`);
                 const { adminFirestore } = await import("@/lib/firebase-admin");
                 await adminFirestore().collection('users').doc(userRecord.uid).set({
                     subscriptionStatus: 'active',
@@ -88,13 +95,18 @@ export async function POST(request: NextRequest) {
                     ...(isNewUser && { createdAt: new Date(), isFirstAccess: true })
                 }, { merge: true });
 
-                console.log(`Updated subscription for user: ${userRecord.uid}`);
+                console.log(`[Webhook] Successfully updated subscription for user: ${userRecord.uid}`);
 
-            } catch (error) {
-                console.error("Error processing webhook:", error);
-                return NextResponse.json({ error: "Error processing webhook" }, { status: 500 });
+            } catch (error: any) {
+                console.error("[Webhook] CRITICAL ERROR processing webhook:", error);
+                console.error("[Webhook] Error stack:", error.stack);
+                return NextResponse.json({ error: "Error processing webhook", details: error.message }, { status: 500 });
             }
+        } else {
+            console.log("[Webhook] No email found in session customer_details");
         }
+    } else {
+        console.log(`[Webhook] Ignoring event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
