@@ -6,12 +6,9 @@ import Stripe from "stripe";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
-export async function GET() {
-    return new Response("Stripe Webhook Endpoint is active. Use POST to send events.", { status: 200 });
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
     const body = await request.text();
     const signature = request.headers.get("stripe-signature") as string;
 
