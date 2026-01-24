@@ -7,6 +7,7 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     onAuthStateChanged,
+    confirmPasswordReset,
     User as FirebaseUser,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
@@ -143,4 +144,14 @@ export async function checkFirstAccess(uid: string): Promise<boolean> {
 // Observer de autenticação
 export function onAuthChange(callback: (user: FirebaseUser | null) => void) {
     return onAuthStateChanged(auth, callback);
+}
+
+// Confirmar reset de senha
+export async function confirmResetPassword(oobCode: string, newPassword: string): Promise<void> {
+    try {
+        await confirmPasswordReset(auth, oobCode, newPassword);
+    } catch (error) {
+        console.error("Erro ao confirmar reset de senha:", error);
+        throw error;
+    }
 }

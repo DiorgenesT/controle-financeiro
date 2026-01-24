@@ -47,7 +47,14 @@ export async function POST(request: NextRequest) {
             handleCodeInApp: false,
         };
 
-        const resetLink = await adminAuth().generatePasswordResetLink(email, actionCodeSettings);
+        const firebaseLink = await adminAuth().generatePasswordResetLink(email, actionCodeSettings);
+
+        // Extrair o oobCode do link do Firebase para criar nosso link personalizado
+        const urlObj = new URL(firebaseLink);
+        const oobCode = urlObj.searchParams.get("oobCode");
+
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tatudoemdia.com.br";
+        const resetLink = `${baseUrl}/nova-senha?oobCode=${oobCode}`;
 
         // Enviar email via Resend
         try {
