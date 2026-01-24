@@ -69,7 +69,6 @@ export async function POST(request: Request) {
                         emailVerified: true,
                         password: password,
                         displayName: name,
-                        phoneNumber: phone || undefined,
                         disabled: false,
                     });
 
@@ -78,7 +77,7 @@ export async function POST(request: Request) {
                     // 2. Send Welcome Email with Credentials
                     console.log(`[Webhook] Sending welcome email to ${email}...`);
                     const emailResult = await resend.emails.send({
-                        from: 'Tudo Em Dia <nao-responda@tudoemdia.app>',
+                        from: 'Tudo Em Dia <nao-responda@tatudoemdia.com.br>',
                         to: email,
                         subject: 'Bem-vindo ao Tudo Em Dia! Seu acesso chegou.',
                         html: `
@@ -92,7 +91,7 @@ export async function POST(request: Request) {
                                     <p style="margin: 10px 0 0;"><strong>Senha Temporária:</strong> ${password}</p>
                                 </div>
                                 <p>Recomendamos que você altere sua senha após o primeiro login.</p>
-                                <a href="https://tudoemdia.app/login" style="display: inline-block; background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Acessar Agora</a>
+                                <a href="https://tatudoemdia.com.br/login" style="display: inline-block; background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Acessar Agora</a>
                             </div>
                         `,
                     });
