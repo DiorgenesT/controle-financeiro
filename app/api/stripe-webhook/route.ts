@@ -5,6 +5,11 @@ import { resend } from "@/lib/resend";
 import Stripe from "stripe";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET() {
+    return new Response("Stripe Webhook Endpoint is active. Use POST to send events.", { status: 200 });
+}
 
 export async function POST(request: NextRequest) {
     const body = await request.text();
