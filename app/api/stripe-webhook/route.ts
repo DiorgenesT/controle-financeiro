@@ -7,6 +7,18 @@ import Stripe from "stripe";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+    return new Response(null, {
+        status: 204,
+        headers: {
+            'Allow': 'POST, OPTIONS',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, stripe-signature',
+        },
+    });
+}
 
 export async function POST(request: Request) {
     const body = await request.text();
