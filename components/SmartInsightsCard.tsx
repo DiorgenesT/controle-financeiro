@@ -96,12 +96,12 @@ export function SmartInsightsCard() {
             {/* Dynamic Glow based on type - subtle */}
             <div className={`absolute -right-10 -top-10 w-32 h-32 bg-white/10 blur-3xl rounded-full pointer-events-none`} />
 
-            <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4 relative z-10">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-3 md:pt-6 md:px-6 relative z-10">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-white/10 backdrop-blur-md shadow-sm border border-white/10">
-                        <Sparkles className="w-3.5 h-3.5 text-white" />
+                        <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
                     </div>
-                    <CardTitle className="text-white text-base font-bold tracking-wide">
+                    <CardTitle className="text-white text-sm md:text-base font-bold tracking-wide">
                         IA Financeira
                     </CardTitle>
                 </div>
@@ -115,20 +115,20 @@ export function SmartInsightsCard() {
                 </div>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col justify-center p-4 pt-0 relative z-10">
+            <CardContent className="flex-1 flex flex-col justify-center p-3 pt-0 md:p-6 md:pt-0 relative z-10">
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300" key={currentIndex}>
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border mb-3 backdrop-blur-md shadow-sm ${getGradient(currentInsight.type)}`}>
+                    <div className={`inline-flex items-center gap-2 px-2.5 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-semibold border mb-2 md:mb-3 backdrop-blur-md shadow-sm ${getGradient(currentInsight.type)}`}>
                         {getIcon(currentInsight.icon)}
                         {currentInsight.title}
                     </div>
 
-                    <p className="text-sm text-white/90 leading-relaxed font-medium drop-shadow-sm">
+                    <p className="text-xs md:text-sm text-white/90 leading-relaxed font-medium drop-shadow-sm">
                         {currentInsight.description}
                     </p>
                 </div>
 
                 {/* Indicators */}
-                <div className="flex justify-center gap-1.5 mt-4 absolute bottom-4 left-0 right-0">
+                <div className="flex justify-center gap-1.5 mt-3 md:mt-4 absolute bottom-3 md:bottom-4 left-0 right-0">
                     {insights.map((_, idx) => (
                         <div
                             key={idx}

@@ -67,26 +67,68 @@ export function MarketTicker() {
     ];
 
     return (
-        <div className="w-full mb-8">
-            <div className="flex items-center justify-between mb-4 px-1">
+        <div className="w-full mb-4 md:mb-8">
+            {/* Header - Adaptive */}
+            <div className="flex items-center justify-between mb-2 md:mb-4 px-1">
                 <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
-                        <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                    <div className="p-1 md:p-1.5 rounded-md md:rounded-lg bg-white/5 border border-white/10">
+                        <Globe className="w-3 h-3 md:w-3.5 md:h-3.5 text-muted-foreground" />
                     </div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Mercado Global</h3>
+                    <h3 className="text-xs md:text-sm font-medium text-muted-foreground">Mercado Global</h3>
                 </div>
-                <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex items-center gap-1.5 md:gap-2 px-2 py-0.5 md:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                     <span className="relative flex h-1.5 w-1.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                     </span>
-                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                    <p className="text-[9px] md:text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
                         Ao vivo
                     </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Mobile View: 2x2 Grid (No Scroll) */}
+            <div className="grid md:hidden grid-cols-2 gap-2">
+                {items.map((item) => {
+                    const isPositive = parseFloat(item.data.pctChange) >= 0;
+                    const VariationIcon = isPositive ? TrendingUp : TrendingDown;
+                    const variationColor = isPositive ? "text-emerald-400" : "text-red-400";
+
+                    return (
+                        <div
+                            key={item.key}
+                            className={cn(
+                                "relative group rounded-xl border border-white/5 bg-card/30 backdrop-blur-xl transition-all duration-300",
+                                item.border
+                            )}
+                        >
+                            <div className="p-2 flex flex-col gap-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5">
+                                        <div className={cn("w-4 h-4 rounded flex items-center justify-center", item.bg)}>
+                                            <item.icon className={cn("w-2.5 h-2.5", item.text)} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                            {item.symbol}
+                                        </span>
+                                    </div>
+                                    <div className={cn("flex items-center gap-0.5 text-[9px] font-bold", variationColor)}>
+                                        <VariationIcon className="w-2 h-2" />
+                                        {item.data.pctChange}%
+                                    </div>
+                                </div>
+
+                                <p className="text-xs font-bold text-foreground tracking-tight">
+                                    R$ {parseFloat(item.data.bid).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Desktop View: Grid & Full Size (Original) */}
+            <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-3">
                 {items.map((item) => {
                     const isPositive = parseFloat(item.data.pctChange) >= 0;
                     const VariationIcon = isPositive ? TrendingUp : TrendingDown;

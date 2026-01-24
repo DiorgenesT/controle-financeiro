@@ -88,35 +88,35 @@ export function ForecastCard() {
 
     return (
         <Card className="bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+            <CardHeader className="pb-2 pt-3 px-3 md:pt-6 md:px-6">
+                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     Previsão Próximo Mês
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
+            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+                <div className="space-y-3 md:space-y-4">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm">
-                                <TrendingUp className="w-4 h-4 text-white" />
+                            <div className="p-1.5 md:p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm">
+                                <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                             </div>
-                            <span className="text-sm text-muted-foreground">Receitas Fixas</span>
+                            <span className="text-xs md:text-sm text-muted-foreground">Receitas Fixas</span>
                         </div>
-                        <span className="font-bold text-foreground">{formatCurrency(forecast.income)}</span>
+                        <span className="text-sm md:text-base font-bold text-foreground">{formatCurrency(forecast.income)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-sm">
-                                <TrendingDown className="w-4 h-4 text-white" />
+                            <div className="p-1.5 md:p-2 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-sm">
+                                <TrendingDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                             </div>
-                            <span className="text-sm text-muted-foreground">Despesas Previstas</span>
+                            <span className="text-xs md:text-sm text-muted-foreground">Despesas Previstas</span>
                         </div>
-                        <span className="font-bold text-foreground">{formatCurrency(forecast.expenses)}</span>
+                        <span className="text-sm md:text-base font-bold text-foreground">{formatCurrency(forecast.expenses)}</span>
                     </div>
-                    <div className="pt-4 border-t border-border flex justify-between items-center">
-                        <span className="text-sm font-medium text-muted-foreground">Saldo Previsto</span>
-                        <span className={`font-bold ${forecast.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <div className="pt-3 md:pt-4 border-t border-border flex justify-between items-center">
+                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Saldo Previsto</span>
+                        <span className={`text-sm md:text-base font-bold ${forecast.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {formatCurrency(forecast.balance)}
                         </span>
                     </div>
