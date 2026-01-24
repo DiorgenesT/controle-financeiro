@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { changePassword, DEFAULT_PASSWORD } from "@/lib/auth";
+import { changePassword } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { Loader2, Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-re
 export default function AlterarSenhaPage() {
     const router = useRouter();
     const { user, refreshUser, loading: authLoading } = useAuth();
-    const [currentPassword, setCurrentPassword] = useState(DEFAULT_PASSWORD);
+    const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -172,6 +172,7 @@ export default function AlterarSenhaPage() {
                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                     className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
                                     required
+                                    autoComplete="off"
                                 />
                             </div>
                         </div>
