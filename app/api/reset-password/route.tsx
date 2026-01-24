@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Gerar link de reset de senha via Firebase
+        console.log("[ResetPassword] Generating reset link for:", email);
         const actionCodeSettings = {
             url: process.env.NEXT_PUBLIC_APP_URL
                 ? `${process.env.NEXT_PUBLIC_APP_URL}/login`
@@ -44,31 +45,33 @@ export async function POST(request: NextRequest) {
         };
 
         const resetLink = await adminAuth().generatePasswordResetLink(email, actionCodeSettings);
+        console.log("[ResetPassword] Reset link generated successfully");
 
         // Enviar email via Resend
+        console.log("[ResetPassword] Sending email via Resend...");
         const { data, error } = await resend.emails.send({
-            from: "Tudo Em Dia <noreply@tatudoemdia.com.br>",
+            from: "Tudo Em Dia <nao-responda@tatudoemdia.com.br>",
             to: [email],
             subject: "🔐 Recuperação de Senha - Tudo Em Dia",
             react: <ResetPasswordEmail resetUrl={resetLink} email={email} />,
         });
 
         if (error) {
-            console.error("Erro ao enviar email de recuperação:", error);
+            console.error("[ResetPassword] Resend error:", error);
             return NextResponse.json(
-                { error: "Falha ao enviar email de recuperação" },
+                { error: "Falha ao enviar email de recuperação", details: error },
                 { status: 500 }
             );
         }
 
-        console.log("Email de recuperação enviado:", data?.id);
+        console.log("[ResetPassword] Email sent successfully:", data?.id);
 
         return NextResponse.json(
             { message: "Se o email estiver cadastrado, você receberá um link de recuperação." },
             { status: 200 }
         );
     } catch (error: unknown) {
-        console.error("Erro no endpoint de reset password:", error);
+        console.error("[ResetPassword] CRITICAL ERROR:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         return NextResponse.json(
             { error: "Erro interno do servidor", details: errorMessage },
