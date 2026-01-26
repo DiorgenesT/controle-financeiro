@@ -72,9 +72,9 @@ function TickerItem({ account, isLinked }: { account: Account; isLinked: boolean
         <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-default shadow-sm group relative overflow-hidden"
             style={{
-                backgroundColor: isItemHovered ? bankColor : 'var(--secondary)', // Fundo sólido neutro (mais evidente)
-                borderColor: isItemHovered ? 'transparent' : 'var(--border)',
-                color: isItemHovered ? hoverTextColor : bankColor, // Texto na cor do banco (normal) ou contraste (hover)
+                backgroundColor: isItemHovered ? bankColor : 'rgba(255, 255, 255, 0.9)', // Fundo sempre branco (com leve transparência)
+                borderColor: isItemHovered ? 'transparent' : 'rgba(255, 255, 255, 0.2)',
+                color: isItemHovered ? hoverTextColor : bankColor, // Texto na cor do banco
             }}
             onMouseEnter={() => setIsItemHovered(true)}
             onMouseLeave={() => setIsItemHovered(false)}

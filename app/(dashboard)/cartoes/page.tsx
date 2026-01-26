@@ -502,7 +502,7 @@ export default function CartoesPage() {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {cards.map((card) => {
                                     const bank = getBankByCode(card.bankCode);
                                     const Icon = getIconById(bank.icon);
@@ -514,42 +514,74 @@ export default function CartoesPage() {
                                     return (
                                         <div
                                             key={card.id}
-                                            className="rounded-xl overflow-hidden group relative"
+                                            className="rounded-xl overflow-hidden group relative border shadow-sm hover:shadow-md transition-all duration-300"
+                                            style={{
+                                                borderColor: `${card.color}40`
+                                            }}
                                         >
-                                            {/* Cartão visual */}
+                                            {/* Cartão visual Premium */}
                                             <div
-                                                className="p-4 relative overflow-hidden"
+                                                className="aspect-[1.586/1] relative overflow-hidden p-6 flex flex-col justify-between transition-transform duration-300 hover:scale-[1.02]"
                                                 style={{
-                                                    background: `linear-gradient(135deg, ${card.color}, ${card.color}dd)`
+                                                    background: `linear-gradient(135deg, ${card.color}, ${card.color}dd)`,
+                                                    boxShadow: `0 10px 30px -10px ${card.color}80`
                                                 }}
                                             >
-                                                <div className="absolute inset-0 opacity-20">
-                                                    <div className="absolute top-4 right-4 w-24 h-24 rounded-full bg-white/20 blur-xl" />
-                                                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-black/10 blur-xl" />
+                                                {/* Efeitos de Fundo (Noise/Texture simulation) */}
+                                                <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+                                                <div className="absolute -top-[50%] -right-[50%] w-[100%] h-[100%] rounded-full bg-white/10 blur-3xl"></div>
+                                                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/40 to-transparent"></div>
+
+                                                {/* Header do Cartão */}
+                                                <div className="relative flex justify-between items-start z-10">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="bg-white/20 backdrop-blur-md p-1.5 rounded-lg border border-white/10">
+                                                            <Icon className="w-5 h-5 text-white" />
+                                                        </div>
+                                                        <span className="text-white/90 font-medium tracking-wide text-sm">{bank.name}</span>
+                                                    </div>
+
+                                                    {/* Contactless Icon */}
+                                                    <svg className="w-6 h-6 text-white/60" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" opacity="0" />
+                                                        <path d="M12 4c4.41 0 8 3.59 8 8h-2c0-3.31-2.69-6-6-6s-6 2.69-6 6H4c0-4.41 3.59-8 8-8z" opacity="0.5" />
+                                                        <path d="M12 7c2.76 0 5 2.24 5 5h-2c0-1.66-1.34-3-3-3s-3 1.34-3 3H7c0-2.76 2.24-5 5-5z" opacity="0.7" />
+                                                        <path d="M12 10c1.1 0 2 .9 2 2h-2c0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4z" />
+                                                    </svg>
                                                 </div>
-                                                <div className="relative">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <p className="text-white/70 text-xs">{bank.name}</p>
+
+                                                {/* Chip e Número */}
+                                                <div className="relative z-10 space-y-6">
+                                                    <div className="flex items-center justify-between">
+                                                        {/* Chip Simulado */}
+                                                        <div className="w-10 h-8 rounded-md bg-gradient-to-br from-yellow-200 to-yellow-500 border border-yellow-600/50 shadow-sm flex items-center justify-center overflow-hidden relative">
+                                                            <div className="absolute inset-0 border-[0.5px] border-black/20 rounded-md"></div>
+                                                            <div className="w-full h-[1px] bg-black/20 absolute top-1/2"></div>
+                                                            <div className="h-full w-[1px] bg-black/20 absolute left-1/2"></div>
+                                                            <div className="w-4 h-4 border border-black/20 rounded-sm"></div>
+                                                        </div>
+
+                                                        {/* Menu de Ações (discreto) */}
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
+                                                                    className="text-white/50 hover:text-white hover:bg-white/10 h-8 w-8 rounded-full"
                                                                 >
-                                                                    <MoreHorizontal className="w-4 h-4" />
+                                                                    <MoreHorizontal className="w-5 h-5" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="bg-popover border-border">
                                                                 <DropdownMenuItem
-                                                                    className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted"
+                                                                    className="text-muted-foreground hover:text-foreground"
                                                                     onClick={() => openEditDialog(card)}
                                                                 >
                                                                     <Pencil className="w-4 h-4 mr-2" />
                                                                     Editar
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
-                                                                    className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10"
+                                                                    className="text-red-400 hover:text-red-300"
                                                                     onClick={() => handleDelete(card.id)}
                                                                 >
                                                                     <Trash2 className="w-4 h-4 mr-2" />
@@ -558,10 +590,32 @@ export default function CartoesPage() {
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </div>
-                                                    <p className="text-white font-mono text-lg tracking-widest mb-4">
-                                                        •••• •••• •••• {card.lastFourDigits || "••••"}
-                                                    </p>
-                                                    <p className="text-white font-medium">{card.name}</p>
+
+                                                    <div className="space-y-1">
+                                                        <p className="text-white/80 text-[10px] uppercase tracking-widest">Número do Cartão</p>
+                                                        <p className="text-white font-mono text-xl md:text-2xl tracking-widest drop-shadow-md">
+                                                            •••• •••• •••• {card.lastFourDigits || "••••"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Footer do Cartão */}
+                                                <div className="relative z-10 flex justify-between items-end">
+                                                    <div>
+                                                        <p className="text-white/60 text-[9px] uppercase tracking-wider mb-0.5">Titular</p>
+                                                        <p className="text-white font-medium tracking-wide text-sm uppercase truncate max-w-[150px]">{card.name}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-white/60 text-[9px] uppercase tracking-wider mb-0.5">Validade</p>
+                                                        <p className="text-white font-medium tracking-wide text-sm">
+                                                            {card.dueDay.toString().padStart(2, '0')}/29
+                                                        </p>
+                                                    </div>
+                                                    {/* Logo da Bandeira (Simulado) */}
+                                                    <div className="ml-4 flex -space-x-3 opacity-90">
+                                                        <div className="w-6 h-6 rounded-full bg-red-500/80 mix-blend-screen"></div>
+                                                        <div className="w-6 h-6 rounded-full bg-yellow-500/80 mix-blend-screen"></div>
+                                                    </div>
                                                 </div>
                                             </div>
 
