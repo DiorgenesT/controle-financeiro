@@ -39,6 +39,7 @@ import { getIconById } from "@/lib/icons";
 import { TransactionModal } from "@/components/TransactionModal";
 import { formatTransactionDescription } from "@/lib/utils";
 import { toast } from "sonner";
+import { ForecastCard } from "@/components/ForecastCard";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -215,7 +216,7 @@ export default function TransacoesPage() {
                 </div>
 
                 {/* Cards de Resumo */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none text-white shadow-lg shadow-green-500/20">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
@@ -275,6 +276,8 @@ export default function TransacoesPage() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    <ForecastCard compact className="shadow-lg" />
                 </div>
 
                 {/* Filtros */}

@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useRecurring } from "@/hooks/useRecurring";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCreditCards, getNextInvoice } from "@/lib/creditCards";
 import { addMonths, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -16,7 +18,12 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-export function ForecastCard() {
+interface ForecastCardProps {
+    className?: string;
+    compact?: boolean;
+}
+
+export function ForecastCard({ className, compact }: ForecastCardProps) {
     const { transactions } = useTransactions();
     const { recurring } = useRecurring();
     const { user } = useAuth();
@@ -84,10 +91,52 @@ export function ForecastCard() {
         calculateForecast();
     }, [transactions, recurring, user?.uid]);
 
-    if (loading) return <div className="h-[200px] bg-muted/50 rounded-xl animate-pulse border border-border" />;
+    if (compact) {
+        return (
+            <Card className={cn("bg-gradient-to-br from-slate-700 to-slate-900 border-none text-white shadow-lg shadow-slate-500/20", className)}>
+                <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                        <div className="w-full">
+                            <p className="text-sm text-white/80 font-medium">Previsão Próximo Mês</p>
+                            {loading ? (
+                                <Skeleton className="h-8 w-32 bg-white/20 mt-1" />
+                            ) : (
+                                <p className={cn("text-2xl font-bold mt-1", forecast.balance >= 0 ? "text-emerald-400" : "text-red-400")}>
+                                    {formatCurrency(forecast.balance)}
+                                </p>
+                            )}
+
+                            {loading ? (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <Skeleton className="h-3 w-16 bg-white/20" />
+                                    <Skeleton className="h-3 w-16 bg-white/20" />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 mt-1 text-[10px] md:text-xs">
+                                    <span className="flex items-center text-emerald-400 font-medium">
+                                        <TrendingUp className="w-3 h-3 mr-1" />
+                                        {formatCurrency(forecast.income)}
+                                    </span>
+                                    <span className="flex items-center text-red-400 font-medium">
+                                        <TrendingDown className="w-3 h-3 mr-1" />
+                                        {formatCurrency(forecast.expenses)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center self-start shrink-0">
+                            <Calendar className="w-6 h-6 text-white" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (loading) return <div className={cn("h-[200px] bg-muted/50 rounded-xl animate-pulse border border-border", className)} />;
 
     return (
-        <Card className="bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full">
+        <Card className={cn("bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full", className)}>
             <CardHeader className="pb-2 pt-3 px-3 md:pt-6 md:px-6">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
