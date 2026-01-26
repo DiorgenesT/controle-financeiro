@@ -45,6 +45,7 @@ const formatDate = (date: Date) => {
 
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { MarketTicker } from "@/components/MarketTicker";
+import { AccountsTicker } from "@/components/AccountsTicker";
 
 export default function DashboardPage() {
     const { user } = useAuth();
@@ -56,7 +57,7 @@ export default function DashboardPage() {
     const saldoContas = accounts.reduce((acc, a) => acc + a.balance, 0);
 
     // Identificar contas vinculadas a metas
-    const linkedAccountIds = new Set(goals.map(g => g.linkedAccountId).filter(id => id));
+    const linkedAccountIds = new Set(goals.map(g => g.linkedAccountId).filter((id): id is string => !!id));
 
     const greeting = () => {
         const hour = new Date().getHours();
@@ -116,112 +117,54 @@ export default function DashboardPage() {
 
                 {/* Stats Cards */}
                 <div className="grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-                    <Card id="dashboard-balance-card" className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-500 to-emerald-700 border-none overflow-hidden relative text-white shadow-lg shadow-emerald-500/20">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 relative p-3 md:p-6">
-                            <div className="space-y-0.5 md:space-y-1">
-                                <CardTitle className="text-[10px] md:text-sm font-medium text-white/80">
+                    <Card id="dashboard-balance-card" className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-800 border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative text-white group">
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
+                            <div className="space-y-0.5">
+                                <CardTitle className="text-xs md:text-base font-medium text-white/80">
                                     Saldo Total
                                 </CardTitle>
                                 {loading || loadingContas ? (
-                                    <Skeleton className="h-5 md:h-6 w-20 md:w-24 bg-white/20" />
+                                    <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
                                 ) : (
-                                    <div className="text-base md:text-xl font-bold text-white">
+                                    <div className="text-xl md:text-3xl font-bold text-white">
                                         {formatCurrency(saldoContas)}
                                     </div>
                                 )}
                             </div>
-                            <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                                <Wallet className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                <Wallet className="w-5 h-5 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
-                        <CardContent className="relative pt-0 p-3 md:p-6">
+                        <CardContent className="relative pt-0 p-3 md:p-4 pb-3 md:pb-4 overflow-hidden">
                             {!loading && !loadingContas && !loadingGoals && (
-                                <div className="space-y-0.5 max-h-[60px] md:max-h-[80px] overflow-y-auto pr-1 custom-scrollbar-white mt-0.5 md:mt-1">
-                                    {[...accounts]
-                                        .sort((a, b) => {
-                                            const isAEmergency = a.type === 'emergency';
-                                            const isBEmergency = b.type === 'emergency';
-                                            const isALinked = linkedAccountIds.has(a.id);
-                                            const isBLinked = linkedAccountIds.has(b.id);
-
-                                            const isASpecial = isAEmergency || isALinked;
-                                            const isBSpecial = isBEmergency || isBLinked;
-
-                                            if (isASpecial && !isBSpecial) return 1;
-                                            if (!isASpecial && isBSpecial) return -1;
-
-                                            return b.balance - a.balance;
-                                        })
-                                        .map(account => {
-                                            const isEmergency = account.type === 'emergency';
-                                            const isLinkedToGoal = linkedAccountIds.has(account.id);
-
-                                            let containerClass = "hover:bg-white/10";
-                                            let iconClass = "text-white/70";
-                                            let textClass = "text-white/80 font-medium";
-                                            let balanceClass = "text-white/90 font-bold";
-                                            let prefix = "";
-
-                                            if (isEmergency) {
-                                                containerClass = "bg-gradient-to-r from-red-500 to-red-600 border-none shadow-sm mt-1";
-                                                iconClass = "text-white";
-                                                textClass = "text-white font-medium";
-                                                balanceClass = "text-white font-bold";
-                                                prefix = "Reserva - ";
-                                            } else if (isLinkedToGoal) {
-                                                containerClass = "bg-gradient-to-r from-purple-500 to-purple-600 border-none shadow-sm mt-1";
-                                                iconClass = "text-white";
-                                                textClass = "text-white font-medium";
-                                                balanceClass = "text-white font-bold";
-                                                prefix = "Metas - ";
-                                            }
-
-                                            return (
-                                                <div
-                                                    key={account.id}
-                                                    className={`flex justify-between items-center text-[9px] md:text-[10px] py-0.5 px-1.5 rounded transition-all ${containerClass}`}
-                                                >
-                                                    <div className="flex items-center gap-1.5">
-                                                        {isEmergency && (
-                                                            <AlertTriangle className={`w-2 h-2 md:w-2.5 md:h-2.5 ${iconClass}`} />
-                                                        )}
-                                                        {isLinkedToGoal && !isEmergency && (
-                                                            <Target className={`w-2 h-2 md:w-2.5 md:h-2.5 ${iconClass}`} />
-                                                        )}
-                                                        <span className={textClass}>
-                                                            {prefix}{account.name}
-                                                        </span>
-                                                    </div>
-                                                    <span className={balanceClass}>
-                                                        {formatCurrency(account.balance)}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })}
-                                </div>
+                                <AccountsTicker accounts={accounts} linkedAccountIds={linkedAccountIds} />
                             )}
                         </CardContent>
                     </Card>
 
-                    <Card id="dashboard-receitas-card" className="bg-gradient-to-br from-green-500 to-green-700 border-none overflow-hidden relative text-white shadow-lg shadow-green-500/20">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 relative p-2.5 md:p-6">
-                            <CardTitle className="text-[10px] md:text-sm font-medium text-white/80">
+                    <Card id="dashboard-receitas-card" className="bg-gradient-to-br from-green-600 via-green-500 to-green-800 border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative text-white group">
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
+                            <CardTitle className="text-xs md:text-base font-medium text-white/80">
                                 Receitas
                             </CardTitle>
-                            <div className="w-5 h-5 md:w-10 md:h-10 rounded-md md:rounded-lg bg-white/20 flex items-center justify-center">
-                                <TrendingUp className="w-2.5 h-2.5 md:w-5 md:h-5 text-white" />
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
-                        <CardContent className="relative p-2.5 md:p-6 pt-0">
+                        <CardContent className="relative p-3 md:p-4 pt-0">
                             {loading ? (
-                                <Skeleton className="h-5 md:h-6 w-20 md:w-24 bg-white/20" />
+                                <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
                             ) : (
                                 <>
-                                    <div className="text-base md:text-2xl font-bold text-white">
+                                    <div className="text-xl md:text-3xl font-bold text-white">
                                         {formatCurrency(totalReceitas)}
                                     </div>
-                                    <p className="text-[9px] md:text-xs text-white/80 flex items-center mt-0.5 md:mt-1">
-                                        <ArrowUpRight className="w-2 h-2 md:w-3 md:h-3 mr-0.5 md:mr-1" />
+                                    <p className="text-[10px] md:text-xs text-white/80 flex items-center mt-0.5">
+                                        <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                         Este mês
                                     </p>
                                 </>
@@ -229,25 +172,27 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card id="dashboard-despesas-card" className="bg-gradient-to-br from-red-500 to-red-700 border-none overflow-hidden relative text-white shadow-lg shadow-red-500/20">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 relative p-2.5 md:p-6">
-                            <CardTitle className="text-[10px] md:text-sm font-medium text-white/80">
+                    <Card id="dashboard-despesas-card" className="bg-gradient-to-br from-red-600 via-red-500 to-red-800 border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative text-white group">
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
+                            <CardTitle className="text-xs md:text-base font-medium text-white/80">
                                 Despesas
                             </CardTitle>
-                            <div className="w-5 h-5 md:w-10 md:h-10 rounded-md md:rounded-lg bg-white/20 flex items-center justify-center">
-                                <TrendingDown className="w-2.5 h-2.5 md:w-5 md:h-5 text-white" />
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                <TrendingDown className="w-5 h-5 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
-                        <CardContent className="relative p-2.5 md:p-6 pt-0">
+                        <CardContent className="relative p-3 md:p-4 pt-0">
                             {loading ? (
-                                <Skeleton className="h-5 md:h-6 w-20 md:w-24 bg-white/20" />
+                                <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
                             ) : (
                                 <>
-                                    <div className="text-base md:text-2xl font-bold text-white">
+                                    <div className="text-xl md:text-3xl font-bold text-white">
                                         {formatCurrency(totalDespesas)}
                                     </div>
-                                    <p className="text-[9px] md:text-xs text-white/80 flex items-center mt-0.5 md:mt-1">
-                                        <ArrowDownRight className="w-2 h-2 md:w-3 md:h-3 mr-0.5 md:mr-1" />
+                                    <p className="text-[10px] md:text-xs text-white/80 flex items-center mt-0.5">
+                                        <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                         Este mês
                                     </p>
                                 </>
@@ -268,17 +213,34 @@ export default function DashboardPage() {
 
                 <div className="grid gap-3 md:gap-4 md:grid-cols-1 lg:grid-cols-3 items-start w-full min-w-0">
                     {/* 1. Transações Recentes (Compacto) */}
-                    <Card className="bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 pt-2.5 px-2.5 md:pt-6 md:px-6">
-                            <div>
-                                <CardTitle className="text-foreground text-xs md:text-base">Recentes</CardTitle>
+                    {/* 1. Transações Recentes (Compacto) */}
+                    <Card className="h-full flex flex-col overflow-hidden min-w-0 w-full border border-blue-500/40 dark:border-white/10 bg-gradient-to-b from-card to-muted/20 shadow-[0_0_20px_-5px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.2)] transition-all duration-300 group relative">
+                        {/* Top Glow Line */}
+                        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5 px-5 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
+                                    <div className="relative p-2 rounded-xl bg-card border border-blue-100/10 shadow-sm ring-1 ring-blue-500/10">
+                                        <Receipt className="w-4 h-4 text-blue-500" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <CardTitle className="text-sm font-semibold text-foreground tracking-tight">
+                                        Transações
+                                    </CardTitle>
+                                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                                        Últimas atividades
+                                    </p>
+                                </div>
                             </div>
-                            <Link href="/transacoes" className="text-[9px] md:text-xs text-muted-foreground hover:text-emerald-500 transition-colors flex items-center gap-1">
+                            <Link href="/transacoes" className="group flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-blue-500 transition-colors bg-muted/50 px-2 py-1 rounded-full border border-border/50 hover:bg-blue-500/10 hover:border-blue-500/20">
                                 Ver tudo
-                                <ArrowUpRight className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                             </Link>
                         </CardHeader>
-                        <CardContent className="flex-1 overflow-hidden p-2.5 pt-0 md:p-6 md:pt-0">
+                        <CardContent className="flex-1 overflow-hidden p-5 pt-2 relative z-10">
                             {loading ? (
                                 <div className="space-y-2">
                                     {[1, 2, 3].map((i) => (

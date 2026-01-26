@@ -109,14 +109,14 @@ export function InsightsCarousel({
             icon: TrendingUp,
             iconColor: "text-white",
             bgIcon: "bg-white/20",
-            fullGradient: "bg-gradient-to-br from-purple-500 to-purple-700",
+            fullGradient: "bg-gradient-to-br from-purple-600 via-purple-500 to-purple-800",
             content: (
                 <>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-3xl font-bold text-white">
                         {economia.toFixed(1)}%
                     </div>
-                    <p className="text-xs text-white/80 flex items-center mt-1">
-                        <ArrowUpRight className="w-3 h-3 mr-1" />
+                    <p className="text-xs md:text-sm text-white/80 flex items-center mt-1">
+                        <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         Da receita mensal
                     </p>
                 </>
@@ -128,14 +128,14 @@ export function InsightsCarousel({
             icon: Shield,
             iconColor: "text-white",
             bgIcon: "bg-white/20",
-            fullGradient: "bg-gradient-to-br from-emerald-500 to-emerald-700",
+            fullGradient: "bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-800",
             content: (
                 <>
-                    <div className="text-2xl font-bold text-white">
-                        {mesesCobertura.toFixed(1)} <span className="text-sm font-normal text-white/80">meses</span>
+                    <div className="text-3xl font-bold text-white">
+                        {mesesCobertura.toFixed(1)} <span className="text-base font-normal text-white/80">meses</span>
                     </div>
-                    <p className="text-xs text-white/80 flex items-center mt-1">
-                        <Shield className="w-3 h-3 mr-1" />
+                    <p className="text-xs md:text-sm text-white/80 flex items-center mt-1">
+                        <Shield className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         Cobertura atual
                     </p>
                 </>
@@ -147,14 +147,14 @@ export function InsightsCarousel({
             icon: Target,
             iconColor: "text-white",
             bgIcon: "bg-white/20",
-            fullGradient: "bg-gradient-to-br from-blue-500 to-blue-700",
+            fullGradient: "bg-gradient-to-br from-blue-600 via-blue-500 to-blue-800",
             content: (
                 <>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-3xl font-bold text-white">
                         {progressoMetas.toFixed(0)}%
                     </div>
-                    <p className="text-xs text-white/80 flex items-center mt-1">
-                        <Target className="w-3 h-3 mr-1" />
+                    <p className="text-xs md:text-sm text-white/80 flex items-center mt-1">
+                        <Target className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         Conclusão geral
                     </p>
                 </>
@@ -166,13 +166,13 @@ export function InsightsCarousel({
             icon: Activity,
             iconColor: "text-white",
             bgIcon: "bg-white/20",
-            fullGradient: `bg-gradient-to-br from-${health.color.split('-')[1]}-500 to-${health.color.split('-')[1]}-700`,
+            fullGradient: `bg-gradient-to-br from-${health.color.split('-')[1]}-600 via-${health.color.split('-')[1]}-500 to-${health.color.split('-')[1]}-800`,
             content: (
                 <>
-                    <div className="text-base font-bold text-white">
+                    <div className="text-xl font-bold text-white">
                         {health.status}
                     </div>
-                    <p className="text-xs text-white/80 mt-1 leading-tight">
+                    <p className="text-xs md:text-sm text-white/80 mt-1 leading-tight">
                         {health.message}
                     </p>
                 </>
@@ -200,41 +200,43 @@ export function InsightsCarousel({
     const Icon = currentSlide.icon;
 
     return (
-        <Card className={`${currentSlide.fullGradient} border-none overflow-hidden relative h-full transition-all duration-500 shadow-lg group`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-                <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg ${currentSlide.bgIcon} flex items-center justify-center transition-colors duration-500`}>
-                        <Icon className={`w-4 h-4 ${currentSlide.iconColor}`} />
+        <Card className={`${currentSlide.fullGradient} border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative h-full transition-all duration-500 group`}>
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
+                <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl ${currentSlide.bgIcon} flex items-center justify-center transition-colors duration-500`}>
+                        <Icon className={`w-5 h-5 ${currentSlide.iconColor}`} />
                     </div>
-                    <CardTitle className="text-xs md:text-sm font-medium text-white/90">
+                    <CardTitle className="text-xs md:text-base font-medium text-white/90">
                         {currentSlide.title}
                     </CardTitle>
                 </div>
                 <div className="flex gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white hover:bg-white/10" onClick={prevSlide}>
-                        <ChevronLeft className="w-3 h-3" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10" onClick={prevSlide}>
+                        <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white hover:bg-white/10" onClick={nextSlide}>
-                        <ChevronRight className="w-3 h-3" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10" onClick={nextSlide}>
+                        <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
             </CardHeader>
 
-            <CardContent className="relative">
+            <CardContent className="relative p-3 md:p-4 pt-0 pb-3 md:pb-4">
                 {loading || loadingRecurring ? (
-                    <Skeleton className="h-8 w-32 bg-white/20" />
+                    <Skeleton className="h-9 w-40 bg-white/20" />
                 ) : (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-500 h-[55px] flex flex-col justify-center">
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-500 h-[50px] flex flex-col justify-center">
                         {currentSlide.content}
                     </div>
                 )}
 
                 {/* Indicators */}
-                <div className="flex gap-1 mt-4 justify-center">
+                <div className="flex gap-1 mt-1 justify-center">
                     {slides.map((_, idx) => (
                         <div
                             key={idx}
-                            className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? "w-4 bg-white" : "w-1 bg-white/30"
+                            className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? "w-3 bg-white" : "w-1 bg-white/30"
                                 }`}
                         />
                     ))}

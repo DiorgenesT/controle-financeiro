@@ -136,38 +136,62 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
     if (loading) return <div className={cn("h-[200px] bg-muted/50 rounded-xl animate-pulse border border-border", className)} />;
 
     return (
-        <Card className={cn("bg-card border-border h-full flex flex-col overflow-hidden min-w-0 w-full", className)}>
-            <CardHeader className="pb-2 pt-3 px-3 md:pt-6 md:px-6">
-                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    Previsão Próximo Mês
-                </CardTitle>
+        <Card className={cn("h-full flex flex-col overflow-hidden min-w-0 w-full border border-emerald-500/40 dark:border-white/10 bg-gradient-to-b from-card to-muted/20 shadow-[0_0_20px_-5px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_-5px_rgba(16,185,129,0.2)] transition-all duration-300 group", className)}>
+            {/* Top Glow Line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent opacity-50" />
+
+            <CardHeader className="pb-2 pt-5 px-5 relative z-10">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-emerald-500/20 blur-lg rounded-full" />
+                        <div className="relative p-2 rounded-xl bg-card border border-emerald-100/10 shadow-sm ring-1 ring-emerald-500/10">
+                            <Calendar className="w-4 h-4 text-emerald-500" />
+                        </div>
+                    </div>
+                    <div>
+                        <CardTitle className="text-sm font-semibold text-foreground tracking-tight">
+                            Previsão
+                        </CardTitle>
+                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                            Próximo Mês
+                        </p>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-                <div className="space-y-3 md:space-y-4">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 md:p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm">
-                                <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
-                            </div>
-                            <span className="text-xs md:text-sm text-muted-foreground">Receitas Fixas</span>
-                        </div>
-                        <span className="text-sm md:text-base font-bold text-foreground">{formatCurrency(forecast.income)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 md:p-2 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-sm">
-                                <TrendingDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
-                            </div>
-                            <span className="text-xs md:text-sm text-muted-foreground">Despesas Previstas</span>
-                        </div>
-                        <span className="text-sm md:text-base font-bold text-foreground">{formatCurrency(forecast.expenses)}</span>
-                    </div>
-                    <div className="pt-3 md:pt-4 border-t border-border flex justify-between items-center">
-                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Saldo Previsto</span>
-                        <span className={`text-sm md:text-base font-bold ${forecast.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            <CardContent className="p-5 pt-2 relative z-10">
+                <div className="space-y-5">
+                    {/* Saldo em Destaque */}
+                    <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground font-medium">Saldo Estimado</span>
+                        <span className={cn("text-2xl font-bold tracking-tight", forecast.balance >= 0 ? 'text-emerald-500' : 'text-red-500')}>
                             {formatCurrency(forecast.balance)}
                         </span>
+                    </div>
+
+                    {/* Barras de Comparação */}
+                    <div className="space-y-3">
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground font-medium">Receitas</span>
+                                <span className="text-emerald-600 font-bold">{formatCurrency(forecast.income)}</span>
+                            </div>
+                            <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
+                                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '100%' }} />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground font-medium">Despesas</span>
+                                <span className="text-red-600 font-bold">{formatCurrency(forecast.expenses)}</span>
+                            </div>
+                            <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-red-500 rounded-full"
+                                    style={{ width: `${Math.min((forecast.expenses / (forecast.income || 1)) * 100, 100)}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </CardContent>
