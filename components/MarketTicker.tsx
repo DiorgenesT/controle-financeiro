@@ -11,7 +11,7 @@ export function MarketTicker() {
         return (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                 {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-24 bg-muted/20 animate-pulse rounded-2xl border border-white/5" />
+                    <div key={i} className="h-24 bg-muted/20 animate-pulse rounded-2xl border border-foreground/15" />
                 ))}
             </div>
         );
@@ -25,8 +25,8 @@ export function MarketTicker() {
             name: 'Dólar',
             symbol: 'USD',
             icon: DollarSign,
-            gradient: 'from-emerald-500/10 to-emerald-900/10',
-            border: 'hover:border-emerald-500/30',
+            gradient: 'from-emerald-500/20 to-emerald-900/20',
+            border: 'hover:border-emerald-500/60',
             text: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
             data: data.USDBRL
@@ -36,8 +36,8 @@ export function MarketTicker() {
             name: 'Euro',
             symbol: 'EUR',
             icon: Euro,
-            gradient: 'from-blue-500/10 to-blue-900/10',
-            border: 'hover:border-blue-500/30',
+            gradient: 'from-blue-500/20 to-blue-900/20',
+            border: 'hover:border-blue-500/60',
             text: 'text-blue-500',
             bg: 'bg-blue-500/10',
             data: data.EURBRL
@@ -47,8 +47,8 @@ export function MarketTicker() {
             name: 'Bitcoin',
             symbol: 'BTC',
             icon: Bitcoin,
-            gradient: 'from-amber-500/10 to-amber-900/10',
-            border: 'hover:border-amber-500/30',
+            gradient: 'from-amber-500/20 to-amber-900/20',
+            border: 'hover:border-amber-500/60',
             text: 'text-amber-500',
             bg: 'bg-amber-500/10',
             data: data.BTCBRL
@@ -58,8 +58,8 @@ export function MarketTicker() {
             name: 'Ethereum',
             symbol: 'ETH',
             icon: Coins,
-            gradient: 'from-purple-500/10 to-purple-900/10',
-            border: 'hover:border-purple-500/30',
+            gradient: 'from-purple-500/20 to-purple-900/20',
+            border: 'hover:border-purple-500/60',
             text: 'text-purple-500',
             bg: 'bg-purple-500/10',
             data: data.ETHBRL
@@ -71,7 +71,7 @@ export function MarketTicker() {
             {/* Header - Adaptive */}
             <div className="flex items-center justify-between mb-2 md:mb-4 px-1">
                 <div className="flex items-center gap-2">
-                    <div className="p-1 md:p-1.5 rounded-md md:rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-1 md:p-1.5 rounded-md md:rounded-lg bg-muted/20 border border-foreground/15">
                         <Globe className="w-3 h-3 md:w-3.5 md:h-3.5 text-muted-foreground" />
                     </div>
                     <h3 className="text-xs md:text-sm font-medium text-muted-foreground">Mercado Global</h3>
@@ -98,7 +98,7 @@ export function MarketTicker() {
                         <div
                             key={item.key}
                             className={cn(
-                                "relative group rounded-xl border border-white/5 bg-card/30 backdrop-blur-xl transition-all duration-300",
+                                "relative group rounded-xl border border-foreground/15 bg-card/30 backdrop-blur-xl transition-all duration-300",
                                 item.border
                             )}
                         >
@@ -139,7 +139,7 @@ export function MarketTicker() {
                         <div
                             key={item.key}
                             className={cn(
-                                "relative overflow-hidden group rounded-2xl border border-white/5 bg-card/30 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1",
+                                "relative overflow-hidden group rounded-2xl border border-foreground/15 bg-card/30 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1",
                                 item.border
                             )}
                         >
@@ -151,7 +151,7 @@ export function MarketTicker() {
                                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-300", item.bg)}>
                                         <item.icon className={cn("w-4 h-4", item.text)} />
                                     </div>
-                                    <div className={cn("flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border border-white/5", variationBg, variationColor)}>
+                                    <div className={cn("flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border border-foreground/15", variationBg, variationColor)}>
                                         <VariationIcon className="w-2.5 h-2.5" />
                                         {item.data.pctChange}%
                                     </div>
