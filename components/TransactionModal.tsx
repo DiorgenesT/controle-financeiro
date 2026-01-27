@@ -759,38 +759,41 @@ export function TransactionModal({
                             </button>
 
                             <button
-                                onClick={() => handlePaymentSelect("credit")}
-                                disabled={creditCards.length === 0}
-                                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/20 text-left disabled:opacity-50 disabled:cursor-not-allowed border-none"
+                                onClick={() => {
+                                    if (creditCards.length === 0) {
+                                        handleClose();
+                                        window.location.href = "/cartoes";
+                                    } else {
+                                        handlePaymentSelect("credit");
+                                    }
+                                }}
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/20 border-none"
                             >
                                 <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
-                                    <CreditCard className="w-6 h-6 text-white" />
+                                    {creditCards.length === 0 ? (
+                                        <Plus className="w-6 h-6 text-white" />
+                                    ) : (
+                                        <CreditCard className="w-6 h-6 text-white" />
+                                    )}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-bold truncate">Cartão de Crédito</p>
-                                    <p className="text-sm text-violet-100 truncate">Vai para a fatura</p>
+                                <div className="text-center">
+                                    <p className="font-bold">Cartão</p>
+                                    <p className="text-xs text-violet-100">
+                                        {creditCards.length === 0 ? "Cadastrar" : "Fatura"}
+                                    </p>
                                 </div>
-                                {creditCards.length === 0 && (
-                                    <Link
-                                        href="/cartoes"
-                                        onClick={handleClose}
-                                        className="text-xs text-white/80 hover:text-white underline shrink-0"
-                                    >
-                                        Criar
-                                    </Link>
-                                )}
                             </button>
 
                             <button
                                 onClick={() => handlePaymentSelect("boleto")}
-                                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 text-left border-none"
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/10 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 border-none"
                             >
                                 <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
                                     <Receipt className="w-6 h-6 text-white" />
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="font-bold truncate">Boleto / Carnê</p>
-                                    <p className="text-sm text-orange-100 truncate">Pendente ou pago</p>
+                                <div className="text-center">
+                                    <p className="font-bold">Boleto</p>
+                                    <p className="text-xs text-orange-100">Carnê</p>
                                 </div>
                             </button>
                         </div>

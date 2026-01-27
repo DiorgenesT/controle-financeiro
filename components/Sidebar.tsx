@@ -21,6 +21,10 @@ import {
     ArrowLeftRight,
     Barcode,
     Repeat,
+    Sparkles,
+    Rocket,
+    Gamepad2,
+    Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +71,27 @@ export const menuItems = [
         title: "Relatórios",
         href: "/relatorios",
         icon: BarChart3,
+    },
+];
+
+export const premiumMenuItems = [
+    {
+        title: "Assistente",
+        href: "/assistente",
+        icon: Bot,
+        color: "text-amber-400",
+    },
+    {
+        title: "Acelerar",
+        href: "/acelerar",
+        icon: Rocket,
+        color: "text-blue-400",
+    },
+    {
+        title: "Arena",
+        href: "/arena",
+        icon: Gamepad2,
+        color: "text-purple-400",
     },
 ];
 
@@ -138,6 +163,34 @@ export function Sidebar() {
                         >
                             <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
                             <span className="font-medium">{item.title}</span>
+                        </Link>
+                    );
+                })}
+
+                <div className="pt-4 pb-2 px-3">
+                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Especial</p>
+                </div>
+
+                {premiumMenuItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                                isActive
+                                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/20"
+                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                            )}
+                        >
+                            <item.icon className={cn("w-5 h-5 flex-shrink-0 transition-colors", isActive ? "text-white" : item.color)} />
+                            <span className="font-medium">{item.title}</span>
+                            {!isActive && (
+                                <span className="ml-auto text-[10px] font-bold bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Em Breve
+                                </span>
+                            )}
                         </Link>
                     );
                 })}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Menu, Bell, Search, Settings, LogOut, User, CreditCard } from "lucide-react";
-import { menuItems, bottomMenuItems } from "@/components/Sidebar";
+import { menuItems, bottomMenuItems, premiumMenuItems } from "@/components/Sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -82,6 +82,29 @@ export function Header({ title }: HeaderProps) {
                                             )}
                                         >
                                             <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-white")} />
+                                            <span className="font-medium">{item.title}</span>
+                                        </Link>
+                                    );
+                                })}
+
+                                <div className="pt-4 pb-2 px-3">
+                                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Especial</p>
+                                </div>
+
+                                {premiumMenuItems.map((item) => {
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                                                isActive
+                                                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/20"
+                                                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                                            )}
+                                        >
+                                            <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-white" : item.color)} />
                                             <span className="font-medium">{item.title}</span>
                                         </Link>
                                     );
