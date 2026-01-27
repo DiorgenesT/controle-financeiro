@@ -438,7 +438,7 @@ export function AlertTicker() {
                         </Button>
                         <Button
                             onClick={handleConfirm}
-                            disabled={!!processing || (confirmModal.item && ('daysUntilDue' in confirmModal.item || (confirmModal.item as Transaction).paymentMethod === 'boleto') && !selectedAccountId)}
+                            disabled={Boolean(processing || (confirmModal.item && ('daysUntilDue' in confirmModal.item || (confirmModal.item as Transaction).paymentMethod === 'boleto') && !selectedAccountId))}
                             className="bg-emerald-600 hover:bg-emerald-700"
                         >
                             {processing ? "Processando..." : "Confirmar"}

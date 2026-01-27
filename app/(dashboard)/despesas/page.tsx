@@ -121,18 +121,18 @@ export default function DespesasPage() {
 
                 {/* Summary Card */}
                 <Card className="bg-gradient-to-br from-red-500 to-red-700 border-none shadow-lg shadow-red-500/20">
-                    <CardContent className="pt-6">
+                    <CardContent className="p-4 md:pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-white/80 font-medium">Total de Despesas</p>
+                                <p className="text-xs md:text-sm text-white/80 font-medium">Total de Despesas</p>
                                 {loading ? (
-                                    <Skeleton className="h-9 w-40 bg-white/20 mt-1" />
+                                    <Skeleton className="h-7 md:h-9 w-32 md:w-40 bg-white/20 mt-1" />
                                 ) : (
-                                    <p className="text-3xl font-bold text-white mt-1">{formatCurrency(totalDespesas)}</p>
+                                    <p className="text-xl md:text-3xl font-bold text-white mt-0.5 md:mt-1">{formatCurrency(totalDespesas)}</p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                                <TrendingDown className="w-8 h-8 text-white" />
+                            <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
+                                <TrendingDown className="w-5 h-5 md:w-8 md:h-8 text-white" />
                             </div>
                         </div>
                     </CardContent>

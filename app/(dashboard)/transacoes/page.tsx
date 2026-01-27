@@ -249,62 +249,62 @@ export default function TransacoesPage() {
                 </div>
 
                 {/* Cards de Resumo */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
                     <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none text-white shadow-lg shadow-green-500/20">
-                        <CardContent className="pt-6">
+                        <CardContent className="p-3 md:pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-white/80 font-medium">Receitas</p>
+                                    <p className="text-[10px] md:text-sm text-white/80 font-medium">Receitas</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
+                                        <Skeleton className="h-5 md:h-7 w-20 md:w-28 bg-white/20 mt-1" />
                                     ) : (
-                                        <p className="text-2xl font-bold text-white mt-1">
+                                        <p className="text-base md:text-2xl font-bold text-white mt-0.5 md:mt-1">
                                             +{formatCurrency(monthTotals.receitas)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                    <TrendingUp className="w-6 h-6 text-white" />
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                    <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card className="bg-gradient-to-br from-red-500 to-red-700 border-none text-white shadow-lg shadow-red-500/20">
-                        <CardContent className="pt-6">
+                        <CardContent className="p-3 md:pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-white/80 font-medium">Despesas</p>
+                                    <p className="text-[10px] md:text-sm text-white/80 font-medium">Despesas</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
+                                        <Skeleton className="h-5 md:h-7 w-20 md:w-28 bg-white/20 mt-1" />
                                     ) : (
-                                        <p className="text-2xl font-bold text-white mt-1">
+                                        <p className="text-sm md:text-2xl font-bold text-white mt-0.5 md:mt-1">
                                             -{formatCurrency(monthTotals.despesas)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                    <TrendingDown className="w-6 h-6 text-white" />
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                    <TrendingDown className="w-4 h-4 md:w-6 md:h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card className="bg-gradient-to-br from-blue-500 to-blue-700 border-none text-white shadow-lg shadow-blue-500/20">
-                        <CardContent className="pt-6">
+                        <CardContent className="p-3 md:pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-white/80">Balanço do Mês</p>
+                                    <p className="text-[10px] md:text-sm text-white/80 font-medium">Balanço</p>
                                     {loading ? (
-                                        <Skeleton className="h-7 w-28 bg-white/20 mt-1" />
+                                        <Skeleton className="h-5 md:h-7 w-20 md:w-28 bg-white/20 mt-1" />
                                     ) : (
-                                        <p className="text-2xl font-bold mt-1 text-white">
+                                        <p className="text-sm md:text-2xl font-bold mt-0.5 md:mt-1 text-white">
                                             {monthTotals.saldo >= 0 ? '+' : ''}{formatCurrency(monthTotals.saldo)}
                                         </p>
                                     )}
                                 </div>
-                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                    <ArrowUpDown className="w-6 h-6 text-white" />
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                    <ArrowUpDown className="w-4 h-4 md:w-6 md:h-6 text-white" />
                                 </div>
                             </div>
                         </CardContent>

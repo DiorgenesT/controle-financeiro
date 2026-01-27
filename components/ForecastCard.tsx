@@ -94,25 +94,25 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
     if (compact) {
         return (
             <Card className={cn("bg-gradient-to-br from-slate-700 to-slate-900 border-none text-white shadow-lg shadow-slate-500/20", className)}>
-                <CardContent className="pt-6">
+                <CardContent className="p-3 md:pt-6">
                     <div className="flex items-center justify-between">
                         <div className="w-full">
-                            <p className="text-sm text-white/80 font-medium">Previsão Próximo Mês</p>
+                            <p className="text-[10px] md:text-sm text-white/80 font-medium">Previsão Próximo Mês</p>
                             {loading ? (
-                                <Skeleton className="h-8 w-32 bg-white/20 mt-1" />
+                                <Skeleton className="h-5 md:h-8 w-20 md:w-32 bg-white/20 mt-1" />
                             ) : (
-                                <p className={cn("text-2xl font-bold mt-1", forecast.balance >= 0 ? "text-emerald-400" : "text-red-400")}>
+                                <p className={cn("text-base md:text-2xl font-bold mt-0.5 md:mt-1", forecast.balance >= 0 ? "text-emerald-400" : "text-red-400")}>
                                     {formatCurrency(forecast.balance)}
                                 </p>
                             )}
 
                             {loading ? (
-                                <div className="flex items-center gap-2 mt-1">
+                                <div className="hidden md:flex items-center gap-2 mt-1">
                                     <Skeleton className="h-3 w-16 bg-white/20" />
                                     <Skeleton className="h-3 w-16 bg-white/20" />
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 mt-1 text-[10px] md:text-xs">
+                                <div className="hidden md:flex items-center gap-2 mt-1 text-xs">
                                     <span className="flex items-center text-emerald-400 font-medium">
                                         <TrendingUp className="w-3 h-3 mr-1" />
                                         {formatCurrency(forecast.income)}
@@ -124,8 +124,8 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center self-start shrink-0">
-                            <Calendar className="w-6 h-6 text-white" />
+                        <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center self-start shrink-0">
+                            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-white" />
                         </div>
                     </div>
                 </CardContent>

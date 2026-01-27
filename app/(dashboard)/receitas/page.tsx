@@ -121,18 +121,18 @@ export default function ReceitasPage() {
 
                 {/* Summary Card */}
                 <Card className="bg-gradient-to-br from-green-500 to-green-700 border-none shadow-lg shadow-green-500/20">
-                    <CardContent className="pt-6">
+                    <CardContent className="p-4 md:pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-white/80 font-medium">Total de Receitas</p>
+                                <p className="text-xs md:text-sm text-white/80 font-medium">Total de Receitas</p>
                                 {loading ? (
-                                    <Skeleton className="h-9 w-40 bg-white/20 mt-1" />
+                                    <Skeleton className="h-7 md:h-9 w-32 md:w-40 bg-white/20 mt-1" />
                                 ) : (
-                                    <p className="text-3xl font-bold text-white mt-1">{formatCurrency(totalReceitas)}</p>
+                                    <p className="text-xl md:text-3xl font-bold text-white mt-0.5 md:mt-1">{formatCurrency(totalReceitas)}</p>
                                 )}
                             </div>
-                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                                <TrendingUp className="w-8 h-8 text-white" />
+                            <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm shrink-0">
+                                <TrendingUp className="w-5 h-5 md:w-8 md:h-8 text-white" />
                             </div>
                         </div>
                     </CardContent>

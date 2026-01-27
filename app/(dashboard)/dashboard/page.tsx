@@ -122,19 +122,19 @@ export default function DashboardPage() {
                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
                             <div className="space-y-0.5">
-                                <CardTitle className="text-xs md:text-base font-medium text-white/80">
+                                <CardTitle className="text-[10px] md:text-base font-medium text-white/80">
                                     Saldo Total
                                 </CardTitle>
                                 {loading || loadingContas ? (
-                                    <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
+                                    <Skeleton className="h-6 md:h-9 w-20 md:w-32 bg-white/20" />
                                 ) : (
-                                    <div className="text-xl md:text-3xl font-bold text-white">
+                                    <div className="text-base md:text-3xl font-bold text-white">
                                         {formatCurrency(saldoContas)}
                                     </div>
                                 )}
                             </div>
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                <Wallet className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative pt-0 p-3 md:p-4 pb-3 md:pb-4 overflow-hidden">
@@ -148,23 +148,23 @@ export default function DashboardPage() {
                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
-                            <CardTitle className="text-xs md:text-base font-medium text-white/80">
+                            <CardTitle className="text-[10px] md:text-base font-medium text-white/80">
                                 Receitas
                             </CardTitle>
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative p-3 md:p-4 pt-0">
                             {loading ? (
-                                <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
+                                <Skeleton className="h-6 md:h-9 w-20 md:w-32 bg-white/20" />
                             ) : (
                                 <>
-                                    <div className="text-xl md:text-3xl font-bold text-white">
+                                    <div className="text-base md:text-3xl font-bold text-white">
                                         {formatCurrency(totalReceitas)}
                                     </div>
-                                    <p className="text-[10px] md:text-xs text-white/80 flex items-center mt-0.5">
-                                        <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                    <p className="text-[8px] md:text-xs text-white/80 flex items-center mt-0.5">
+                                        <ArrowUpRight className="w-2.5 h-2.5 md:w-4 md:h-4 mr-1" />
                                         Este mês
                                     </p>
                                 </>
@@ -176,23 +176,23 @@ export default function DashboardPage() {
                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
-                            <CardTitle className="text-xs md:text-base font-medium text-white/80">
+                            <CardTitle className="text-[10px] md:text-base font-medium text-white/80">
                                 Despesas
                             </CardTitle>
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                <TrendingDown className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                <TrendingDown className="w-4 h-4 md:w-6 md:h-6 text-white" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative p-3 md:p-4 pt-0">
                             {loading ? (
-                                <Skeleton className="h-7 md:h-9 w-24 md:w-32 bg-white/20" />
+                                <Skeleton className="h-6 md:h-9 w-20 md:w-32 bg-white/20" />
                             ) : (
                                 <>
-                                    <div className="text-xl md:text-3xl font-bold text-white">
+                                    <div className="text-base md:text-3xl font-bold text-white">
                                         {formatCurrency(totalDespesas)}
                                     </div>
-                                    <p className="text-[10px] md:text-xs text-white/80 flex items-center mt-0.5">
-                                        <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                    <p className="text-[8px] md:text-xs text-white/80 flex items-center mt-0.5">
+                                        <ArrowDownRight className="w-2.5 h-2.5 md:w-4 md:h-4 mr-1" />
                                         Este mês
                                     </p>
                                 </>
