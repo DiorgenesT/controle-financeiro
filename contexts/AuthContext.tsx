@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         createdAt: new Date(),
                         subscriptionStatus: "active",
                     });
-                    setIsFirstAccess(true);
+                    setIsFirstAccess(false);
                 }
             } else {
                 setUser(null);
