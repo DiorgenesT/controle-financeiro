@@ -7,7 +7,7 @@ import { roundCurrency } from "./utils";
 
 const COLLECTION = "recurring_transactions";
 
-export async function processRecurringTransaction(userId: string, recurring: RecurringTransaction, actualValue?: number): Promise<string> {
+export async function processRecurringTransaction(userId: string, recurring: RecurringTransaction, actualValue?: number, overrideAccountId?: string): Promise<string> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -124,12 +124,14 @@ export async function processRecurringTransaction(userId: string, recurring: Rec
             };
 
             if (recurring.paymentMethod) transactionData.paymentMethod = recurring.paymentMethod;
-            if (recurring.accountId) transactionData.accountId = recurring.accountId;
+
+            const finalAccountId = overrideAccountId || recurring.accountId;
+            if (finalAccountId) transactionData.accountId = finalAccountId;
             if (recurring.personId) transactionData.personId = recurring.personId;
 
             // 3. Ler e Atualizar Conta (se aplicável)
-            if (recurring.accountId && (recurring.type === 'despesa' || recurring.type === 'receita')) {
-                const accountRef = doc(db, "accounts", recurring.accountId);
+            if (finalAccountId && (recurring.type === 'despesa' || recurring.type === 'receita')) {
+                const accountRef = doc(db, "accounts", finalAccountId);
                 const accountDoc = await transaction.get(accountRef);
 
                 if (accountDoc.exists()) {

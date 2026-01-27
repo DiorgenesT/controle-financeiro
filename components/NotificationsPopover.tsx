@@ -8,18 +8,27 @@ import {
 } from "@/components/ui/popover";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useRecurring } from "@/hooks/useRecurring";
+import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, Calendar, CheckCircle2 } from "lucide-react";
+import { Bell, Calendar, CheckCircle2, Wallet, Landmark } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
-import { isBefore, addDays, startOfDay, endOfDay } from "date-fns";
+import { isBefore, addDays, startOfDay, endOfDay, isToday } from "date-fns";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { processRecurringTransaction } from "@/lib/recurring";
 import { updateTransaction } from "@/lib/firestore";
 import { updateAccountBalance } from "@/lib/accounts";
+import { getBankByCode, getAccountTypeLabel } from "@/lib/banks";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -31,12 +40,14 @@ const formatCurrency = (value: number) => {
 export function NotificationsPopover() {
     const { transactions } = useTransactions();
     const { recurring } = useRecurring();
+    const { accounts } = useAccounts();
     const { user } = useAuth();
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [creditCards, setCreditCards] = useState<any[]>([]);
     const [goals, setGoals] = useState<any[]>([]);
     const [processing, setProcessing] = useState<string | null>(null);
+    const [selectedAccountId, setSelectedAccountId] = useState<string>("");
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; item: any | null }>({
         open: false,
         item: null
@@ -78,6 +89,16 @@ export function NotificationsPopover() {
 
     const openConfirmModal = (item: any) => {
         setEditValue(item.amount.toString());
+
+        // Pre-selecionar conta: se o item já tem, usa ela. Se não, usa a padrão.
+        const existingAccountId = item.originalData?.accountId;
+        if (existingAccountId) {
+            setSelectedAccountId(existingAccountId);
+        } else {
+            const defaultAcc = accounts.find(a => a.isDefault) || accounts[0];
+            setSelectedAccountId(defaultAcc?.id || "");
+        }
+
         setConfirmModal({ open: true, item });
     };
 
@@ -94,7 +115,7 @@ export function NotificationsPopover() {
         try {
             if (confirmModal.item.type === 'recurring') {
                 const rec = confirmModal.item.originalData;
-                await processRecurringTransaction(user.uid, rec, value);
+                await processRecurringTransaction(user.uid, rec, value, selectedAccountId);
                 toast.success("Transação confirmada!");
             } else if (confirmModal.item.type === 'boleto') {
                 const transaction = confirmModal.item.originalData;
@@ -150,9 +171,9 @@ export function NotificationsPopover() {
             }
         });
 
-        // 2. Recurring Expenses (Always active)
+        // 2. Recurring Transactions (Income and Expense)
         recurring.forEach(r => {
-            if (r.type === 'despesa' && r.active) {
+            if (r.active) {
                 const currentDay = today.getDate();
                 const currentMonth = today.getMonth();
                 const currentYear = today.getFullYear();
@@ -226,11 +247,19 @@ export function NotificationsPopover() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="relative text-muted-foreground hover:text-foreground hover:bg-accent"
+                        className="relative text-muted-foreground hover:text-foreground hover:bg-accent group"
                     >
-                        <Bell className="w-5 h-5" />
+                        <Bell className={`w-5 h-5 transition-all ${notifications.length > 0 ? 'text-amber-500 animate-bell-ring' : ''}`} />
                         {notifications.length > 0 && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                            <>
+                                <span className="absolute top-1.5 right-1.5 flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-background"></span>
+                                </span>
+                                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[10px] font-bold rounded-full border-2 border-background shadow-sm animate-bounce">
+                                    {notifications.length}
+                                </span>
+                            </>
                         )}
                     </Button>
                 </PopoverTrigger>
@@ -252,29 +281,29 @@ export function NotificationsPopover() {
                                 {notifications.map((item, idx) => (
                                     <div
                                         key={`${item.type}-${item.id}-${idx}`}
-                                        className="p-3 hover:bg-muted/50 transition-colors cursor-pointer"
-                                        onClick={() => {
-                                            setOpen(false);
-                                            router.push('/fixas');
-                                        }}
+                                        className="p-3 hover:bg-muted/50 transition-colors"
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex items-start gap-3">
                                                 <div className={`mt-0.5 w-8 h-8 rounded-md flex items-center justify-center shrink-0 
                                                 ${item.type === 'budget' ? 'bg-red-500/10 text-red-500' :
                                                         item.type === 'goal' ? 'bg-blue-500/10 text-blue-500' :
-                                                            item.isOverdue ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                            item.originalData?.type === 'receita' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                                item.isOverdue ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
                                                     {item.type === 'budget' ? <Bell className="w-4 h-4" /> :
                                                         item.type === 'goal' ? <CheckCircle2 className="w-4 h-4" /> :
                                                             <Calendar className="w-4 h-4" />}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-foreground line-clamp-1">
+                                                    <p className={`font-medium text-foreground leading-tight ${item.description.length > 25 ? 'text-[11px]' : 'text-sm'}`}>
                                                         {item.description}
                                                     </p>
                                                     <p className={`text-xs ${item.isOverdue ? 'text-red-400 font-bold' : 'text-muted-foreground'}`}>
                                                         {item.type === 'budget' ? 'Atenção ao limite' :
-                                                            item.isOverdue ? 'Venceu dia ' : 'Vence dia '} {item.date.getDate()}
+                                                            isToday(item.date) ? (item.originalData?.type === 'receita' ? 'Receber Hoje' : 'Vence Hoje') :
+                                                                (item.originalData?.type === 'receita'
+                                                                    ? (item.isOverdue ? 'Recebimento pendente desde dia ' : 'Receber dia ')
+                                                                    : (item.isOverdue ? 'Venceu dia ' : 'Vence dia ')) + item.date.getDate()}
                                                     </p>
                                                 </div>
                                             </div>
@@ -293,7 +322,7 @@ export function NotificationsPopover() {
                                                         }}
                                                         disabled={!!processing}
                                                     >
-                                                        {processing === item.id ? "..." : "Confirmar Pagamento"}
+                                                        {processing === item.id ? "..." : (item.originalData?.type === 'receita' ? "Confirmar Recebimento" : "Confirmar Pagamento")}
                                                     </Button>
                                                 )}
                                             </div>
@@ -308,7 +337,7 @@ export function NotificationsPopover() {
 
             {/* Modal de Confirmação com Edição de Valor */}
             <Dialog open={confirmModal.open} onOpenChange={(open) => setConfirmModal({ open, item: null })}>
-                <DialogContent className="bg-popover border-border max-w-sm">
+                <DialogContent className="bg-popover border-border sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle className="text-foreground">
                             Confirmar {confirmModal.item?.originalData?.type === 'receita' ? 'Recebimento' : 'Pagamento'}
@@ -338,6 +367,50 @@ export function NotificationsPopover() {
                                     Valor original: {formatCurrency(confirmModal.item.amount)}
                                 </p>
                             </div>
+
+                            {/* Seletor de Conta */}
+                            {(confirmModal.item.type === 'recurring' || confirmModal.item.type === 'boleto') && (
+                                <div className="space-y-2">
+                                    <Label className="text-muted-foreground flex items-center gap-2">
+                                        <Wallet className="w-3 h-3" />
+                                        Conta para {confirmModal.item.originalData?.type === 'receita' ? 'recebimento' : 'pagamento'}
+                                    </Label>
+                                    <Select
+                                        value={selectedAccountId}
+                                        onValueChange={setSelectedAccountId}
+                                    >
+                                        <SelectTrigger className="bg-muted/50 border-input">
+                                            <SelectValue placeholder="Selecione a conta" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-popover border-border">
+                                            {accounts.map((acc) => {
+                                                const bank = getBankByCode(acc.bankCode);
+                                                return (
+                                                    <SelectItem key={acc.id} value={acc.id}>
+                                                        <div className="flex items-center gap-2 w-full min-w-0">
+                                                            <div
+                                                                className="w-2 h-2 rounded-full shrink-0"
+                                                                style={{ backgroundColor: bank.color }}
+                                                            />
+                                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                                                    {getAccountTypeLabel(acc.type)}
+                                                                </span>
+                                                                <span className="text-sm font-medium truncate">{acc.name}</span>
+                                                            </div>
+                                                        </div>
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                    {!selectedAccountId && (
+                                        <p className="text-[10px] text-amber-500 font-medium">
+                                            * Selecione uma conta para atualizar o saldo
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -351,14 +424,25 @@ export function NotificationsPopover() {
                         </Button>
                         <Button
                             onClick={handleConfirm}
-                            disabled={!!processing}
+                            disabled={!!processing || ((confirmModal.item?.type === 'recurring' || confirmModal.item?.type === 'boleto') && !selectedAccountId)}
                             className="bg-emerald-600 hover:bg-emerald-700"
                         >
-                            {processing ? "Processando..." : "Confirmar Pagamento"}
+                            {processing ? "Processando..." : (confirmModal.item?.originalData?.type === 'receita' ? "Confirmar Recebimento" : "Confirmar Pagamento")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            <style jsx>{`
+                @keyframes bell-ring {
+                    0%, 100% { transform: rotate(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+                    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+                }
+                .animate-bell-ring {
+                    animation: bell-ring 2s ease-in-out infinite;
+                    transform-origin: top center;
+                }
+            `}</style>
         </>
     );
 }

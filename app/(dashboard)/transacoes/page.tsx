@@ -24,6 +24,17 @@ import {
     Smartphone,
 } from "lucide-react";
 import {
+    format,
+    isBefore,
+    startOfDay,
+    isSameMonth,
+    isSameYear,
+    addDays,
+    isToday,
+    isYesterday
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -109,6 +120,28 @@ export default function TransacoesPage() {
             return matchType && matchSearch;
         });
     }, [allMonthTransactions, filterType, searchTerm]);
+
+    // Agrupar transações por data
+    const groupedTransactions = useMemo(() => {
+        const groups: { [key: string]: typeof transactions } = {};
+
+        filteredTransactions.forEach(t => {
+            const date = new Date(t.date);
+            const dateKey = format(date, "yyyy-MM-dd");
+            if (!groups[dateKey]) {
+                groups[dateKey] = [];
+            }
+            groups[dateKey].push(t);
+        });
+
+        // Ordenar chaves (datas) decrescente
+        return Object.keys(groups)
+            .sort((a, b) => b.localeCompare(a))
+            .map(dateKey => ({
+                date: new Date(dateKey + "T12:00:00"), // Evitar problemas de fuso
+                items: groups[dateKey]
+            }));
+    }, [filteredTransactions]);
 
     // Calcular totais do mês (usando allMonthTransactions)
     const monthTotals = useMemo(() => {
@@ -373,101 +406,115 @@ export default function TransacoesPage() {
                                 </p>
                             </div>
                         ) : (
-                            <div className="space-y-3">
-                                {filteredTransactions.map((transaction) => {
-                                    const category = getCategoryByName(transaction.category);
-                                    const isReceita = transaction.type === "receita";
-                                    const Icon = category
-                                        ? getIconById(category.icon)
-                                        : (isReceita ? TrendingUp : TrendingDown);
-                                    const color = category?.color || (isReceita ? "#22C55E" : "#EF4444");
-                                    const showInstallments = transaction.installments && transaction.installments > 1;
+                            <div className="space-y-6">
+                                {groupedTransactions.map((group) => {
+                                    const date = group.date;
+                                    let dateLabel = format(date, "dd 'de' MMMM", { locale: ptBR });
+
+                                    if (isToday(date)) dateLabel = "Hoje";
+                                    else if (isYesterday(date)) dateLabel = "Ontem";
 
                                     return (
-                                        <div
-                                            key={transaction.id}
-                                            className="flex items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all group"
-                                        >
-                                            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 mr-2">
-                                                <div
-                                                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shadow-lg shrink-0 ${isReceita
-                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20'
-                                                        : 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/20'
-                                                        }`}
-                                                >
-                                                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                                                </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="font-bold text-foreground text-sm sm:text-lg truncate leading-tight mb-1">
-                                                        {formatTransactionDescription(transaction, accounts)}
-                                                    </p>
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-[10px] sm:text-sm text-muted-foreground flex items-center shrink-0">
-                                                            <Calendar className="w-3 h-3 mr-1" />
-                                                            {formatDate(transaction.date)}
-                                                        </span>
-                                                        {transaction.paymentMethod && !isReceita && (
-                                                            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground px-1.5 py-0.5 rounded-md bg-muted border border-border shrink-0">
-                                                                {getPaymentIcon(transaction)}
-                                                                <span className="hidden sm:inline">
-                                                                    {transaction.paymentMethod === "credit" && "Crédito"}
-                                                                    {transaction.paymentMethod === "debit" && "Débito"}
-                                                                    {transaction.paymentMethod === "pix" && "PIX"}
-                                                                    {transaction.paymentMethod === "boleto" && "Boleto"}
-                                                                </span>
-                                                            </span>
-                                                        )}
-                                                        {transaction.boletoStatus === "pending" && (
-                                                            <Badge className="bg-yellow-500 text-white border-none text-[10px] sm:text-xs shrink-0 px-1.5 py-0">
-                                                                Pendente
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </div>
+                                        <div key={date.toISOString()} className="space-y-2">
+                                            <div className="flex items-center gap-2 px-1">
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                                                    {dateLabel}
+                                                </span>
+                                                <div className="h-[1px] flex-1 bg-border/30" />
                                             </div>
-                                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-4 shrink-0">
-                                                <div className="text-right">
-                                                    <span className={`text-sm sm:text-lg font-bold ${isReceita ? 'text-emerald-600' : 'text-red-600'}`}>
-                                                        {isReceita ? '+' : '-'}{formatCurrency(transaction.amount)}
-                                                    </span>
-                                                    {showInstallments && (
-                                                        <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                                            {transaction.installmentNumber}/{transaction.installments}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 sm:h-10 sm:w-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-                                                        >
-                                                            <MoreHorizontal className="w-4 h-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-popover border-border">
-                                                        <DropdownMenuItem
-                                                            className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
+
+                                            <div className="space-y-1">
+                                                {group.items.map((transaction) => {
+                                                    const category = getCategoryByName(transaction.category);
+                                                    const isReceita = transaction.type === "receita";
+                                                    const Icon = category
+                                                        ? getIconById(category.icon)
+                                                        : (isReceita ? TrendingUp : TrendingDown);
+                                                    const showInstallments = transaction.installments && transaction.installments > 1;
+
+                                                    return (
+                                                        <div
+                                                            key={transaction.id}
                                                             onClick={() => handleEdit(transaction)}
+                                                            className="flex items-center justify-between p-2 rounded-xl hover:bg-muted/50 transition-all group cursor-pointer border border-transparent hover:border-border/50"
                                                         >
-                                                            <Pencil className="w-4 h-4 mr-2" />
-                                                            Editar
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10"
-                                                            onClick={() => handleDelete(transaction.id)}
-                                                        >
-                                                            <Trash2 className="w-4 h-4 mr-2" />
-                                                            Excluir
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                                <div
+                                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isReceita
+                                                                        ? 'bg-emerald-500/10 text-emerald-500'
+                                                                        : 'bg-rose-500/10 text-rose-500'
+                                                                        }`}
+                                                                >
+                                                                    <Icon className="w-4.5 h-4.5" />
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="font-semibold text-foreground text-sm truncate leading-tight">
+                                                                        {formatTransactionDescription(transaction, accounts)}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                                                            {transaction.category}
+                                                                        </span>
+                                                                        {transaction.paymentMethod && !isReceita && (
+                                                                            <span className="flex items-center gap-1 text-[9px] text-muted-foreground/70">
+                                                                                • {getPaymentIcon(transaction)}
+                                                                            </span>
+                                                                        )}
+                                                                        {transaction.boletoStatus === "pending" && (
+                                                                            <span className="text-[9px] text-amber-500 font-bold uppercase tracking-tighter">
+                                                                                • Pendente
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 shrink-0 ml-2">
+                                                                <div className="text-right">
+                                                                    <p className={`text-sm font-bold tabular-nums ${isReceita ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                        {isReceita ? '+' : '-'}{formatCurrency(transaction.amount)}
+                                                                    </p>
+                                                                    {showInstallments && (
+                                                                        <p className="text-[9px] text-muted-foreground font-medium">
+                                                                            {transaction.installmentNumber}/{transaction.installments}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                                                        >
+                                                                            <MoreHorizontal className="w-3.5 h-3.5" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent className="bg-popover border-border">
+                                                                        <DropdownMenuItem
+                                                                            className="text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
+                                                                            onClick={() => handleEdit(transaction)}
+                                                                        >
+                                                                            <Pencil className="w-4 h-4 mr-2" />
+                                                                            Editar
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem
+                                                                            className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10"
+                                                                            onClick={() => handleDelete(transaction.id)}
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4 mr-2" />
+                                                                            Excluir
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     );
                                 })}
-                            </div >
+                            </div>
                         )}
                     </CardContent >
                 </Card >

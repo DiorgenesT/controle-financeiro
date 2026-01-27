@@ -26,14 +26,18 @@ import {
     TrendingDown,
     Loader2,
     Plus,
+    Smartphone,
     AlertCircle,
     Wallet,
     CreditCard,
     Receipt,
     Calendar,
-    Smartphone,
     Users,
-    User
+    User,
+    Clock,
+    CheckCircle2,
+    FileText,
+    Lightbulb
 } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -326,8 +330,8 @@ export function TransactionModal({
                 // A edição deve ser apenas pontual nesta transação.
                 // Portanto, removemos a lógica de updateRecurringTransaction aqui.
 
-                // Apenas se for uma NOVA transação e marcada como recorrente, criamos a regra.
-                if (!initialData && formData.isRecurring) {
+                // Se for marcada como recorrente e ainda não tem um ID de recorrência vinculado
+                if (formData.isRecurring && !recurringTransactionId) {
                     try {
                         console.log("Criando nova recorrência...");
                         recurringTransactionId = await addRecurringTransaction(user.uid, recurringData);
@@ -358,6 +362,7 @@ export function TransactionModal({
                         isRecurring: formData.isRecurring,
                         recurrenceDay: formData.isRecurring ? purchaseDate.getDate() : null,
                         personId: formData.personId === "family" ? null : formData.personId,
+                        recurringTransactionId: recurringTransactionId || null,
                     });
                     toast.success("Receita atualizada!");
                 } else {
@@ -395,6 +400,7 @@ export function TransactionModal({
                             isRecurring: formData.isRecurring,
                             recurrenceDay: formData.isRecurring ? purchaseDate.getDate() : null,
                             personId: formData.personId === "family" ? null : formData.personId,
+                            recurringTransactionId: recurringTransactionId || null,
                         });
                         toast.success("Despesa atualizada!");
                     } else {
@@ -447,6 +453,9 @@ export function TransactionModal({
                             boletoStatus: formData.boletoStatus,
                             boletoDueDate: new Date(formData.boletoDueDate),
                             personId: formData.personId === "family" ? null : formData.personId,
+                            isRecurring: formData.isRecurring,
+                            recurrenceDay: formData.isRecurring ? purchaseDate.getDate() : null,
+                            recurringTransactionId: recurringTransactionId || null,
                         });
                         toast.success("Boleto atualizado!");
                     } else {
@@ -528,6 +537,9 @@ export function TransactionModal({
                             paymentMethod: "credit",
                             creditCardId: formData.creditCardId,
                             personId: formData.personId === "family" ? null : formData.personId,
+                            isRecurring: formData.isRecurring,
+                            recurrenceDay: formData.isRecurring ? purchaseDate.getDate() : null,
+                            recurringTransactionId: recurringTransactionId || null,
                         });
                         toast.success("Despesa no cartão atualizada!");
                     } else {
@@ -1058,7 +1070,7 @@ export function TransactionModal({
                                                     : "border-input bg-muted/50 text-muted-foreground hover:border-purple-400 hover:text-purple-400"
                                                     }`}
                                             >
-                                                🔄 Fixa
+                                                <Repeat className="w-4 h-4" /> Fixa
                                             </button>
                                         </div>
                                         {formData.installments !== "fixed" && (parseInt(formData.installments) || 1) > 1 && formData.amount && (
@@ -1070,8 +1082,8 @@ export function TransactionModal({
                                             </p>
                                         )}
                                         {formData.installments === "fixed" && (
-                                            <p className="text-sm text-purple-400">
-                                                💡 Será lançado automaticamente todo mês na fatura
+                                            <p className="text-sm text-purple-400 flex items-center gap-1.5">
+                                                <Lightbulb className="w-4 h-4" /> Será lançado automaticamente todo mês na fatura
                                             </p>
                                         )}
                                     </div>
@@ -1108,8 +1120,8 @@ export function TransactionModal({
                                     {/* Info de parcelas */}
                                     {parseInt(formData.boletoInstallments) > 1 && formData.amount && (
                                         <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                                            <p className="text-sm text-yellow-400">
-                                                📋 Carnê de {formData.boletoInstallments}x de{" "}
+                                            <p className="text-sm text-yellow-400 flex items-center gap-1.5">
+                                                <FileText className="w-4 h-4" /> Carnê de {formData.boletoInstallments}x de{" "}
                                                 <span className="font-bold">
                                                     R$ {(parseFloat(formData.amount) / parseInt(formData.boletoInstallments)).toFixed(2)}
                                                 </span>
@@ -1133,7 +1145,7 @@ export function TransactionModal({
                                                         : "border-input bg-muted/50 text-muted-foreground hover:bg-muted"
                                                         }`}
                                                 >
-                                                    ⏳ Pendente
+                                                    <Clock className="w-4 h-4" /> Pendente
                                                 </button>
                                                 <button
                                                     type="button"
@@ -1143,7 +1155,7 @@ export function TransactionModal({
                                                         : "border-input bg-muted/50 text-muted-foreground hover:bg-muted"
                                                         }`}
                                                 >
-                                                    ✓ Já pago
+                                                    <CheckCircle2 className="w-4 h-4" /> Já pago
                                                 </button>
                                             </div>
                                             <p className="text-xs text-muted-foreground">

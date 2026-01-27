@@ -5,6 +5,11 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
     format,
+    isBefore,
+    startOfDay,
+    isSameMonth,
+    isSameYear,
+    addDays
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -18,7 +23,10 @@ import {
     ChevronLeft,
     ChevronRight,
     Plus,
-    Tag
+    Tag,
+    AlertCircle,
+    Clock,
+    CheckCircle2
 } from "lucide-react";
 import { useRecurring } from "@/hooks/useRecurring";
 import { RecurringModal } from "@/components/RecurringModal";
@@ -124,6 +132,22 @@ export default function FixasPage() {
                             const category = categories.find(c => c.name === item.category && c.type === item.type);
                             const CategoryIcon = category ? getIconById(category.icon || 'tag') : Tag;
 
+                            // Lógica de status
+                            const today = new Date();
+                            const isProcessed = item.lastProcessedDate &&
+                                isSameMonth(new Date(item.lastProcessedDate), today) &&
+                                isSameYear(new Date(item.lastProcessedDate), today);
+
+                            const itemDate = new Date(today.getFullYear(), today.getMonth(), item.day);
+                            const isOverdue = !isProcessed && isBefore(itemDate, startOfDay(today));
+                            const isUpcoming = !isProcessed && !isOverdue && item.day <= today.getDate() + 3;
+
+                            let statusClass = "";
+                            if (isOverdue) {
+                                statusClass = "animate-tremble-intense shadow-[0_0_30px_rgba(244,63,94,0.6)]";
+                            } else if (isUpcoming) {
+                                statusClass = "animate-tremble-soft shadow-[0_0_20px_rgba(251,191,36,0.4)]";
+                            }
                             return (
                                 <div
                                     key={item.id}
@@ -133,8 +157,16 @@ export default function FixasPage() {
                                         ${item.type === 'receita'
                                             ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-emerald-500/20'
                                             : 'bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-rose-500/20'}
+                                        ${statusClass}
                                     `}
                                 >
+                                    {/* Wave Effect for Upcoming */}
+                                    {isUpcoming && (
+                                        <>
+                                            <div className={`absolute inset-0 z-0 animate-wave-1 rounded-2xl md:rounded-3xl ${item.type === 'receita' ? 'bg-emerald-400/30' : 'bg-rose-400/30'}`} />
+                                            <div className={`absolute inset-0 z-0 animate-wave-2 rounded-2xl md:rounded-3xl ${item.type === 'receita' ? 'bg-emerald-400/20' : 'bg-rose-400/20'}`} />
+                                        </>
+                                    )}
                                     {/* Glassmorphism Overlay */}
                                     <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -148,10 +180,13 @@ export default function FixasPage() {
 
                                     <div className="relative z-10 flex flex-col gap-0.5 md:gap-1">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1 bg-black/20 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
-                                                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter md:tracking-widest opacity-90">
+                                            <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full">
+                                                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter md:tracking-widest text-white">
                                                     Dia {item.day}
                                                 </span>
+                                                {isOverdue && <AlertCircle className="w-2.5 h-2.5 md:w-3 md:h-3 text-white animate-pulse" />}
+                                                {isUpcoming && <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-white animate-pulse" />}
+                                                {isProcessed && <CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />}
                                             </div>
 
                                             <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
@@ -216,6 +251,50 @@ export default function FixasPage() {
                     refresh();
                 }}
             />
+            <style jsx>{`
+                @keyframes wave {
+                    0% { transform: scale(1); opacity: 0.6; }
+                    100% { transform: scale(1.4); opacity: 0; }
+                }
+                @keyframes tremble-soft {
+                    0%, 20%, 100% { transform: translate(0, 0) rotate(0); }
+                    2% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+                    4% { transform: translate(1px, -1px) rotate(0.5deg); }
+                    6% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+                    8% { transform: translate(1px, 1px) rotate(0.5deg); }
+                    10% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+                    12% { transform: translate(1px, -1px) rotate(0.5deg); }
+                }
+                @keyframes tremble-intense {
+                    0%, 15%, 100% { transform: translate(0, 0) rotate(0); }
+                    1% { transform: translate(-3px, 3px) rotate(-2deg); }
+                    2% { transform: translate(3px, -3px) rotate(2deg); }
+                    3% { transform: translate(-3px, -3px) rotate(-2deg); }
+                    4% { transform: translate(3px, 3px) rotate(2deg); }
+                    5% { transform: translate(-3px, 3px) rotate(-2deg); }
+                    6% { transform: translate(3px, -3px) rotate(2deg); }
+                    7% { transform: translate(-3px, -3px) rotate(-2deg); }
+                    8% { transform: translate(3px, 3px) rotate(2deg); }
+                    9% { transform: translate(-3px, 3px) rotate(-2deg); }
+                    10% { transform: translate(3px, -3px) rotate(2deg); }
+                    11% { transform: translate(-3px, -3px) rotate(-2deg); }
+                    12% { transform: translate(3px, 3px) rotate(2deg); }
+                    13% { transform: translate(-3px, 3px) rotate(-2deg); }
+                    14% { transform: translate(3px, -3px) rotate(2deg); }
+                }
+                .animate-wave-1 {
+                    animation: wave 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+                }
+                .animate-wave-2 {
+                    animation: wave 3s cubic-bezier(0, 0, 0.2, 1) infinite 1.5s;
+                }
+                .animate-tremble-soft {
+                    animation: tremble-soft 4s ease-in-out infinite;
+                }
+                .animate-tremble-intense {
+                    animation: tremble-intense 3s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 }

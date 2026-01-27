@@ -140,12 +140,10 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                 day: parseInt(formData.day),
                 personId: formData.personId === "family" ? null : formData.personId,
                 active: true,
-                // Campos de pagamento (apenas para despesas)
-                ...(formData.type === "despesa" && {
-                    paymentMethod: formData.paymentMethod,
-                    creditCardId: formData.paymentMethod === "credit" ? formData.creditCardId : undefined,
-                    accountId: formData.paymentMethod === "debit" ? formData.accountId : undefined,
-                }),
+                // Campos de pagamento
+                paymentMethod: formData.type === "despesa" ? formData.paymentMethod : "debit",
+                creditCardId: (formData.type === "despesa" && formData.paymentMethod === "credit") ? formData.creditCardId : undefined,
+                accountId: (formData.type === "receita" || formData.paymentMethod === "debit") ? formData.accountId : undefined,
             };
 
             if (editingId) {
@@ -256,81 +254,85 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                         </div>
                     </div>
 
-                    {/* Forma de pagamento - apenas para despesas */}
-                    {formData.type === "despesa" && (
-                        <div className="space-y-3">
-                            <Label>Forma de Pagamento</Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, paymentMethod: "debit" })}
-                                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "debit"
-                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                        : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
-                                        }`}
+                    {/* Forma de pagamento e Conta */}
+                    <div className="space-y-3">
+                        {formData.type === "despesa" && (
+                            <>
+                                <Label>Forma de Pagamento</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: "debit" })}
+                                        className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "debit"
+                                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                            : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
+                                            }`}
+                                    >
+                                        <Wallet className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Débito/PIX</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: "credit" })}
+                                        disabled={creditCards.length === 0}
+                                        className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "credit"
+                                            ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                                            : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
+                                            } ${creditCards.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    >
+                                        <CreditCard className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Cartão</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Seletor de cartão (apenas despesa no crédito) */}
+                        {formData.type === "despesa" && formData.paymentMethod === "credit" && creditCards.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-muted-foreground">Cartão</Label>
+                                <Select
+                                    value={formData.creditCardId}
+                                    onValueChange={(v) => setFormData({ ...formData, creditCardId: v })}
                                 >
-                                    <Wallet className="w-4 h-4" />
-                                    <span className="text-sm font-medium">Débito/PIX</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, paymentMethod: "credit" })}
-                                    disabled={creditCards.length === 0}
-                                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "credit"
-                                        ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400"
-                                        : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
-                                        } ${creditCards.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                                >
-                                    <CreditCard className="w-4 h-4" />
-                                    <span className="text-sm font-medium">Cartão</span>
-                                </button>
+                                    <SelectTrigger className="bg-muted/50 border-input">
+                                        <SelectValue placeholder="Selecione o cartão" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        {creditCards.map((card) => (
+                                            <SelectItem key={card.id} value={card.id}>
+                                                {card.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
+                        )}
 
-                            {/* Seletor de cartão */}
-                            {formData.paymentMethod === "credit" && creditCards.length > 0 && (
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Cartão</Label>
-                                    <Select
-                                        value={formData.creditCardId}
-                                        onValueChange={(v) => setFormData({ ...formData, creditCardId: v })}
-                                    >
-                                        <SelectTrigger className="bg-muted/50 border-input">
-                                            <SelectValue placeholder="Selecione o cartão" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-popover border-border">
-                                            {creditCards.map((card) => (
-                                                <SelectItem key={card.id} value={card.id}>
-                                                    {card.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
-
-                            {/* Seletor de conta para débito */}
-                            {formData.paymentMethod === "debit" && accounts.length > 0 && (
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Conta</Label>
-                                    <Select
-                                        value={formData.accountId}
-                                        onValueChange={(v) => setFormData({ ...formData, accountId: v })}
-                                    >
-                                        <SelectTrigger className="bg-muted/50 border-input">
-                                            <SelectValue placeholder="Selecione a conta" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-popover border-border">
-                                            {accounts.map((acc) => (
-                                                <SelectItem key={acc.id} value={acc.id}>
-                                                    {acc.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                        {/* Seletor de conta (para receita ou despesa no débito) */}
+                        {(formData.type === "receita" || (formData.type === "despesa" && formData.paymentMethod === "debit")) && accounts.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-muted-foreground">
+                                    {formData.type === "receita" ? "Conta de Destino" : "Conta"}
+                                </Label>
+                                <Select
+                                    value={formData.accountId}
+                                    onValueChange={(v) => setFormData({ ...formData, accountId: v })}
+                                >
+                                    <SelectTrigger className="bg-muted/50 border-input">
+                                        <SelectValue placeholder="Selecione a conta" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        {accounts.map((acc) => (
+                                            <SelectItem key={acc.id} value={acc.id}>
+                                                {acc.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    </div>
 
                     <div className="space-y-2">
                         <Label>Atribuir a</Label>

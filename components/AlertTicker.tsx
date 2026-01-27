@@ -7,14 +7,23 @@ import { checkRecurringStatus, processRecurringTransaction, PendingRecurring } f
 import { updateTransaction, getGoals, updateGoal } from "@/lib/firestore";
 import { updateAccountBalance } from "@/lib/accounts";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertCircle, Calendar, Clock, CreditCard, Receipt, CheckCircle, Repeat, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { AlertCircle, Calendar, Clock, CreditCard, Receipt, CheckCircle, Repeat, ChevronLeft, ChevronRight, X, Wallet, Landmark } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Transaction } from "@/types";
+import { useAccounts } from "@/hooks/useAccounts";
+import { getBankByCode, getAccountTypeLabel } from "@/lib/banks";
 
 interface Alert {
     id: string;
@@ -40,10 +49,12 @@ import { useRouter } from "next/navigation";
 export function AlertTicker() {
     const router = useRouter();
     const { transactions } = useTransactions();
+    const { accounts } = useAccounts();
     const { user } = useAuth();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [processing, setProcessing] = useState<string | null>(null);
+    const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
     // Modal de confirmação
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; item: PendingRecurring | Transaction | null }>({
@@ -54,6 +65,15 @@ export function AlertTicker() {
 
     const openConfirmModal = (item: PendingRecurring | Transaction) => {
         setEditValue(item.amount.toString());
+
+        // Pre-selecionar conta: se o item já tem, usa ela. Se não, usa a padrão.
+        if (item.accountId) {
+            setSelectedAccountId(item.accountId);
+        } else {
+            const defaultAcc = accounts.find(a => a.isDefault) || accounts[0];
+            setSelectedAccountId(defaultAcc?.id || "");
+        }
+
         setConfirmModal({ open: true, item });
     };
 
@@ -70,7 +90,7 @@ export function AlertTicker() {
         try {
             // Verificar se é recorrente (PendingRecurring tem daysUntilDue)
             if ('daysUntilDue' in confirmModal.item) {
-                await processRecurringTransaction(user.uid, confirmModal.item as PendingRecurring, value);
+                await processRecurringTransaction(user.uid, confirmModal.item as PendingRecurring, value, selectedAccountId);
                 setAlerts(prev => prev.filter(a => a.id !== `recurring-${confirmModal.item!.id}`));
             } else {
                 // É boleto (Transaction)
@@ -203,13 +223,13 @@ export function AlertTicker() {
                     let alertType: "danger" | "warning" | "info" = "info";
 
                     if (rec.daysUntilDue === 0) {
-                        message = `"${rec.description}" vence HOJE!`;
+                        message = isReceita ? `"${rec.description}" para RECEBER HOJE!` : `"${rec.description}" vence HOJE!`;
                         alertType = "warning";
                     } else if (rec.daysUntilDue === 1) {
-                        message = `"${rec.description}" vence amanhã`;
+                        message = isReceita ? `"${rec.description}" para receber amanhã` : `"${rec.description}" vence amanhã`;
                         alertType = "info";
                     } else {
-                        message = `"${rec.description}" vence em ${rec.daysUntilDue} dias`;
+                        message = isReceita ? `"${rec.description}" para receber em ${rec.daysUntilDue} dias` : `"${rec.description}" vence em ${rec.daysUntilDue} dias`;
                         alertType = "info";
                     }
 
@@ -239,12 +259,22 @@ export function AlertTicker() {
 
     // Rotação automática
     useEffect(() => {
-        if (alerts.length <= 1) return;
+        if (alerts.length <= 1) {
+            setCurrentIndex(0);
+            return;
+        }
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % alerts.length);
         }, 6000);
         return () => clearInterval(interval);
     }, [alerts.length]);
+
+    // Garantir que o índice está sempre dentro dos limites
+    useEffect(() => {
+        if (currentIndex >= alerts.length && alerts.length > 0) {
+            setCurrentIndex(0);
+        }
+    }, [alerts.length, currentIndex]);
 
     const goNext = () => setCurrentIndex((prev) => (prev + 1) % alerts.length);
     const goPrev = () => setCurrentIndex((prev) => (prev - 1 + alerts.length) % alerts.length);
@@ -258,7 +288,8 @@ export function AlertTicker() {
         );
     }
 
-    const currentAlert = alerts[currentIndex];
+    const currentAlert = alerts[currentIndex] || alerts[0];
+    if (!currentAlert) return null;
     const Icon = currentAlert.icon;
 
     return (
@@ -320,7 +351,7 @@ export function AlertTicker() {
 
             {/* Modal de Confirmação com Edição de Valor */}
             <Dialog open={confirmModal.open} onOpenChange={(open) => setConfirmModal({ open, item: null })}>
-                <DialogContent className="bg-popover border-border max-w-sm">
+                <DialogContent className="bg-popover border-border sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle className="text-foreground">
                             Confirmar {confirmModal.item?.type === 'receita' ? 'Recebimento' : 'Pagamento'}
@@ -350,6 +381,50 @@ export function AlertTicker() {
                                     Valor original: {formatCurrency(confirmModal.item.amount)}
                                 </p>
                             </div>
+
+                            {/* Seletor de Conta */}
+                            {('daysUntilDue' in confirmModal.item || (confirmModal.item as Transaction).paymentMethod === 'boleto') && (
+                                <div className="space-y-2">
+                                    <Label className="text-muted-foreground flex items-center gap-2">
+                                        <Wallet className="w-3 h-3" />
+                                        Conta para {confirmModal.item.type === 'receita' ? 'recebimento' : 'pagamento'}
+                                    </Label>
+                                    <Select
+                                        value={selectedAccountId}
+                                        onValueChange={setSelectedAccountId}
+                                    >
+                                        <SelectTrigger className="bg-muted/50 border-input">
+                                            <SelectValue placeholder="Selecione a conta" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-popover border-border">
+                                            {accounts.map((acc) => {
+                                                const bank = getBankByCode(acc.bankCode);
+                                                return (
+                                                    <SelectItem key={acc.id} value={acc.id}>
+                                                        <div className="flex items-center gap-2 w-full min-w-0">
+                                                            <div
+                                                                className="w-2 h-2 rounded-full shrink-0"
+                                                                style={{ backgroundColor: bank.color }}
+                                                            />
+                                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                                                    {getAccountTypeLabel(acc.type)}
+                                                                </span>
+                                                                <span className="text-sm font-medium truncate">{acc.name}</span>
+                                                            </div>
+                                                        </div>
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                    {!selectedAccountId && (
+                                        <p className="text-[10px] text-amber-500 font-medium">
+                                            * Selecione uma conta para atualizar o saldo
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -363,7 +438,7 @@ export function AlertTicker() {
                         </Button>
                         <Button
                             onClick={handleConfirm}
-                            disabled={!!processing}
+                            disabled={!!processing || (confirmModal.item && ('daysUntilDue' in confirmModal.item || (confirmModal.item as Transaction).paymentMethod === 'boleto') && !selectedAccountId)}
                             className="bg-emerald-600 hover:bg-emerald-700"
                         >
                             {processing ? "Processando..." : "Confirmar"}

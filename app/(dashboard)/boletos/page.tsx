@@ -38,7 +38,9 @@ import {
     ArrowRight,
     TrendingUp,
     FileText,
-    Loader2
+    Loader2,
+    HelpCircle,
+    CalendarRange
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -291,31 +293,31 @@ export default function BoletosPage() {
 
             if (boleto.boletoStatus === "paid") {
                 groupKey = "paid";
-                groupTitle = "✓ Pagos";
+                groupTitle = "Pagos";
                 priority = 5;
             } else if (!parsedDueDate) {
                 groupKey = "unknown";
-                groupTitle = "❓ Data indefinida";
+                groupTitle = "Data indefinida";
                 priority = 6;
             } else if (daysDiff < 0) {
                 groupKey = "overdue";
-                groupTitle = "⚠️ Vencidos";
+                groupTitle = "Vencidos";
                 priority = 0;
             } else if (daysDiff === 0) {
                 groupKey = "today";
-                groupTitle = "🔴 Vence Hoje";
+                groupTitle = "Vence Hoje";
                 priority = 1;
             } else if (daysDiff <= 7) {
                 groupKey = "week";
-                groupTitle = "📅 Próximos 7 dias";
+                groupTitle = "Próximos 7 dias";
                 priority = 2;
             } else if (daysDiff <= 30) {
                 groupKey = "month";
-                groupTitle = "📆 Este mês";
+                groupTitle = "Este mês";
                 priority = 3;
             } else {
                 groupKey = "future";
-                groupTitle = "📋 Futuros";
+                groupTitle = "Futuros";
                 priority = 4;
             }
 
@@ -566,9 +568,16 @@ export default function BoletosPage() {
                     ) : (
                         groupedBoletos.map((group) => (
                             <div key={group.title} className="space-y-3">
-                                <h3 className="text-sm font-medium text-muted-foreground px-1">
+                                <h3 className="text-sm font-medium text-muted-foreground px-1 flex items-center gap-2">
+                                    {group.title === "Pagos" && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                                    {group.title === "Data indefinida" && <HelpCircle className="w-4 h-4 text-gray-500" />}
+                                    {group.title === "Vencidos" && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                                    {group.title === "Vence Hoje" && <AlertCircle className="w-4 h-4 text-amber-500" />}
+                                    {group.title === "Próximos 7 dias" && <Calendar className="w-4 h-4 text-blue-500" />}
+                                    {group.title === "Este mês" && <CalendarRange className="w-4 h-4 text-blue-400" />}
+                                    {group.title === "Futuros" && <FileText className="w-4 h-4 text-muted-foreground" />}
                                     {group.title}
-                                    <span className="ml-2 text-xs text-muted-foreground">({group.boletos.length})</span>
+                                    <span className="ml-1 text-xs text-muted-foreground">({group.boletos.length})</span>
                                 </h3>
                                 <div className="space-y-2">
                                     {group.boletos.map((boleto) => {
