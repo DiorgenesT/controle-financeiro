@@ -12,20 +12,42 @@ interface AccountsTickerProps {
 
 export function AccountsTicker({ accounts, linkedAccountIds }: AccountsTickerProps) {
     const [isHovered, setIsHovered] = useState(false);
+    const [shouldScroll, setShouldScroll] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
-    // Duplicar contas para garantir loop infinito suave
-    const tickerAccounts = [...accounts, ...accounts, ...accounts];
+    useEffect(() => {
+        const checkOverflow = () => {
+            if (containerRef.current && contentRef.current) {
+                // Se o conteúdo for maior que o container, deve scrollar
+                const hasOverflow = contentRef.current.scrollWidth > containerRef.current.clientWidth;
+                setShouldScroll(hasOverflow);
+            }
+        };
+
+        checkOverflow();
+
+        const observer = new ResizeObserver(checkOverflow);
+        if (containerRef.current) observer.observe(containerRef.current);
+
+        return () => observer.disconnect();
+    }, [accounts]);
+
+    // Só duplicar contas se for necessário scrollar
+    const tickerAccounts = shouldScroll ? [...accounts, ...accounts, ...accounts] : accounts;
 
     return (
         <div
+            ref={containerRef}
             className="w-full overflow-hidden relative mt-1"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
-                className={`flex gap-3 w-max animate-scroll ${isHovered ? 'pause-animation' : ''}`}
+                ref={contentRef}
+                className={`flex gap-3 w-max ${shouldScroll ? 'animate-scroll' : ''} ${isHovered && shouldScroll ? 'pause-animation' : ''}`}
                 style={{
-                    animation: `scroll ${accounts.length * 5}s linear infinite`
+                    animation: shouldScroll ? `scroll ${accounts.length * 5}s linear infinite` : 'none'
                 }}
             >
                 {tickerAccounts.map((account, index) => (

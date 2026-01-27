@@ -172,10 +172,10 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-zinc-800 text-white sm:max-w-[425px]">
+            <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{initialData ? "Editar Fixa" : "Nova Transação Fixa"}</DialogTitle>
-                    <DialogDescription className="text-zinc-400">
+                    <DialogDescription className="text-muted-foreground">
                         Configure uma receita ou despesa que se repete todo mês.
                     </DialogDescription>
                 </DialogHeader>
@@ -187,10 +187,10 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                                 value={formData.type}
                                 onValueChange={(v: "receita" | "despesa") => setFormData({ ...formData, type: v, category: "" })}
                             >
-                                <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                <SelectTrigger className="bg-muted/50 border-input">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-zinc-800">
+                                <SelectContent className="bg-popover border-border">
                                     <SelectItem value="receita">Receita</SelectItem>
                                     <SelectItem value="despesa">Despesa</SelectItem>
                                 </SelectContent>
@@ -204,7 +204,7 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                                 max="31"
                                 value={formData.day}
                                 onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                                className="bg-zinc-800 border-zinc-700"
+                                className="bg-muted/50 border-input"
                             />
                         </div>
                     </div>
@@ -215,7 +215,7 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Ex: Aluguel, Salário"
-                            className="bg-zinc-800 border-zinc-700"
+                            className="bg-muted/50 border-input"
                             required
                         />
                     </div>
@@ -226,7 +226,7 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             <CurrencyInput
                                 value={formData.amount}
                                 onChange={(val) => setFormData({ ...formData, amount: val })}
-                                className="bg-zinc-800 border-zinc-700"
+                                className="bg-muted/50 border-input"
                                 required
                             />
                         </div>
@@ -236,10 +236,10 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                                 value={formData.category}
                                 onValueChange={(v) => setFormData({ ...formData, category: v })}
                             >
-                                <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                <SelectTrigger className="bg-muted/50 border-input">
                                     <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-zinc-800 max-h-60">
+                                <SelectContent className="bg-popover border-border max-h-60">
                                     {filteredCategories.map((cat) => {
                                         const Icon = getIconById(cat.icon);
                                         return (
@@ -265,8 +265,8 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                                     type="button"
                                     onClick={() => setFormData({ ...formData, paymentMethod: "debit" })}
                                     className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "debit"
-                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                        : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600"
+                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                        : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
                                         }`}
                                 >
                                     <Wallet className="w-4 h-4" />
@@ -277,8 +277,8 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                                     onClick={() => setFormData({ ...formData, paymentMethod: "credit" })}
                                     disabled={creditCards.length === 0}
                                     className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${formData.paymentMethod === "credit"
-                                        ? "border-purple-500 bg-purple-500/10 text-purple-400"
-                                        : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600"
+                                        ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                                        : "border-input bg-muted/50 text-muted-foreground hover:border-accent"
                                         } ${creditCards.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                     <CreditCard className="w-4 h-4" />
@@ -289,15 +289,15 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             {/* Seletor de cartão */}
                             {formData.paymentMethod === "credit" && creditCards.length > 0 && (
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-400">Cartão</Label>
+                                    <Label className="text-muted-foreground">Cartão</Label>
                                     <Select
                                         value={formData.creditCardId}
                                         onValueChange={(v) => setFormData({ ...formData, creditCardId: v })}
                                     >
-                                        <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                        <SelectTrigger className="bg-muted/50 border-input">
                                             <SelectValue placeholder="Selecione o cartão" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                                        <SelectContent className="bg-popover border-border">
                                             {creditCards.map((card) => (
                                                 <SelectItem key={card.id} value={card.id}>
                                                     {card.name}
@@ -311,15 +311,15 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             {/* Seletor de conta para débito */}
                             {formData.paymentMethod === "debit" && accounts.length > 0 && (
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-400">Conta</Label>
+                                    <Label className="text-muted-foreground">Conta</Label>
                                     <Select
                                         value={formData.accountId}
                                         onValueChange={(v) => setFormData({ ...formData, accountId: v })}
                                     >
-                                        <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                        <SelectTrigger className="bg-muted/50 border-input">
                                             <SelectValue placeholder="Selecione a conta" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                                        <SelectContent className="bg-popover border-border">
                                             {accounts.map((acc) => (
                                                 <SelectItem key={acc.id} value={acc.id}>
                                                     {acc.name}
@@ -338,10 +338,10 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                             value={formData.personId}
                             onValueChange={(v) => setFormData({ ...formData, personId: v })}
                         >
-                            <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                            <SelectTrigger className="bg-muted/50 border-input">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                            <SelectContent className="bg-popover border-border">
                                 <SelectItem value="family">Família</SelectItem>
                                 {people.map((person) => (
                                     <SelectItem key={person.id} value={person.id}>
@@ -353,7 +353,7 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
                     </div>
 
                     <DialogFooter>
-                        <Button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700">
+                        <Button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                             Salvar Fixa
                         </Button>

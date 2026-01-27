@@ -5,17 +5,6 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
     format,
-    addMonths,
-    subMonths,
-    startOfMonth,
-    endOfMonth,
-    startOfWeek,
-    endOfWeek,
-    eachDayOfInterval,
-    isSameMonth,
-    isSameDay,
-    getDate,
-    isToday
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -28,11 +17,15 @@ import {
     Repeat,
     ChevronLeft,
     ChevronRight,
-    Plus
+    Plus,
+    Tag
 } from "lucide-react";
 import { useRecurring } from "@/hooks/useRecurring";
 import { RecurringModal } from "@/components/RecurringModal";
 import { RecurringTransaction } from "@/types";
+import { getCategories, Category } from "@/lib/categories";
+import { getIconById } from "@/lib/icons";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const formatCurrency = (value: number) => {
@@ -43,10 +36,17 @@ const formatCurrency = (value: number) => {
 };
 
 export default function FixasPage() {
+    const { user } = useAuth();
     const { recurring, loading, deleteRecurringTransaction, refresh } = useRecurring();
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<RecurringTransaction | null>(null);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    // Carregar categorias para exibir ícones
+    useEffect(() => {
+        if (!user?.uid) return;
+        getCategories(user.uid).then(setCategories).catch(console.error);
+    }, [user?.uid]);
 
     // Verificar parâmetro de URL para edição automática
     useEffect(() => {
@@ -81,168 +81,125 @@ export default function FixasPage() {
         }
     };
 
-    const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-    const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-    const goToToday = () => setCurrentMonth(new Date());
 
-    // Gerar dias do calendário
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { locale: ptBR });
-    const endDate = endOfWeek(monthEnd, { locale: ptBR });
-
-    const calendarDays = eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-    });
-
-    const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-    // Função para obter transações de um dia específico
-    const getTransactionsForDay = (date: Date) => {
-        // Só mostra transações se o dia pertencer ao mês atual (ou se quisermos mostrar em todos os meses visualizados)
-        // Como são fixas mensais, elas teoricamente "existem" em todos os meses no mesmo dia.
-        // Vamos mostrar baseando-se no dia do mês (1-31).
-
-        const dayOfMonth = getDate(date);
-        const isCurrentMonthDay = isSameMonth(date, currentMonth);
-
-        if (!isCurrentMonthDay) return [];
-
-        // Filtra transações que vencem neste dia
-        let transactions = recurring.filter(item => item.day === dayOfMonth);
-
-        // Lógica para fim de mês (ex: dia 31 em mês de 30 dias)
-        // Se for o último dia do mês, inclui transações com dia > que o último dia
-        const lastDayOfCurrentMonth = getDate(monthEnd);
-        if (dayOfMonth === lastDayOfCurrentMonth) {
-            const overflowTransactions = recurring.filter(item => item.day > lastDayOfCurrentMonth);
-            transactions = [...transactions, ...overflowTransactions];
-        }
-
-        return transactions.sort((a, b) => b.amount - a.amount); // Maiores valores primeiro
-    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header title="Calendário de Fixas" />
 
             <div className="flex-1 p-4 md:p-6 flex flex-col overflow-hidden">
-                {/* Calendar Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold capitalize text-foreground">
-                            {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+                <div className="flex justify-between items-center mb-8">
+                    <div className="flex flex-col">
+                        <h2 className="text-3xl font-black tracking-tight text-foreground">
+                            Transações Fixas
                         </h2>
-                        <div className="flex items-center rounded-md border bg-card/50 backdrop-blur-sm">
-                            <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8">
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <div className="w-px h-4 bg-border" />
-                            <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8">
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={goToToday} className="hidden sm:flex">
-                            Hoje
-                        </Button>
+                        <p className="text-muted-foreground text-sm">
+                            Gerencie suas receitas e despesas recorrentes
+                        </p>
                     </div>
 
-                    <Button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} className="gap-2">
-                        <Plus className="w-4 h-4" />
+                    <Button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} className="gap-2 shadow-lg shadow-primary/20 px-6 h-12 rounded-2xl font-bold">
+                        <Plus className="w-5 h-5" />
                         Nova Fixa
                     </Button>
                 </div>
 
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                        Carregando calendário...
+                        Carregando transações fixas...
+                    </div>
+                ) : recurring.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-4">
+                        <div className="p-6 rounded-full bg-muted/20">
+                            <Calendar className="w-12 h-12 opacity-20" />
+                        </div>
+                        <p>Nenhuma transação fixa cadastrada.</p>
+                        <Button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} variant="outline">
+                            Criar minha primeira fixa
+                        </Button>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col border rounded-xl bg-card shadow-xl overflow-hidden ring-1 ring-border/50">
-                        {/* Week Days Header */}
-                        <div className="grid grid-cols-7 bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground shadow-md relative z-10">
-                            {weekDays.map((day, idx) => (
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-4 pb-8">
+                        {recurring.sort((a, b) => a.day - b.day).map((item) => {
+                            const category = categories.find(c => c.name === item.category && c.type === item.type);
+                            const CategoryIcon = category ? getIconById(category.icon || 'tag') : Tag;
+
+                            return (
                                 <div
-                                    key={day}
+                                    key={item.id}
+                                    onClick={(e) => handleEdit(item, e)}
                                     className={`
-                                        py-4 text-center text-sm font-bold uppercase tracking-wider opacity-90
-                                        ${(idx === 0 || idx === 6) ? 'bg-black/20' : ''}
+                                        group relative flex flex-col justify-between p-2.5 md:p-4 rounded-2xl md:rounded-3xl cursor-pointer transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-[0.97] overflow-hidden border border-white/10
+                                        ${item.type === 'receita'
+                                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-emerald-500/20'
+                                            : 'bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-rose-500/20'}
                                     `}
                                 >
-                                    {day}
-                                </div>
-                            ))}
-                        </div>
+                                    {/* Glassmorphism Overlay */}
+                                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        {/* Calendar Grid */}
-                        <div className="flex-1 grid grid-cols-7 grid-rows-5 md:grid-rows-auto min-h-[600px]">
-                            {calendarDays.map((day, dayIdx) => {
-                                const isCurrentMonth = isSameMonth(day, currentMonth);
-                                const isTodayDate = isToday(day);
-                                const transactions = getTransactionsForDay(day);
-                                const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                                    {/* Background Accent Icon */}
+                                    <div className="absolute -right-2 -top-2 md:-right-4 md:-top-4 opacity-[0.07] group-hover:opacity-[0.15] group-hover:scale-125 group-hover:-rotate-12 transition-all duration-700 ease-out">
+                                        {item.type === 'receita'
+                                            ? <ArrowUpCircle className="w-16 h-16 md:w-24 md:h-24" />
+                                            : <ArrowDownCircle className="w-16 h-16 md:w-24 md:h-24" />
+                                        }
+                                    </div>
 
-                                // Calcular totais do dia
-                                const totalReceita = transactions
-                                    .filter(t => t.type === 'receita')
-                                    .reduce((acc, curr) => acc + curr.amount, 0);
-                                const totalDespesa = transactions
-                                    .filter(t => t.type === 'despesa')
-                                    .reduce((acc, curr) => acc + curr.amount, 0);
+                                    <div className="relative z-10 flex flex-col gap-0.5 md:gap-1">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1 bg-black/20 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
+                                                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter md:tracking-widest opacity-90">
+                                                    Dia {item.day}
+                                                </span>
+                                            </div>
 
-                                return (
-                                    <div
-                                        key={day.toString()}
-                                        className={`
-                                            relative border-b border-r p-2 transition-colors hover:bg-accent/20 flex flex-col gap-1
-                                            ${!isCurrentMonth ? 'bg-muted/10 text-muted-foreground/40' :
-                                                isWeekend ? 'bg-primary/5' : 'bg-background/40'}
-                                            ${dayIdx % 7 === 0 ? 'border-l-0' : ''}
-                                            ${dayIdx % 7 === 6 ? 'border-r-0' : ''}
-                                        `}
-                                    >
-                                        {/* Day Number */}
-                                        <div className="flex justify-between items-start">
-                                            <span className={`
-                                                text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
-                                                ${isTodayDate ? 'bg-primary text-primary-foreground' : ''}
-                                                ${!isCurrentMonth ? 'opacity-50' : ''}
-                                            `}>
-                                                {format(day, "d")}
-                                            </span>
+                                            <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-5 w-5 md:h-7 md:w-7 text-white hover:bg-white/20 rounded-full transition-colors"
+                                                    onClick={(e) => handleEdit(item, e)}
+                                                >
+                                                    <Pencil className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-5 w-5 md:h-7 md:w-7 text-white hover:bg-white/20 rounded-full transition-colors"
+                                                    onClick={(e) => handleDelete(item.id, e)}
+                                                >
+                                                    <Trash2 className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />
+                                                </Button>
+                                            </div>
                                         </div>
 
-                                        {/* Transactions List */}
-                                        <div className="flex-1 flex flex-col gap-1 mt-1">
-                                            {transactions.map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    onClick={(e) => handleEdit(item, e)}
-                                                    className={`
-                                                        group flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-[10px] sm:text-xs cursor-pointer shadow-sm transition-all hover:scale-[1.02] hover:shadow-md
-                                                        ${item.type === 'receita'
-                                                            ? 'bg-emerald-600 text-white hover:bg-emerald-500'
-                                                            : 'bg-red-600 text-white hover:bg-red-500'}
-                                                    `}
-                                                >
-                                                    <div className="flex items-center gap-1.5 truncate">
-                                                        {item.type === 'receita'
-                                                            ? <ArrowUpCircle className="w-3.5 h-3.5 shrink-0 text-white/90" />
-                                                            : <ArrowDownCircle className="w-3.5 h-3.5 shrink-0 text-white/90" />
-                                                        }
-                                                        <span className="truncate font-semibold">{item.description}</span>
-                                                    </div>
-                                                    <span className="font-bold tabular-nums text-white/95">
-                                                        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.amount)}
-                                                    </span>
-                                                </div>
-                                            ))}
+                                        <div className="flex items-center gap-1.5 mt-1 md:mt-2">
+                                            <div className="p-1 md:p-1.5 rounded-lg bg-white/20 backdrop-blur-sm">
+                                                <CategoryIcon className="w-2.5 h-2.5 md:w-4 md:h-4 text-white" />
+                                            </div>
+                                            <h3 className="font-bold text-[10px] md:text-sm line-clamp-1 leading-tight tracking-tight">
+                                                {item.description}
+                                            </h3>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+
+                                    <div className="relative z-10 mt-3 md:mt-8">
+                                        <div className="flex flex-col">
+                                            <span className="text-[7px] md:text-[9px] font-bold uppercase opacity-60 tracking-widest mb-0.5">Valor Fixo</span>
+                                            <p className="text-xs md:text-xl font-black tabular-nums tracking-tighter md:tracking-tight">
+                                                {new Intl.NumberFormat("pt-BR", {
+                                                    style: "currency",
+                                                    currency: "BRL",
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                }).format(item.amount)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>

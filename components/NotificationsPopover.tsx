@@ -12,6 +12,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Bell, Calendar, CheckCircle2 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { isBefore, addDays, startOfDay, endOfDay } from "date-fns";
+import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { processRecurringTransaction } from "@/lib/recurring";
+import { updateTransaction } from "@/lib/firestore";
+import { updateAccountBalance } from "@/lib/accounts";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -24,9 +32,16 @@ export function NotificationsPopover() {
     const { transactions } = useTransactions();
     const { recurring } = useRecurring();
     const { user } = useAuth();
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [creditCards, setCreditCards] = useState<any[]>([]);
     const [goals, setGoals] = useState<any[]>([]);
+    const [processing, setProcessing] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ open: boolean; item: any | null }>({
+        open: false,
+        item: null
+    });
+    const [editValue, setEditValue] = useState("");
 
     // Fetch additional data for notifications
     useEffect(() => {
@@ -61,6 +76,48 @@ export function NotificationsPopover() {
         fetchData();
     }, [user?.uid, open]); // Fetch when opening to be fresh
 
+    const openConfirmModal = (item: any) => {
+        setEditValue(item.amount.toString());
+        setConfirmModal({ open: true, item });
+    };
+
+    const handleConfirm = async () => {
+        if (!confirmModal.item || !user?.uid) return;
+
+        const value = parseFloat(editValue.replace(',', '.'));
+        if (isNaN(value) || value <= 0) {
+            toast.error("Valor inválido");
+            return;
+        }
+
+        setProcessing(confirmModal.item.id);
+        try {
+            if (confirmModal.item.type === 'recurring') {
+                const rec = confirmModal.item.originalData;
+                await processRecurringTransaction(user.uid, rec, value);
+                toast.success("Transação confirmada!");
+            } else if (confirmModal.item.type === 'boleto') {
+                const transaction = confirmModal.item.originalData;
+                await updateTransaction(transaction.id, {
+                    boletoStatus: 'paid',
+                    amount: value,
+                });
+
+                if (transaction.accountId) {
+                    await updateAccountBalance(transaction.accountId, value, 'subtract');
+                }
+                toast.success("Boleto pago com sucesso!");
+            }
+
+            setConfirmModal({ open: false, item: null });
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao confirmar");
+        } finally {
+            setProcessing(null);
+        }
+    };
+
     const notifications = useMemo(() => {
         if (!user?.uid) return [];
 
@@ -83,11 +140,12 @@ export function NotificationsPopover() {
             if (isBefore(dueDate, next7Days)) {
                 items.push({
                     id: t.id,
-                    description: `Boleto: ${t.description}`,
+                    description: t.description,
                     amount: t.amount,
                     date: dueDate,
                     type: 'boleto',
-                    isOverdue: isBefore(dueDate, today)
+                    isOverdue: isBefore(dueDate, today),
+                    originalData: t
                 });
             }
         });
@@ -109,11 +167,12 @@ export function NotificationsPopover() {
                     if (isBefore(targetDate, next7Days)) {
                         items.push({
                             id: r.id,
-                            description: `Fixa: ${r.description}`,
+                            description: r.description,
                             amount: r.amount,
                             date: targetDate,
                             type: 'recurring',
-                            isOverdue: isBefore(targetDate, today)
+                            isOverdue: isBefore(targetDate, today),
+                            originalData: r
                         });
                     }
                 }
@@ -146,7 +205,7 @@ export function NotificationsPopover() {
                     if (isBefore(deadline, next7Days)) {
                         items.push({
                             id: goal.id,
-                            description: `Meta: ${goal.title}`,
+                            description: goal.title,
                             amount: goal.targetAmount - goal.currentAmount, // Remaining
                             date: deadline,
                             type: 'goal',
@@ -161,66 +220,145 @@ export function NotificationsPopover() {
     }, [transactions, recurring, user?.uid, creditCards, goals, user?.settings]);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-muted-foreground hover:text-foreground hover:bg-accent"
-                >
-                    <Bell className="w-5 h-5" />
-                    {notifications.length > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    )}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0 bg-card border-border" align="end">
-                <div className="p-4 border-b border-border">
-                    <h4 className="font-medium leading-none text-foreground">Notificações</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                        Você tem {notifications.length} alertas pendentes
-                    </p>
-                </div>
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                    {notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
-                            <CheckCircle2 className="w-8 h-8 mb-2 opacity-50" />
-                            <p className="text-sm">Tudo em dia!</p>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-border">
-                            {notifications.map((item, idx) => (
-                                <div key={`${item.type}-${item.id}-${idx}`} className="p-3 hover:bg-muted/50 transition-colors">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`mt-0.5 w-8 h-8 rounded-md flex items-center justify-center shrink-0 
+        <>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative text-muted-foreground hover:text-foreground hover:bg-accent"
+                    >
+                        <Bell className="w-5 h-5" />
+                        {notifications.length > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0 bg-card border-border" align="end">
+                    <div className="p-4 border-b border-border">
+                        <h4 className="font-medium leading-none text-foreground">Notificações</h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Você tem {notifications.length} alertas pendentes
+                        </p>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                        {notifications.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
+                                <CheckCircle2 className="w-8 h-8 mb-2 opacity-50" />
+                                <p className="text-sm">Tudo em dia!</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-border">
+                                {notifications.map((item, idx) => (
+                                    <div
+                                        key={`${item.type}-${item.id}-${idx}`}
+                                        className="p-3 hover:bg-muted/50 transition-colors cursor-pointer"
+                                        onClick={() => {
+                                            setOpen(false);
+                                            router.push('/fixas');
+                                        }}
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-start gap-3">
+                                                <div className={`mt-0.5 w-8 h-8 rounded-md flex items-center justify-center shrink-0 
                                                 ${item.type === 'budget' ? 'bg-red-500/10 text-red-500' :
-                                                    item.type === 'goal' ? 'bg-blue-500/10 text-blue-500' :
-                                                        item.isOverdue ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                {item.type === 'budget' ? <Bell className="w-4 h-4" /> :
-                                                    item.type === 'goal' ? <CheckCircle2 className="w-4 h-4" /> :
-                                                        <Calendar className="w-4 h-4" />}
+                                                        item.type === 'goal' ? 'bg-blue-500/10 text-blue-500' :
+                                                            item.isOverdue ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                    {item.type === 'budget' ? <Bell className="w-4 h-4" /> :
+                                                        item.type === 'goal' ? <CheckCircle2 className="w-4 h-4" /> :
+                                                            <Calendar className="w-4 h-4" />}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-foreground line-clamp-1">
+                                                        {item.description}
+                                                    </p>
+                                                    <p className={`text-xs ${item.isOverdue ? 'text-red-400 font-bold' : 'text-muted-foreground'}`}>
+                                                        {item.type === 'budget' ? 'Atenção ao limite' :
+                                                            item.isOverdue ? 'Venceu dia ' : 'Vence dia '} {item.date.getDate()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-foreground line-clamp-1">
-                                                    {item.description}
-                                                </p>
-                                                <p className={`text-xs ${item.isOverdue ? 'text-red-400 font-bold' : 'text-muted-foreground'}`}>
-                                                    {item.type === 'budget' ? 'Atenção ao limite' :
-                                                        item.isOverdue ? 'Venceu dia ' : 'Vence dia '} {item.date.getDate()}
-                                                </p>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                                                    {formatCurrency(item.amount)}
+                                                </span>
+                                                {(item.type === 'recurring' || item.type === 'boleto') && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-7 px-2 text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openConfirmModal(item);
+                                                        }}
+                                                        disabled={!!processing}
+                                                    >
+                                                        {processing === item.id ? "..." : "Confirmar Pagamento"}
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
-                                        <span className="text-sm font-bold text-foreground whitespace-nowrap">
-                                            {formatCurrency(item.amount)}
-                                        </span>
                                     </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </PopoverContent>
+            </Popover>
+
+            {/* Modal de Confirmação com Edição de Valor */}
+            <Dialog open={confirmModal.open} onOpenChange={(open) => setConfirmModal({ open, item: null })}>
+                <DialogContent className="bg-popover border-border max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="text-foreground">
+                            Confirmar {confirmModal.item?.originalData?.type === 'receita' ? 'Recebimento' : 'Pagamento'}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {confirmModal.item && (
+                        <div className="space-y-4">
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                                <p className="text-sm text-muted-foreground">Descrição</p>
+                                <p className="text-foreground font-medium">{confirmModal.item.description}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="value" className="text-muted-foreground">Valor (pode ser editado)</Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                                    <Input
+                                        id="value"
+                                        value={editValue}
+                                        onChange={(e) => setEditValue(e.target.value)}
+                                        className="pl-10 bg-muted border-input text-foreground text-lg font-bold"
+                                        placeholder="0,00"
+                                    />
                                 </div>
-                            ))}
+                                <p className="text-xs text-muted-foreground">
+                                    Valor original: {formatCurrency(confirmModal.item.amount)}
+                                </p>
+                            </div>
                         </div>
                     )}
-                </div>
-            </PopoverContent>
-        </Popover>
+
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setConfirmModal({ open: false, item: null })}
+                            className="text-muted-foreground"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleConfirm}
+                            disabled={!!processing}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                            {processing ? "Processando..." : "Confirmar Pagamento"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
