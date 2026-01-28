@@ -103,12 +103,12 @@ function TickerItem({ account, isLinked }: { account: Account; isLinked: boolean
         >
             {/* Ícone Especial (Reserva/Meta) */}
             {isEmergency && (
-                <div className={`p-0.5 rounded-full ${isItemHovered ? 'bg-white/20' : 'bg-background/50'}`}>
+                <div className={`p-0.5 rounded-full ${isItemHovered ? 'bg-white/20' : 'bg-black/5'}`}>
                     <AlertTriangle className="w-3 h-3" />
                 </div>
             )}
             {isLinked && !isEmergency && (
-                <div className={`p-0.5 rounded-full ${isItemHovered ? 'bg-white/20' : 'bg-background/50'}`}>
+                <div className={`p-0.5 rounded-full ${isItemHovered ? 'bg-white/20' : 'bg-black/5'}`}>
                     <Target className="w-3 h-3" />
                 </div>
             )}
