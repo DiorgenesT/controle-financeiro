@@ -118,13 +118,15 @@ export default function DashboardPage() {
                 {/* Tickers Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start">
                     {/* Market Ticker */}
-                    <MarketTicker
-                        isOpen={isDesktop ? showTickers : undefined}
-                        onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
-                    />
+                    <div id="dashboard-market-ticker" className="h-full">
+                        <MarketTicker
+                            isOpen={isDesktop ? showTickers : undefined}
+                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                        />
+                    </div>
 
                     {/* Central Toggle Button (Desktop Only) */}
-                    <div className="hidden md:flex flex-col items-center justify-start pt-4 h-full z-10">
+                    <div id="dashboard-ticker-toggle" className="hidden md:flex flex-col items-center justify-start pt-4 h-full z-10">
                         <Button
                             variant="ghost"
                             size="sm"
@@ -139,10 +141,12 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Economic Indicators */}
-                    <EconomicIndicatorsCard
-                        isOpen={isDesktop ? showTickers : undefined}
-                        onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
-                    />
+                    <div id="dashboard-economic-indicators" className="h-full">
+                        <EconomicIndicatorsCard
+                            isOpen={isDesktop ? showTickers : undefined}
+                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                        />
+                    </div>
                 </div>
 
                 {/* Main Grid */}
