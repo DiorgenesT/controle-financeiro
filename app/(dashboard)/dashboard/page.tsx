@@ -24,12 +24,14 @@ import {
     Receipt,
     Smartphone,
     AlertTriangle,
+    ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useGoals } from "@/hooks/useGoals";
-import { formatTransactionDescription } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { formatTransactionDescription, cn } from "@/lib/utils";
 import Link from "next/link";
 
 const formatCurrency = (value: number) => {
@@ -46,13 +48,16 @@ const formatDate = (date: Date) => {
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { MarketTicker } from "@/components/MarketTicker";
 import { AccountsTicker } from "@/components/AccountsTicker";
+import { EconomicIndicatorsCard } from "@/components/EconomicIndicatorsCard";
 
 export default function DashboardPage() {
     const { user } = useAuth();
     const { transactions, totalReceitas, totalDespesas, loading } = useTransactions();
     const { accounts, loading: loadingContas } = useAccounts();
     const { goals, loading: loadingGoals } = useGoals();
+    const isDesktop = useMediaQuery("(min-width: 768px)");
     const [showModal, setShowModal] = useState(false);
+    const [showTickers, setShowTickers] = useState(true);
 
     const saldoContas = accounts.reduce((acc, a) => acc + a.balance, 0);
 
@@ -110,12 +115,37 @@ export default function DashboardPage() {
                     </Button>
                 </div>
 
-                {/* Market Ticker */}
-                <div id="dashboard-market-ticker">
-                    <MarketTicker />
+                {/* Tickers Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start">
+                    {/* Market Ticker */}
+                    <MarketTicker
+                        isOpen={isDesktop ? showTickers : undefined}
+                        onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                    />
+
+                    {/* Central Toggle Button (Desktop Only) */}
+                    <div className="hidden md:flex flex-col items-center justify-start pt-4 h-full z-10">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowTickers(!showTickers)}
+                            className={cn(
+                                "rounded-full w-6 h-6 p-0 border border-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300",
+                                !showTickers && "bg-primary/10 text-primary border-primary/20"
+                            )}
+                        >
+                            <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-500", showTickers && "rotate-180")} />
+                        </Button>
+                    </div>
+
+                    {/* Economic Indicators */}
+                    <EconomicIndicatorsCard
+                        isOpen={isDesktop ? showTickers : undefined}
+                        onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                    />
                 </div>
 
-                {/* Stats Cards */}
+                {/* Main Grid */}
                 <div className="grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
                     <Card id="dashboard-balance-card" className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-800 border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative text-white group">
                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -325,7 +355,5 @@ export default function DashboardPage() {
                 </div>
             </div>
         </div>
-
-
     );
 }

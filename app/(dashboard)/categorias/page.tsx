@@ -356,21 +356,21 @@ export default function CategoriasPage() {
                                     return (
                                         <div
                                             key={cat.id}
-                                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
+                                            className="flex items-center justify-between p-2.5 md:p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex items-center gap-2.5 md:gap-3 min-w-0 overflow-hidden">
                                                 <div
-                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
+                                                    className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
                                                     style={{
                                                         background: `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)`
                                                     }}
                                                 >
-                                                    <Icon className="w-5 h-5 text-white" />
+                                                    <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                                 </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <span className="text-foreground text-sm block whitespace-normal break-words leading-tight">{cat.name}</span>
+                                                <div className="min-w-0 flex-1 overflow-hidden">
+                                                    <span className="text-foreground text-xs md:text-sm font-medium block truncate pr-1">{cat.name}</span>
                                                     {cat.isDefault && (
-                                                        <span className="text-xs text-muted-foreground">Padrão</span>
+                                                        <span className="text-[10px] md:text-xs text-muted-foreground block truncate">Padrão</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -379,9 +379,9 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
+                                                        className="h-7 w-7 md:h-8 md:w-8 md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground flex-shrink-0"
                                                     >
-                                                        <MoreHorizontal className="w-4 h-4" />
+                                                        <MoreHorizontal className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="bg-popover border-border">
@@ -442,21 +442,21 @@ export default function CategoriasPage() {
                                     return (
                                         <div
                                             key={cat.id}
-                                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
+                                            className="flex items-center justify-between p-2.5 md:p-3 rounded-lg bg-muted/50 group hover:bg-muted transition-colors"
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex items-center gap-2.5 md:gap-3 min-w-0 overflow-hidden">
                                                 <div
-                                                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
+                                                    className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
                                                     style={{
                                                         background: `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)`
                                                     }}
                                                 >
-                                                    <Icon className="w-5 h-5 text-white" />
+                                                    <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                                 </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <span className="text-foreground text-sm block whitespace-normal break-words leading-tight">{cat.name}</span>
+                                                <div className="min-w-0 flex-1 overflow-hidden">
+                                                    <span className="text-foreground text-xs md:text-sm font-medium block truncate pr-1">{cat.name}</span>
                                                     {cat.isDefault && (
-                                                        <span className="text-xs text-muted-foreground">Padrão</span>
+                                                        <span className="text-[10px] md:text-xs text-muted-foreground block truncate">Padrão</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -465,9 +465,9 @@ export default function CategoriasPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
+                                                        className="h-7 w-7 md:h-8 md:w-8 md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-foreground flex-shrink-0"
                                                     >
-                                                        <MoreHorizontal className="w-4 h-4" />
+                                                        <MoreHorizontal className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="bg-popover border-border">

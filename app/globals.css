@@ -123,6 +123,19 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Force pointer cursor on interactive elements */
+  button,
+  a,
+  [role="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"],
+  label[for],
+  select,
+  summary {
+    cursor: pointer;
+  }
 }
 
 /* Scrollbar personalizado para modais e áreas de scroll */

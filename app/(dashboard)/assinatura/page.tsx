@@ -45,32 +45,32 @@ export default function AssinaturaPage() {
                 {/* Current Status */}
                 <Card className="bg-gradient-to-br from-emerald-500 to-emerald-700 border-none text-white shadow-xl">
                     <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+                            <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                                <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-inner">
                                     <Crown className="w-8 h-8 text-white" />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-col md:flex-row items-center gap-2">
                                         <h3 className="text-xl font-bold text-white">Sua Assinatura</h3>
                                         <Badge className={isActive ? "bg-white/20 text-white hover:bg-white/30 border-none" : "bg-red-500 text-white border-none"}>
                                             {isActive ? "Ativa" : "Inativa"}
                                         </Badge>
                                     </div>
-                                    <p className="text-white/80 mt-1">
+                                    <p className="text-white/80 mt-1 max-w-[250px] md:max-w-none mx-auto md:mx-0">
                                         Olá, {user?.displayName?.split(" ")[0]}!
                                         {isActive ? " Seu plano está ativo." : " Renove seu plano para continuar usando."}
                                     </p>
                                 </div>
                             </div>
                             {isActive && (
-                                <div className="text-right">
-                                    <div className="flex items-center gap-2 text-white">
+                                <div className="flex flex-col items-center md:items-end text-center md:text-right bg-white/10 md:bg-transparent p-4 md:p-0 rounded-xl w-full md:w-auto">
+                                    <div className="flex items-center gap-2 text-white mb-1">
                                         <CheckCircle className="w-4 h-4" />
                                         <span className="font-medium">Plano Ativo</span>
                                     </div>
                                     {user?.subscriptionEnd && (
-                                        <div className="flex items-center gap-2 text-sm text-white/80 mt-1">
+                                        <div className="flex items-center gap-2 text-sm text-white/80">
                                             <Calendar className="w-4 h-4" />
                                             <span>
                                                 Expira em: {new Intl.DateTimeFormat("pt-BR", {
@@ -82,7 +82,7 @@ export default function AssinaturaPage() {
                                         </div>
                                     )}
                                     {!user?.subscriptionEnd && (
-                                        <p className="text-sm text-white/80 mt-1">
+                                        <p className="text-sm text-white/80">
                                             Acesso completo a todos os recursos
                                         </p>
                                     )}
