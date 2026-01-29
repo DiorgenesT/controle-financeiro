@@ -43,6 +43,7 @@ import { MarketTicker } from "@/components/MarketTicker";
 import { AccountsTicker } from "@/components/AccountsTicker";
 import { EconomicIndicatorsCard } from "@/components/EconomicIndicatorsCard";
 import { FloatingAssistant } from "@/components/FloatingAssistant";
+import { WeatherWidget } from "@/components/WeatherWidget";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -113,21 +114,19 @@ export default function DashboardPage() {
                     <div className="absolute -right-10 -top-10 w-32 md:w-40 h-32 md:h-40 bg-emerald-500/5 rounded-full blur-3xl" />
 
                     <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-5">
-                            <div className="relative shrink-0">
-                                <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-muted border border-border shadow-sm">
-                                    {greetingIcon}
+                        <div className="flex items-start md:items-center gap-4 md:gap-5">
+                            <div className="space-y-1.5 flex-1">
+                                <div className="flex items-center gap-3">
+                                    <h2 className="text-lg md:text-4xl font-bold tracking-tight text-foreground">
+                                        {greetingText},
+                                        <span className="inline ml-1 md:ml-2 text-emerald-500">
+                                            {user?.displayName?.split(" ")[0] || "Usuário"}
+                                        </span>
+                                        <span className="text-emerald-500 ml-1">!</span>
+                                    </h2>
+                                    <WeatherWidget />
                                 </div>
-                            </div>
-                            <div className="space-y-1">
-                                <h2 className="text-lg md:text-4xl font-bold tracking-tight text-foreground">
-                                    {greetingText},
-                                    <span className="inline ml-1 md:ml-2 text-emerald-500">
-                                        {user?.displayName?.split(" ")[0] || "Usuário"}
-                                    </span>
-                                    <span className="text-emerald-500 ml-1">!</span>
-                                </h2>
-                                <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground font-medium">
+                                <div className="text-sm md:text-base text-muted-foreground font-medium">
                                     Aqui está um resumo das suas finanças hoje
                                 </div>
                             </div>

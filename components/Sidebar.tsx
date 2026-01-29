@@ -223,6 +223,12 @@ export function Sidebar() {
                 })}
             </div>
 
+            <div className="mt-auto p-4 flex justify-center">
+                <span className="text-[10px] font-medium text-muted-foreground/40 tracking-widest uppercase">
+                    Versão 1.0.0
+                </span>
+            </div>
+
 
         </aside>
     );
