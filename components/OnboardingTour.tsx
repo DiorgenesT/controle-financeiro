@@ -62,7 +62,7 @@ export function OnboardingTour() {
                                 <span>Bem-vindo ao seu Controle!</span>
                             </div>
                         ),
-                        description: "Preparamos um tour rápido para te mostrar as ferramentas poderosas que você tem em mãos para dominar seu dinheiro. Vamos lá?",
+                        description: "Preparamos um tour rápido para te mostrar as ferramentas poderosas que você tem em mãos. Dica: Passe o mouse sobre os cards para ver animações e detalhes interativos!",
                     },
                 },
                 {
@@ -160,6 +160,20 @@ export function OnboardingTour() {
                         ),
                         description: "Comprou um café ou recebeu um pix? Clique aqui para registrar receitas e despesas rapidamente e manter tudo organizado.",
                         side: "left",
+                        align: "start",
+                    },
+                },
+                {
+                    element: "#dashboard-score-card",
+                    popover: {
+                        title: ReactDOMServer.renderToString(
+                            <div className="flex items-center gap-2">
+                                <Target className="w-5 h-5 text-purple-500" />
+                                <span>Seu Score Financeiro</span>
+                            </div>
+                        ),
+                        description: "Acompanhe sua evolução financeira com nosso sistema de pontuação. De 'Crítico' a 'Excelente', veja como seus hábitos impactam sua saúde financeira.",
+                        side: "top",
                         align: "start",
                     },
                 },

@@ -205,8 +205,8 @@ export function InsightsCarousel({
             <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 relative p-3 md:p-4">
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${currentSlide.bgIcon} flex items-center justify-center transition-colors duration-500`}>
-                        <Icon className={`w-5 h-5 ${currentSlide.iconColor}`} />
+                    <div className={`w-10 h-10 rounded-xl ${currentSlide.bgIcon} flex items-center justify-center transition-colors duration-500 group-hover:bg-white/30`}>
+                        <Icon className={`w-5 h-5 ${currentSlide.iconColor} group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]`} />
                     </div>
                     <CardTitle className="text-xs md:text-base font-medium text-white/90">
                         {currentSlide.title}

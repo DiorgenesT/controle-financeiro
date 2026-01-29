@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TransactionModal } from "@/components/TransactionModal";
 import { ForecastCard } from "@/components/ForecastCard";
-import { SmartInsightsCard } from "@/components/SmartInsightsCard";
+import { FinancialScoreCard } from "@/components/FinancialScoreCard";
 import { UpcomingBillsCard } from "@/components/UpcomingBillsCard";
 import { InsightsCarousel } from "@/components/InsightsCarousel";
 import {
@@ -33,6 +33,11 @@ import { useGoals } from "@/hooks/useGoals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { formatTransactionDescription, cn } from "@/lib/utils";
 import Link from "next/link";
+import { OnboardingTour } from "@/components/OnboardingTour";
+import { MarketTicker } from "@/components/MarketTicker";
+import { AccountsTicker } from "@/components/AccountsTicker";
+import { EconomicIndicatorsCard } from "@/components/EconomicIndicatorsCard";
+import { FloatingAssistant } from "@/components/FloatingAssistant";
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -44,11 +49,6 @@ const formatCurrency = (value: number) => {
 const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR");
 };
-
-import { OnboardingTour } from "@/components/OnboardingTour";
-import { MarketTicker } from "@/components/MarketTicker";
-import { AccountsTicker } from "@/components/AccountsTicker";
-import { EconomicIndicatorsCard } from "@/components/EconomicIndicatorsCard";
 
 export default function DashboardPage() {
     const { user } = useAuth();
@@ -88,9 +88,12 @@ export default function DashboardPage() {
     const economia = totalReceitas > 0 ? ((totalReceitas - totalDespesas) / totalReceitas * 100) : 0;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background relative">
             <OnboardingTour />
             <Header title="Dashboard" />
+
+            {/* Floating Assistant */}
+            <FloatingAssistant />
 
             <TransactionModal open={showModal} onOpenChange={setShowModal} />
 
@@ -167,8 +170,8 @@ export default function DashboardPage() {
                                     </div>
                                 )}
                             </div>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                                <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0 group-hover:bg-white/30 transition-colors duration-500">
+                                <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative pt-0 p-3 md:p-4 pb-3 md:pb-4 overflow-hidden">
@@ -185,8 +188,8 @@ export default function DashboardPage() {
                             <CardTitle className="text-[10px] md:text-base font-medium text-white/80">
                                 Receitas
                             </CardTitle>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0 group-hover:bg-white/30 transition-colors duration-500">
+                                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative p-3 md:p-4 pt-0">
@@ -213,8 +216,8 @@ export default function DashboardPage() {
                             <CardTitle className="text-[10px] md:text-base font-medium text-white/80">
                                 Despesas
                             </CardTitle>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                                <TrendingDown className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center shrink-0 group-hover:bg-white/30 transition-colors duration-500">
+                                <TrendingDown className="w-4 h-4 md:w-6 md:h-6 text-white group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                             </div>
                         </CardHeader>
                         <CardContent className="relative p-3 md:p-4 pt-0">
@@ -247,7 +250,6 @@ export default function DashboardPage() {
 
                 <div className="grid gap-3 md:gap-4 md:grid-cols-1 lg:grid-cols-3 items-start w-full min-w-0">
                     {/* 1. Transações Recentes (Compacto) */}
-                    {/* 1. Transações Recentes (Compacto) */}
                     <Card className="h-full flex flex-col overflow-hidden min-w-0 w-full border border-blue-500/40 dark:border-white/10 bg-gradient-to-b from-card to-muted/20 shadow-[0_0_20px_-5px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.2)] transition-all duration-300 group relative">
                         {/* Top Glow Line */}
                         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
@@ -256,8 +258,8 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-3">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
-                                    <div className="relative p-2 rounded-xl bg-card border border-blue-100/10 shadow-sm ring-1 ring-blue-500/10">
-                                        <Receipt className="w-4 h-4 text-blue-500" />
+                                    <div className="relative p-2 rounded-xl bg-card border border-blue-100/10 shadow-sm ring-1 ring-blue-500/10 group-hover:border-blue-500/30 transition-colors duration-500">
+                                        <Receipt className="w-4 h-4 text-blue-500 group-hover:scale-125 group-hover:rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                                     </div>
                                 </div>
                                 <div>
@@ -347,9 +349,9 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    {/* 2. Insights Inteligentes (IA) */}
-                    <div id="dashboard-ai-card" className="h-full">
-                        <SmartInsightsCard />
+                    {/* 2. Score de Saúde Financeira */}
+                    <div id="dashboard-score-card" className="h-full">
+                        <FinancialScoreCard />
                     </div>
 
                     {/* 3. Previsão */}

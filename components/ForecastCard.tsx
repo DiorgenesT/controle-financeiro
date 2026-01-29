@@ -93,7 +93,7 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
 
     if (compact) {
         return (
-            <Card className={cn("bg-gradient-to-br from-slate-700 to-slate-900 border-none text-white shadow-lg shadow-slate-500/20", className)}>
+            <Card className={cn("bg-gradient-to-br from-slate-700 to-slate-900 border-none text-white shadow-lg shadow-slate-500/20 group", className)}>
                 <CardContent className="p-3 md:pt-6">
                     <div className="flex items-center justify-between">
                         <div className="w-full">
@@ -124,8 +124,8 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center self-start shrink-0">
-                            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                        <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center self-start shrink-0 group-hover:bg-white/30 transition-colors duration-500">
+                            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-white group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                         </div>
                     </div>
                 </CardContent>
@@ -144,8 +144,8 @@ export function ForecastCard({ className, compact }: ForecastCardProps) {
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <div className="absolute inset-0 bg-emerald-500/20 blur-lg rounded-full" />
-                        <div className="relative p-2 rounded-xl bg-card border border-emerald-100/10 shadow-sm ring-1 ring-emerald-500/10">
-                            <Calendar className="w-4 h-4 text-emerald-500" />
+                        <div className="relative p-2 rounded-xl bg-card border border-emerald-100/10 shadow-sm ring-1 ring-emerald-500/10 group-hover:border-emerald-500/30 transition-colors duration-500">
+                            <Calendar className="w-4 h-4 text-emerald-500 group-hover:scale-125 group-hover:rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
                         </div>
                     </div>
                     <div>
