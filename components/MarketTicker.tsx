@@ -14,7 +14,7 @@ export function MarketTicker({ isOpen, onToggle }: MarketTickerProps) {
     // Force rebuild
     const { data, loading, error } = useMarketData();
     // Use internal state if props are not provided (fallback)
-    const [internalOpen, setInternalOpen] = useState(true);
+    const [internalOpen, setInternalOpen] = useState(false);
     const isOpenState = isOpen !== undefined ? isOpen : internalOpen;
     const toggleState = onToggle || (() => setInternalOpen(!internalOpen));
 

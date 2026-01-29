@@ -370,15 +370,15 @@ export default function TransacoesPage() {
 
                 {/* Lista de Transações */}
                 <Card className="bg-card border-border">
-                    <CardHeader>
-                        <CardTitle className="text-foreground">
+                    <CardHeader className="pb-0 pt-3 px-3 md:p-4 relative z-10">
+                        <CardTitle className="text-[10px] md:text-sm font-medium text-foreground">
                             Transações de {MONTHS[selectedMonth]}
                         </CardTitle>
-                        <CardDescription className="text-muted-foreground">
+                        <CardDescription className="text-[10px] text-muted-foreground">
                             {filteredTransactions.length} transação(ões) encontrada(s)
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-3 md:p-4 pt-2">
                         {loading ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
@@ -440,19 +440,19 @@ export default function TransacoesPage() {
                                                         >
                                                             <div className="flex items-center gap-3 min-w-0 flex-1">
                                                                 <div
-                                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isReceita
+                                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isReceita
                                                                         ? 'bg-emerald-500/10 text-emerald-500'
                                                                         : 'bg-rose-500/10 text-rose-500'
                                                                         }`}
                                                                 >
-                                                                    <Icon className="w-4.5 h-4.5" />
+                                                                    <Icon className="w-4 h-4" />
                                                                 </div>
                                                                 <div className="min-w-0 flex-1">
-                                                                    <p className="font-semibold text-foreground text-sm truncate leading-tight">
+                                                                    <p className="font-medium text-foreground text-[10px] md:text-[11px] leading-tight">
                                                                         {formatTransactionDescription(transaction, accounts)}
                                                                     </p>
                                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                                                        <span className="text-[9px] text-muted-foreground font-medium">
                                                                             {transaction.category}
                                                                         </span>
                                                                         {transaction.paymentMethod && !isReceita && (
@@ -470,7 +470,7 @@ export default function TransacoesPage() {
                                                             </div>
                                                             <div className="flex items-center gap-3 shrink-0 ml-2">
                                                                 <div className="text-right">
-                                                                    <p className={`text-sm font-bold tabular-nums ${isReceita ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                    <p className={`text-[10px] md:text-[11px] font-bold tabular-nums ${isReceita ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                                         {isReceita ? '+' : '-'}{formatCurrency(transaction.amount)}
                                                                     </p>
                                                                     {showInstallments && (

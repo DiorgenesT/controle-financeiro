@@ -14,7 +14,7 @@ interface EconomicIndicatorsCardProps {
 export function EconomicIndicatorsCard({ isOpen, onToggle }: EconomicIndicatorsCardProps) {
     const { data, loading } = useEconomicData();
     // Use internal state if props are not provided (fallback)
-    const [internalOpen, setInternalOpen] = useState(true);
+    const [internalOpen, setInternalOpen] = useState(false);
     const isOpenState = isOpen !== undefined ? isOpen : internalOpen;
     const toggleState = onToggle || (() => setInternalOpen(!internalOpen));
 

@@ -25,6 +25,11 @@ import {
     Smartphone,
     AlertTriangle,
     ChevronDown,
+    Sun,
+    Sunset,
+    Moon,
+    Sparkles,
+    LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -57,19 +62,23 @@ export default function DashboardPage() {
     const { goals, loading: loadingGoals } = useGoals();
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const [showModal, setShowModal] = useState(false);
-    const [showTickers, setShowTickers] = useState(true);
+    const [showTickers, setShowTickers] = useState(false);
 
     const saldoContas = accounts.reduce((acc, a) => acc + a.balance, 0);
 
     // Identificar contas vinculadas a metas
     const linkedAccountIds = new Set(goals.map(g => g.linkedAccountId).filter((id): id is string => !!id));
 
-    const greeting = () => {
+    const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return "Bom dia";
-        if (hour < 18) return "Boa tarde";
-        return "Boa noite";
+        let text = "Boa noite";
+        if (hour < 12) text = "Bom dia";
+        else if (hour < 18) text = "Boa tarde";
+
+        return { text, icon: <LayoutDashboard className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" /> };
     };
+
+    const { text: greetingText, icon: greetingIcon } = getGreeting();
 
     // Filtrar para mostrar apenas a primeira parcela de compras parceladas
     // (ou todas as transações que não são parcelas futuras)
@@ -99,23 +108,40 @@ export default function DashboardPage() {
 
             <div className="p-2 md:p-6 space-y-3 md:space-y-6">
                 {/* Greeting */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-0">
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-bold text-foreground">
-                            {greeting()}, {user?.displayName?.split(" ")[0] || "Usuário"}!
-                        </h2>
-                        <p className="text-[10px] md:text-base text-muted-foreground mt-0.5">
-                            Aqui está um resumo das suas finanças
-                        </p>
+                <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border bg-card p-4 md:p-8 shadow-sm group">
+                    {/* Background Decorative Elements - Simplified */}
+                    <div className="absolute -right-10 -top-10 w-32 md:w-40 h-32 md:h-40 bg-emerald-500/5 rounded-full blur-3xl" />
+
+                    <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                            <div className="relative shrink-0">
+                                <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-muted border border-border shadow-sm">
+                                    {greetingIcon}
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-lg md:text-4xl font-bold tracking-tight text-foreground">
+                                    {greetingText},
+                                    <span className="inline ml-1 md:ml-2 text-emerald-500">
+                                        {user?.displayName?.split(" ")[0] || "Usuário"}
+                                    </span>
+                                    <span className="text-emerald-500 ml-1">!</span>
+                                </h2>
+                                <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground font-medium">
+                                    Aqui está um resumo das suas finanças hoje
+                                </div>
+                            </div>
+                        </div>
+
+                        <Button
+                            id="dashboard-new-transaction-btn"
+                            onClick={() => setShowModal(true)}
+                            className="w-full md:w-auto h-10 md:h-14 px-6 md:px-8 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 text-xs md:text-base font-bold rounded-xl md:rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group/btn"
+                        >
+                            <Plus className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                            Nova Transação
+                        </Button>
                     </div>
-                    <Button
-                        id="dashboard-new-transaction-btn"
-                        onClick={() => setShowModal(true)}
-                        className="w-full md:w-auto h-9 md:h-10 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25 text-xs md:text-sm"
-                    >
-                        <Plus className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2" />
-                        Nova Transação
-                    </Button>
                 </div>
 
                 {/* Tickers Grid */}
@@ -254,7 +280,7 @@ export default function DashboardPage() {
                         {/* Top Glow Line */}
                         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
 
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5 px-5 relative z-10">
+                        <CardHeader className="flex flex-row items-center justify-between pb-0 pt-3 px-3 md:p-4 relative z-10">
                             <div className="flex items-center gap-3">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
@@ -263,7 +289,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <CardTitle className="text-sm font-semibold text-foreground tracking-tight">
+                                    <CardTitle className="text-[10px] md:text-sm font-medium text-foreground tracking-tight">
                                         Transações
                                     </CardTitle>
                                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
@@ -276,7 +302,7 @@ export default function DashboardPage() {
                                 <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                             </Link>
                         </CardHeader>
-                        <CardContent className="flex-1 overflow-hidden p-5 pt-2 relative z-10">
+                        <CardContent className="flex-1 overflow-hidden p-3 md:p-4 pt-2 relative z-10">
                             {loading ? (
                                 <div className="space-y-2">
                                     {[1, 2, 3].map((i) => (

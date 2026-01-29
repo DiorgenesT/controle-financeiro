@@ -1,8 +1,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Info } from "lucide-react";
 import { FinancialHealthScore } from "@/components/FinancialHealthScore";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function FinancialScoreCard() {
     return (
@@ -27,6 +32,24 @@ export function FinancialScoreCard() {
                         Score
                     </CardTitle>
                 </div>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <button className="hover:bg-white/10 p-1.5 rounded-full transition-colors">
+                            <Info className="w-5 h-5 md:w-6 md:h-6 text-white/70 hover:text-white transition-colors" />
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-4 bg-slate-900/95 border-slate-700 text-slate-100 backdrop-blur-xl" align="end">
+                        <div className="space-y-2">
+                            <h4 className="font-medium leading-none text-emerald-400">Score Interno</h4>
+                            <p className="text-xs text-slate-300 leading-relaxed">
+                                Esta pontuação é calculada exclusivamente com base nos seus registros financeiros dentro do sistema.
+                            </p>
+                            <p className="text-xs text-slate-400 border-t border-slate-800 pt-2 mt-2">
+                                Não possui qualquer vínculo com órgãos de proteção ao crédito (Serasa, SPC, etc).
+                            </p>
+                        </div>
+                    </PopoverContent>
+                </Popover>
             </CardHeader>
 
             <CardContent className="flex-1 flex flex-col justify-center p-0 relative z-10 overflow-hidden">

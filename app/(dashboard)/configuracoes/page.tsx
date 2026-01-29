@@ -466,13 +466,13 @@ export default function ConfiguracoesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-lg bg-muted/50 gap-4 md:gap-0">
                             <div>
                                 <p className="font-medium text-foreground">Email de Contato</p>
                                 <p className="text-sm text-muted-foreground">contato@tatudoemdia.com.br</p>
                             </div>
-                            <a href="mailto:contato@tatudoemdia.com.br">
-                                <Button variant="outline" className="border-emerald-500 text-emerald-500 hover:bg-emerald-500/10">
+                            <a href="mailto:contato@tatudoemdia.com.br" className="w-full md:w-auto">
+                                <Button variant="outline" className="w-full md:w-auto border-emerald-500 text-emerald-500 hover:bg-emerald-500/10">
                                     Enviar Email
                                 </Button>
                             </a>
