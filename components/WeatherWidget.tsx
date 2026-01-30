@@ -103,16 +103,24 @@ export const WeatherWidget = () => {
 
         const getLocationByIP = async () => {
             try {
-                const res = await fetch('https://ipapi.co/json/');
+                // Add a timeout to the fetch request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) throw new Error('IP API returned non-OK status');
+
                 const data = await res.json();
                 if (data.latitude && data.longitude) {
                     fetchWeather(data.latitude, data.longitude);
                 } else {
-                    fetchWeather(-23.5505, -46.6333); // Fallback final para SP
+                    throw new Error('Invalid location data from IP API');
                 }
             } catch (err) {
-                console.error("Erro ao buscar localização por IP:", err);
-                fetchWeather(-23.5505, -46.6333);
+                console.warn("Using fallback location due to IP fetch error:", err);
+                fetchWeather(-23.5505, -46.6333); // Fallback: São Paulo
             }
         };
 
