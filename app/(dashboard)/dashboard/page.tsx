@@ -194,7 +194,7 @@ export default function DashboardPage() {
                         <Button
                             id="dashboard-new-transaction-btn"
                             onClick={() => setShowModal(true)}
-                            className="hidden md:flex h-12 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                            className="flex w-full md:w-auto h-12 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] justify-center"
                         >
                             <Plus className="w-5 h-5 mr-2" />
                             Nova Transação
