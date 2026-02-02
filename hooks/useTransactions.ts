@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Transaction } from "@/types";
 import { getTransactions, addTransaction, deleteTransaction, getTransaction } from "@/lib/firestore";
 import { updateAccountBalance } from "@/lib/accounts";
 import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { isSameMonth } from "date-fns";
 
 export function useTransactions() {
     const { user } = useAuth();
@@ -111,9 +112,12 @@ export function useTransactions() {
         await deleteTransaction(id);
     };
 
-    // Cálculos
-    const receitas = transactions.filter(t => t.type === "receita");
-    const despesas = transactions.filter(t => t.type === "despesa");
+    // Cálculos - filtrar apenas transações do mês atual
+    const today = new Date();
+    const transactionsThisMonth = transactions.filter(t => isSameMonth(t.date, today));
+
+    const receitas = transactionsThisMonth.filter(t => t.type === "receita");
+    const despesas = transactionsThisMonth.filter(t => t.type === "despesa");
 
     // Filtrar transferências para não contar nos totais
     const receitasEfetivas = receitas.filter(t => t.category !== "Transferência");
