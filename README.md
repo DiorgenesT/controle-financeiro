@@ -2,6 +2,8 @@
 
 > Uma plataforma moderna e intuitiva para gestão de finanças pessoais, construída com as tecnologias mais recentes do mercado.
 
+**Acesse agora:** [https://tatudoemdia.com.br/](https://tatudoemdia.com.br/)
+
 ![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-emerald)
 ![Version](https://img.shields.io/badge/Versão-0.1.0-blue)
 

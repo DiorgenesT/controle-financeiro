@@ -132,19 +132,28 @@ export function RecurringModal({ open, onOpenChange, initialData, onSuccess }: R
 
         setLoading(true);
         try {
-            const data = {
+            const amount = parseFloat(formData.amount) || 0;
+
+            // Build sanitized data object
+            const data: any = {
                 description: formData.description,
-                amount: parseFloat(formData.amount),
+                amount: amount,
                 type: formData.type,
                 category: formData.category || (formData.type === "receita" ? "Salário" : "Outros"),
-                day: parseInt(formData.day),
+                day: parseInt(formData.day) || 1,
                 personId: formData.personId === "family" ? null : formData.personId,
                 active: true,
-                // Campos de pagamento
                 paymentMethod: formData.type === "despesa" ? formData.paymentMethod : "debit",
-                creditCardId: (formData.type === "despesa" && formData.paymentMethod === "credit") ? formData.creditCardId : undefined,
-                accountId: (formData.type === "receita" || formData.paymentMethod === "debit") ? formData.accountId : undefined,
             };
+
+            // Add optional fields only if they have values
+            if (formData.type === "despesa" && formData.paymentMethod === "credit" && formData.creditCardId) {
+                data.creditCardId = formData.creditCardId;
+            }
+
+            if (formData.type === "receita" || formData.paymentMethod === "debit") {
+                if (formData.accountId) data.accountId = formData.accountId;
+            }
 
             if (editingId) {
                 console.log("Updating recurring transaction (by ID):", editingId);
