@@ -81,8 +81,18 @@ export async function POST(request: NextRequest) {
             { message: "Se o email estiver cadastrado, você receberá um link de recuperação." },
             { status: 200 }
         );
-    } catch (error: unknown) {
+    } catch (error: any) {
         console.error("[ResetPassword] CRITICAL ERROR:", error);
+
+        // Handle Firebase Rate Limit
+        if (error.code === 'auth/quota-exceeded' ||
+            (error.message && error.message.includes('RESET_PASSWORD_EXCEED_LIMIT'))) {
+            return NextResponse.json(
+                { error: "Muitas tentativas de recuperação. Por favor, aguarde cerca de 1 hora e tente novamente." },
+                { status: 429 }
+            );
+        }
+
         const errorMessage = error instanceof Error ? error.message : String(error);
         return NextResponse.json(
             { error: "Erro interno do servidor", details: errorMessage },

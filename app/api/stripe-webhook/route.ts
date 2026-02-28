@@ -77,7 +77,7 @@ export async function POST(request: Request) {
                     // 2. Send Welcome Email with Credentials
                     console.log(`[Webhook] Sending welcome email to ${email}...`);
                     const emailResult = await resend.emails.send({
-                        from: 'Tudo Em Dia <nao-responda@tatudoemdia.com.br>',
+                        from: 'Tudo Em Dia <noreply@tatudoemdia.com.br>',
                         to: email,
                         subject: 'Bem-vindo ao Tudo Em Dia! Seu acesso chegou.',
                         html: `
