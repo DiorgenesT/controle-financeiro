@@ -51,39 +51,37 @@ export const WeatherWidget = () => {
                 const current = weatherData.current_weather;
                 const addr = geoData.address;
 
-                // Extraction logic optimization: prioritize the city/municipality level
-                // Nominatim 'city' or 'town' usually holds the municipality name.
-                // 'suburb' is the neighborhood (like 'Cruzeiro')
-                const municipality = addr?.city || addr?.town || addr?.municipality || addr?.village;
-                const neighborhood = addr?.suburb || addr?.city_district;
-
-                let finalCity = municipality || neighborhood || "Sua Localização";
-
-                // If it's Brasília/DF level
-                if (addr?.state === 'Distrito Federal') {
-                    // In DF, 'city' is often the RA (Administrative Region), which is what we want to show
-                }
-
-                // Map state to abbreviation
+                // Priority mapping for Brazilian state abbreviations
                 const stateMap: Record<string, string> = {
-                    'Minas Gerais': 'MG',
-                    'São Paulo': 'SP',
-                    'Rio de Janeiro': 'RJ',
-                    'Espírito Santo': 'ES',
-                    'Bahia': 'BA',
-                    'Paraná': 'PR',
-                    'Santa Catarina': 'SC',
-                    'Rio Grande do Sul': 'RS',
-                    'Goiás': 'GO',
-                    'Distrito Federal': 'DF',
-                    'Mato Grosso': 'MT',
-                    'Mato Grosso do Sul': 'MS',
-                    'Pernambuco': 'PE',
-                    'Ceará': 'CE'
+                    'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM',
+                    'Bahia': 'BA', 'Ceará': 'CE', 'Distrito Federal': 'DF',
+                    'Espírito Santo': 'ES', 'Goiás': 'GO', 'Maranhão': 'MA',
+                    'Mato Grosso': 'MT', 'Mato Grosso do Sul': 'MS',
+                    'Minas Gerais': 'MG', 'Pará': 'PA', 'Paraíba': 'PB',
+                    'Paraná': 'PR', 'Pernambuco': 'PE', 'Piauí': 'PI',
+                    'Rio de Janeiro': 'RJ', 'Rio Grande do Norte': 'RN',
+                    'Rio Grande do Sul': 'RS', 'Rondônia': 'RO', 'Roraima': 'RR',
+                    'Santa Catarina': 'SC', 'São Paulo': 'SP', 'Sergipe': 'SE',
+                    'Tocantins': 'TO'
                 };
 
-                const stateAbbr = stateMap[addr?.state] || addr?.state_code || "";
-                const city = stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity;
+                // Specialized extraction for Brazil (Municipality vs District vs Suburb)
+                const state = addr?.state || "";
+                const stateAbbr = stateMap[state] || addr?.state_code || "";
+
+                // Priority: City/Town/Municipality names
+                let finalCity = addr?.city || addr?.town || addr?.municipality || addr?.village;
+
+                // Handle Distrito Federal (Districts are usually what people recognize as "city" there)
+                if (state === "Distrito Federal") {
+                    finalCity = addr?.city || addr?.suburb || "Brasília";
+                }
+                // Fallback to suburb/district only if no municipality found
+                else if (!finalCity) {
+                    finalCity = addr?.suburb || addr?.city_district || "Sua Localização";
+                }
+
+                const cityLabel = stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity;
 
                 // Mapeamento de códigos de clima Open-Meteo
                 const code = current.weathercode;
@@ -123,7 +121,7 @@ export const WeatherWidget = () => {
                     temp: Math.round(current.temperature),
                     condition,
                     icon,
-                    city,
+                    city: cityLabel,
                 });
             } catch (err) {
                 console.error("Erro ao buscar clima ou cidade:", err);
@@ -138,15 +136,11 @@ export const WeatherWidget = () => {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                // Using ip-api.com (HTTPS variant is limited/paid, using standard fallback if it fails)
-                // Actually, let's try ipapi.co first but use their city result for validation if needed
-                // OR use a different provider: ip-api.com works on https via a specific endpoint or alternative
-
-                // Fallback attempt with a different endpoint for ip-api or staying with ipapi.co but robust
+                // Prioritize ipapi.co (reliable for Brazil)
                 const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                if (!res.ok) throw new Error('IP API error');
+                if (!res.ok) throw new Error('IP Geolocation error');
 
                 const data = await res.json();
                 if (data.latitude && data.longitude) {
@@ -155,8 +149,9 @@ export const WeatherWidget = () => {
                     throw new Error('Invalid IP data');
                 }
             } catch (err) {
-                console.warn("Fallback to Betim-MG:", err);
-                fetchWeather(-19.9678, -44.1983); // Betim-MG Fallback
+                console.warn("Geolocation fallback (SP):", err);
+                // Fallback to a major national hub if everything fails
+                fetchWeather(-23.5505, -46.6333);
             }
         };
 
