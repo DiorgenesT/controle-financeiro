@@ -50,8 +50,40 @@ export const WeatherWidget = () => {
 
                 const current = weatherData.current_weather;
                 const addr = geoData.address;
-                // Prioritize city/town/municipality for the city name
-                const city = addr?.city || addr?.town || addr?.municipality || addr?.village || "Sua Localização";
+
+                // Extraction logic optimization: prioritize the city/municipality level
+                // Nominatim 'city' or 'town' usually holds the municipality name.
+                // 'suburb' is the neighborhood (like 'Cruzeiro')
+                const municipality = addr?.city || addr?.town || addr?.municipality || addr?.village;
+                const neighborhood = addr?.suburb || addr?.city_district;
+
+                let finalCity = municipality || neighborhood || "Sua Localização";
+
+                // If it's Brasília/DF level
+                if (addr?.state === 'Distrito Federal') {
+                    // In DF, 'city' is often the RA (Administrative Region), which is what we want to show
+                }
+
+                // Map state to abbreviation
+                const stateMap: Record<string, string> = {
+                    'Minas Gerais': 'MG',
+                    'São Paulo': 'SP',
+                    'Rio de Janeiro': 'RJ',
+                    'Espírito Santo': 'ES',
+                    'Bahia': 'BA',
+                    'Paraná': 'PR',
+                    'Santa Catarina': 'SC',
+                    'Rio Grande do Sul': 'RS',
+                    'Goiás': 'GO',
+                    'Distrito Federal': 'DF',
+                    'Mato Grosso': 'MT',
+                    'Mato Grosso do Sul': 'MS',
+                    'Pernambuco': 'PE',
+                    'Ceará': 'CE'
+                };
+
+                const stateAbbr = stateMap[addr?.state] || addr?.state_code || "";
+                const city = stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity;
 
                 // Mapeamento de códigos de clima Open-Meteo
                 const code = current.weathercode;
@@ -103,24 +135,28 @@ export const WeatherWidget = () => {
 
         const getLocationByIP = async () => {
             try {
-                // Add a timeout to the fetch request
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+                // Using ip-api.com (HTTPS variant is limited/paid, using standard fallback if it fails)
+                // Actually, let's try ipapi.co first but use their city result for validation if needed
+                // OR use a different provider: ip-api.com works on https via a specific endpoint or alternative
+
+                // Fallback attempt with a different endpoint for ip-api or staying with ipapi.co but robust
                 const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                if (!res.ok) throw new Error('IP API returned non-OK status');
+                if (!res.ok) throw new Error('IP API error');
 
                 const data = await res.json();
                 if (data.latitude && data.longitude) {
                     fetchWeather(data.latitude, data.longitude);
                 } else {
-                    throw new Error('Invalid location data from IP API');
+                    throw new Error('Invalid IP data');
                 }
             } catch (err) {
-                console.warn("Using fallback location due to IP fetch error:", err);
-                fetchWeather(-23.5505, -46.6333); // Fallback: São Paulo
+                console.warn("Fallback to Betim-MG:", err);
+                fetchWeather(-19.9678, -44.1983); // Betim-MG Fallback
             }
         };
 
