@@ -28,7 +28,7 @@ export const WeatherWidget = () => {
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        const fetchWeather = async (lat: number, lon: number) => {
+        const fetchWeather = async (lat: number, lon: number, isGenericFallback = false) => {
             try {
                 // Fetch weather data
                 const weatherPromise = fetch(
@@ -78,10 +78,11 @@ export const WeatherWidget = () => {
                 }
                 // Fallback to suburb/district only if no municipality found
                 else if (!finalCity) {
-                    finalCity = addr?.suburb || addr?.city_district || "Sua Localização";
+                    finalCity = addr?.suburb || addr?.city_district || (isGenericFallback ? "Brasil" : "Localização");
                 }
 
-                const cityLabel = stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity;
+                // If it was a generic fallback and we couldn't even find a state, just show "Brasil"
+                const cityLabel = isGenericFallback ? "Brasil" : (stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity);
 
                 // Mapeamento de códigos de clima Open-Meteo
                 const code = current.weathercode;
@@ -124,7 +125,6 @@ export const WeatherWidget = () => {
                     city: cityLabel,
                 });
             } catch (err) {
-                console.error("Erro ao buscar clima ou cidade:", err);
                 setError(true);
             } finally {
                 setLoading(false);
@@ -132,27 +132,42 @@ export const WeatherWidget = () => {
         };
 
         const getLocationByIP = async () => {
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const providers = [
+                { url: 'https://ipapi.co/json/', lat: 'latitude', lon: 'longitude' },
+                { url: 'https://ipinfo.io/json', lat: 'loc', lon: 'loc' } // loc is "lat,lon" string
+            ];
 
-                // Prioritize ipapi.co (reliable for Brazil)
-                const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
-                clearTimeout(timeoutId);
+            for (const provider of providers) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+                    const res = await fetch(provider.url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
 
-                if (!res.ok) throw new Error('IP Geolocation error');
+                    if (!res.ok) continue;
 
-                const data = await res.json();
-                if (data.latitude && data.longitude) {
-                    fetchWeather(data.latitude, data.longitude);
-                } else {
-                    throw new Error('Invalid IP data');
+                    const data = await res.json();
+                    let lat, lon;
+
+                    if (provider.lat === 'loc' && data.loc) {
+                        const [pLat, pLon] = data.loc.split(',');
+                        lat = parseFloat(pLat);
+                        lon = parseFloat(pLon);
+                    } else {
+                        lat = parseFloat(data[provider.lat]);
+                        lon = parseFloat(data[provider.lon]);
+                    }
+
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        return fetchWeather(lat, lon);
+                    }
+                } catch (e) {
+                    continue;
                 }
-            } catch (err) {
-                console.warn("Geolocation fallback (SP):", err);
-                // Fallback to a major national hub if everything fails
-                fetchWeather(-23.5505, -46.6333);
             }
+
+            // Ultimate fallback: Brazil generic (neutral)
+            fetchWeather(-15.7801, -47.9292, true); // Brasília coords but will be labeled neutral
         };
 
         if ("geolocation" in navigator) {
