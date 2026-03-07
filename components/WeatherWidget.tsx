@@ -28,7 +28,7 @@ export const WeatherWidget = () => {
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        const fetchWeather = async (lat: number, lon: number, isGenericFallback = false) => {
+        const fetchWeather = async (lat: number, lon: number) => {
             try {
                 // Fetch weather data
                 const weatherPromise = fetch(
@@ -65,24 +65,23 @@ export const WeatherWidget = () => {
                     'Tocantins': 'TO'
                 };
 
-                // Specialized extraction for Brazil (Municipality vs District vs Suburb)
                 const state = addr?.state || "";
-                const stateAbbr = stateMap[state] || addr?.state_code || "";
+                const stateAbbr = stateMap[state] || addr?.state_code?.toUpperCase() || "";
 
-                // Priority: City/Town/Municipality names
+                // Priority: Strict City/Town/Municipality names to avoid neighborhoods
                 let finalCity = addr?.city || addr?.town || addr?.municipality || addr?.village;
 
-                // Handle Distrito Federal (Districts are usually what people recognize as "city" there)
                 if (state === "Distrito Federal") {
                     finalCity = addr?.city || addr?.suburb || "Brasília";
                 }
-                // Fallback to suburb/district only if no municipality found
-                else if (!finalCity) {
-                    finalCity = addr?.suburb || addr?.city_district || (isGenericFallback ? "Brasil" : "Localização");
+
+                // If we couldn't resolve a precise city, fallback to area
+                if (!finalCity) {
+                    finalCity = addr?.suburb || addr?.city_district || "Localização";
                 }
 
-                // If it was a generic fallback and we couldn't even find a state, just show "Brasil"
-                const cityLabel = isGenericFallback ? "Brasil" : (stateAbbr ? `${finalCity}-${stateAbbr}` : finalCity);
+                // Strict rendering format: "City - UF"
+                const cityLabel = stateAbbr ? `${finalCity} - ${stateAbbr}` : finalCity;
 
                 // Mapeamento de códigos de clima Open-Meteo
                 const code = current.weathercode;
@@ -125,64 +124,33 @@ export const WeatherWidget = () => {
                     city: cityLabel,
                 });
             } catch (err) {
+                console.error("Weather data fetch error:", err);
                 setError(true);
             } finally {
                 setLoading(false);
             }
         };
 
-        const getLocationByIP = async () => {
-            const providers = [
-                { url: 'https://ipapi.co/json/', lat: 'latitude', lon: 'longitude' },
-                { url: 'https://ipinfo.io/json', lat: 'loc', lon: 'loc' } // loc is "lat,lon" string
-            ];
-
-            for (const provider of providers) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000);
-                    const res = await fetch(provider.url, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (!res.ok) continue;
-
-                    const data = await res.json();
-                    let lat, lon;
-
-                    if (provider.lat === 'loc' && data.loc) {
-                        const [pLat, pLon] = data.loc.split(',');
-                        lat = parseFloat(pLat);
-                        lon = parseFloat(pLon);
-                    } else {
-                        lat = parseFloat(data[provider.lat]);
-                        lon = parseFloat(data[provider.lon]);
-                    }
-
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        return fetchWeather(lat, lon);
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-
-            // Ultimate fallback: Brazil generic (neutral)
-            fetchWeather(-15.7801, -47.9292, true); // Brasília coords but will be labeled neutral
-        };
-
-        if ("geolocation" in navigator) {
+        if (typeof window !== "undefined" && "geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     fetchWeather(position.coords.latitude, position.coords.longitude);
                 },
-                () => {
-                    // Silently fallback to IP-based location
-                    getLocationByIP();
+                (err) => {
+                    console.warn("Geolocation access denied or failed.", err);
+                    setError(true);
+                    setLoading(false);
                 },
-                { timeout: 5000, enableHighAccuracy: true }
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
             );
         } else {
-            getLocationByIP();
+            console.warn("Geolocation not supported by this browser.");
+            setError(true);
+            setLoading(false);
         }
     }, []);
 
