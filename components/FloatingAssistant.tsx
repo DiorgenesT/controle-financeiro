@@ -145,6 +145,7 @@ export function FloatingAssistant() {
     }, [sendMessage]);
 
     const toggleListening = () => {
+        unlockAudio(); // Unlock audio on mic toggle too
         if (isListening) {
             recognitionRef.current?.stop();
         } else {
@@ -205,8 +206,10 @@ export function FloatingAssistant() {
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
 
-            const audio = new Audio(url);
-            audioRef.current = audio;
+            // Use the persistent audio ref to avoid mobile blocks
+            if (!audioRef.current) audioRef.current = new Audio();
+            const audio = audioRef.current;
+            audio.src = url;
 
             audio.onended = () => {
                 setIsSpeaking(false);
@@ -230,9 +233,23 @@ export function FloatingAssistant() {
         }
     };
 
+    const unlockAudio = () => {
+        // Unlock audio context for mobile browsers (user gesture requirement)
+        if (audioRef.current) {
+            audioRef.current.play().then(() => {
+                audioRef.current?.pause();
+            }).catch(() => { });
+        } else {
+            const a = new Audio();
+            a.play().then(() => a.pause()).catch(() => { });
+            audioRef.current = a;
+        }
+    };
+
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
+        unlockAudio(); // Important for mobile voice
         sendMessage({ text: input });
         setInput("");
     };
@@ -251,7 +268,10 @@ export function FloatingAssistant() {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className={cn(
+            "fixed z-50 flex flex-col items-end transition-all duration-300",
+            isOpen ? "inset-0 md:inset-auto md:bottom-6 md:right-6" : "bottom-6 right-6"
+        )}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -259,7 +279,10 @@ export function FloatingAssistant() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="mb-4 w-[350px] shadow-2xl rounded-2xl overflow-hidden bg-background border border-border flex flex-col h-[500px] max-h-[80vh]"
+                        className={cn(
+                            "shadow-2xl overflow-hidden bg-background flex flex-col",
+                            "w-full h-full md:w-[350px] md:h-[500px] md:max-h-[80vh] md:rounded-2xl md:border md:border-border md:mb-4"
+                        )}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-md">
@@ -283,7 +306,14 @@ export function FloatingAssistant() {
                                     onClick={() => {
                                         const newValue = !autoSpeak;
                                         setAutoSpeak(newValue);
-                                        if (!newValue) window.speechSynthesis.cancel();
+                                        if (newValue) unlockAudio(); // Unlock on toggle
+                                        if (!newValue) {
+                                            if (audioRef.current) {
+                                                audioRef.current.pause();
+                                                audioRef.current.currentTime = 0;
+                                            }
+                                            window.speechSynthesis.cancel();
+                                        }
                                     }}
                                     title={autoSpeak ? "Desativar voz" : "Ativar voz"}
                                 >
