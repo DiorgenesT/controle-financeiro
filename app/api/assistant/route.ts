@@ -119,28 +119,27 @@ export async function POST(req: Request) {
    - **Balanço Geral**: (Receitas - Despesas).
    - **Maiores Gastos**: Destaque as 3 principais categorias.
    - **Saúde Financeira**: Dê uma nota de 0 a 10 e um conselho prático.
-   - **Ativos Digitais**: Se houver Crypto/BTC nas contas, mencione a performance/estado.
-3. INDICADORES: Use 'getEconomicIndicators' para comparar os rendimentos ou gastos do usuário com a realidade do Brasil (Selic, Inflação).
-4. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" (ex: "Sua reserva renderia mais se estivesse em CDI").
+   - **Mercado Global e Moedas**: Use 'getMarketData' para trazer cotações do Dólar, Euro e Bitcoin se o usuário pedir ou se houver ativos digitais.
+   - **Indicadores Brasil**: Use 'getEconomicIndicators' para comparar os rendimentos do usuário com a Selic, IPCA e CDI.
+3. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" baseada nos indicadores econômicos reais.
 
 CONTEXTO ATUAL:
-- Contas: ${accountsList.map((a: any) => `${a.name} (${a.type === 'crypto' ? 'Digital/Crypto' : 'Bancária'}) - R$ ${a.balance}`).join(', ') || 'Nenhuma'}
+- Contas: ${accountsList.map((a: any) => `${a.name} (${a.type === 'crypto' || a.name.toLowerCase().includes('btc') ? 'Digital/Crypto' : 'Bancária'}) - R$ ${a.balance}`).join(', ') || 'Nenhuma'}
 - Cartões: ${cardsList.map((c: any) => c.name).join(', ') || 'Nenhum'}
 - Categorias: ${catsList.map((c: any) => c.name).join(', ')}
 - Metas: ${goalsList.map((g: any) => `${g.description} (R$ ${g.currentAmount}/${g.targetAmount})`).join(', ') || 'Nenhuma'}
 
-INTERNAL ID MAPPING (NUNCA MOSTRAR - USE ESTES IDS NOS TOOLS):
+INTERNAL ID MAPPING (NUNCA MOSTRAR):
 - Contas: ${accountsList.map((a: any) => `${a.name}: ${a.id}`).join(' | ')}
 - Cartões: ${cardsList.map((c: any) => `${c.name}: ${c.id}`).join(' | ')}
 - Metas: ${goalsList.map((g: any) => `${g.description}: ${g.id}`).join(' | ')}
 - Categorias: ${catsList.map((c: any) => `${c.name}: ${c.id}`).join(' | ')}
 
 INSTRUÇÕES:
-1. GASTOS/GANHOS: Use 'manageTransactions' para um ou mais itens. GARANTA que accountId ou creditCardId estejam corretos.
-2. ENTIDADES: Você pode CRIAR, EDITAR ou EXCLUIR Contas, Cartões, Metas e Categorias usando os respectios tools.
-3. PESQUISA: Se o usuário perguntar sobre algo antigo, use 'searchEntities'.
-4. ANÁLISE: Para resumos e relatórios profundos, use 'getFinancialAnalysis'.
-5. ECONOMIA: Para Selic/IPCA, use 'getEconomicIndicators'.
+1. ANÁLISE: Para resumos e relatórios profundos, use 'getFinancialAnalysis'.
+2. ECONOMIA: Para Selic/IPCA/CDI reais, use 'getEconomicIndicators'.
+3. MERCADO: Para cotações de Dólar/Euro/BTC/ETH, use 'getMarketData'.
+4. TRANSAÇÕES: Use 'manageTransactions' para salvar novos lançamentos.
 `;
 
         const body = await req.json().catch(e => {
@@ -267,26 +266,47 @@ INSTRUÇÕES:
             stopWhen: stepCountIs(10),
             tools: {
                 getEconomicIndicators: tool({
-                    description: 'Busca indicadores econômicos atuais do Brasil (Selic, IPCA, CDI).',
+                    description: 'Busca indicadores econômicos REAIS do Brasil diretamente do Banco Central (Selic, IPCA, CDI).',
                     inputSchema: z.object({}),
                     execute: async () => {
-                        console.log(`[Assistant] Tool: getEconomicIndicators`);
-                        // Mock/Source data for Brazilian Indicators
-                        return {
-                            success: true,
-                            indicators: {
-                                selic: '11.25%',
-                                cdi: '11.15%',
-                                ipca_acumulado_12m: '4.51%',
-                                igpm_acumulado_12m: '0.89%',
-                                data_referencia: new Date().toLocaleDateString('pt-BR'),
-                                fonte: 'Banco Central / IBGE'
-                            }
-                        };
+                        console.log(`[Assistant] Tool: getEconomicIndicators (Real-time)`);
+                        try {
+                            const fetchInd = async (code: number) => {
+                                const resp = await fetch(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${code}/dados/ultimos/1?formato=json`);
+                                const data = await resp.json();
+                                return data?.[0]?.valor ? parseFloat(data[0].valor) : null;
+                            };
+                            const [selic, ipca, cdi] = await Promise.all([
+                                fetchInd(432), // Selic Meta
+                                fetchInd(433), // IPCA Mensal
+                                fetchInd(4389) // CDI Mensal
+                            ]);
+                            return {
+                                success: true,
+                                indicators: { selic, ipca, cdi, date: new Date().toISOString() }
+                            };
+                        } catch (e) {
+                            console.error('[Assistant] Indicator error:', e);
+                            return { error: 'Falha ao buscar indicadores do BCB.' };
+                        }
+                    }
+                }),
+                getMarketData: tool({
+                    description: 'Busca cotações REAIS de Dólar, Euro, Bitcoin e Ethereum.',
+                    inputSchema: z.object({}),
+                    execute: async () => {
+                        console.log(`[Assistant] Tool: getMarketData`);
+                        try {
+                            const resp = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BTC-BRL,ETH-BRL');
+                            const data = await resp.json();
+                            return { success: true, market: data };
+                        } catch (e) {
+                            return { error: 'Falha ao buscar cotações do mercado.' };
+                        }
                     }
                 }),
                 getFinancialAnalysis: tool({
-                    description: 'Analisa finanças de um mês específico, calculando totais, categorias e saldos.',
+                    description: 'Analisa finanças de um período, calculando totais e categorias.',
                     inputSchema: z.object({
                         month: z.number().describe('Mês (1-12)'),
                         year: z.number().describe('Ano (ex: 2024)')
@@ -297,13 +317,17 @@ INSTRUÇÕES:
                             const start = new Date(year, month - 1, 1);
                             const end = new Date(year, month, 0, 23, 59, 59);
 
+                            console.log(`[Assistant] Querying: ${start.toISOString()} to ${end.toISOString()}`);
+
                             const txSnap = await db.collection('transactions')
                                 .where('userId', '==', userId)
                                 .where('date', '>=', admin.firestore.Timestamp.fromDate(start))
                                 .where('date', '<=', admin.firestore.Timestamp.fromDate(end))
                                 .get();
 
-                            const transactions = txSnap.docs.map(doc => doc.data());
+                            console.log(`[Assistant] Found ${txSnap.size} transactions`);
+
+                            const transactions = txSnap.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
 
                             let totalRevenue = 0;
                             let totalExpenses = 0;
@@ -320,29 +344,16 @@ INSTRUÇÕES:
                                 }
                             });
 
-                            // Identify Crypto Assets if any
-                            const cryptoAccounts = accountsList.filter((a: any) =>
-                                a.type === 'crypto' || a.name.toLowerCase().includes('btc') || a.name.toLowerCase().includes('crypto')
-                            );
-
                             return {
                                 success: true,
                                 period: `${month}/${year}`,
-                                totals: {
-                                    revenue: totalRevenue,
-                                    expenses: totalExpenses,
-                                    balance: totalRevenue - totalExpenses
-                                },
-                                topCategories: Object.entries(categorySpending)
-                                    .sort(([, a], [, b]) => b - a)
-                                    .slice(0, 5)
-                                    .map(([name, value]) => ({ name, value })),
-                                digitalAssets: cryptoAccounts.map((a: any) => ({ name: a.name, balance: a.balance })),
-                                transactionCount: transactions.length
+                                totals: { revenue: totalRevenue, expenses: totalExpenses, balance: totalRevenue - totalExpenses },
+                                topCategories: Object.entries(categorySpending).sort(([, a], [, b]) => b - a).slice(0, 5).map(([name, value]) => ({ name, value })),
+                                txCount: transactions.length
                             };
                         } catch (e: any) {
-                            console.error(`[Assistant] getFinancialAnalysis error:`, e);
-                            return { error: 'Falha ao processar análise financeira.' };
+                            console.error(`[Assistant] getFinancialAnalysis failure:`, e);
+                            return { error: `Erro na análise: ${e.message}` };
                         }
                     }
                 }),

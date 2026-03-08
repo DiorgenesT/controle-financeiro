@@ -179,7 +179,7 @@ export function FloatingAssistant() {
                 const response = await fetch('/api/assistant/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: sentence, voice: 'alloy' })
+                    body: JSON.stringify({ text: sentence, voice: 'nova' })
                 });
 
                 if (!response.ok) continue;
@@ -240,7 +240,7 @@ export function FloatingAssistant() {
                 const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
                 if (isNaN(amount)) return amountStr;
                 const reals = Math.floor(amount);
-                const cents = Math.round((amount - reals) * 100);
+                const cents = Math.round((amount - Math.floor(amount)) * 100);
                 const parts = [];
                 if (reals > 0) parts.push(`${reals} ${reals === 1 ? 'real' : 'reais'}`);
                 if (cents > 0) parts.push(`${cents} ${cents === 1 ? 'centavo' : 'centavos'}`);
