@@ -70,17 +70,29 @@ export function SmartInsightsCard() {
                 <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4 relative z-10">
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 rounded-md bg-white/10 backdrop-blur-md shadow-sm">
-                            <Bot className="w-3.5 h-3.5 text-white animate-pulse" />
+                            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
                         </div>
                         <CardTitle className="text-white text-base font-bold">
-                            Assistente
+                            Assistente IA
                         </CardTitle>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 flex items-center justify-center p-4 pt-0 relative z-10">
+                <CardContent className="flex-1 flex flex-col items-center justify-center p-4 pt-0 relative z-10 gap-3">
                     <p className="text-sm text-white/80 text-center">
-                        Adicione movimentações para gerar insights.
+                        Olá! Quer analisar suas finanças?
                     </p>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full bg-white/20 hover:bg-white/30 text-white border-none"
+                        onClick={() => {
+                            // Click the hidden trigger in FloatingAssistant
+                            document.getElementById('ai-chat-trigger')?.click();
+                        }}
+                    >
+                        <Bot className="w-4 h-4 mr-2" />
+                        Abrir Chat Inteligente
+                    </Button>
                 </CardContent>
             </Card>
         );
@@ -104,10 +116,10 @@ export function SmartInsightsCard() {
             <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5 px-5 relative z-10">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-white/20 shadow-sm ring-1 ring-white/20 backdrop-blur-md">
-                        <Bot className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
+                        <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
                     </div>
                     <CardTitle className="text-white text-sm md:text-base font-bold tracking-wide drop-shadow-sm">
-                        Assistente
+                        Insights Rápidos
                     </CardTitle>
                 </div>
                 <div className="flex gap-1">
@@ -127,13 +139,25 @@ export function SmartInsightsCard() {
                         {currentInsight.title}
                     </div>
 
-                    <p className="text-xs md:text-sm text-white/90 leading-relaxed font-medium drop-shadow-sm">
+                    <p className="text-xs md:text-sm text-white/90 leading-relaxed font-medium drop-shadow-sm mb-4">
                         {currentInsight.description}
                     </p>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                        onClick={() => {
+                            document.getElementById('ai-chat-trigger')?.click();
+                        }}
+                    >
+                        <Bot className="w-4 h-4 mr-2" />
+                        Aprofundar com IA
+                    </Button>
                 </div>
 
                 {/* Indicators */}
-                <div className="flex justify-center gap-1.5 mt-3 md:mt-4 absolute bottom-3 md:bottom-4 left-0 right-0">
+                <div className="flex justify-center gap-1.5 mt-3 absolute bottom-2 left-0 right-0">
                     {insights.map((_, idx) => (
                         <div
                             key={idx}

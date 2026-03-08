@@ -76,12 +76,6 @@ export const menuItems = [
 
 export const premiumMenuItems = [
     {
-        title: "Assistente",
-        href: "/assistente",
-        icon: Bot,
-        color: "text-amber-400",
-    },
-    {
         title: "Acelerar",
         href: "/acelerar",
         icon: Rocket,

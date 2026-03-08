@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Sidebar } from "@/components/Sidebar";
+import { FloatingAssistant } from "@/components/FloatingAssistant";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -62,6 +63,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     {children}
                 </main>
             </div>
+            <FloatingAssistant />
         </div>
     );
 }
