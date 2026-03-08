@@ -162,24 +162,81 @@ export function FloatingAssistant() {
         }
     };
 
-    // State for high-quality audio playback
+    // State for high-quality audio playback and queue
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const sentenceQueueRef = useRef<string[]>([]);
+    const isProcessingQueueRef = useRef(false);
 
-    // Text to Speech Logic (Premium OpenAI TTS Upgrade)
+    const processQueue = async () => {
+        if (isProcessingQueueRef.current || sentenceQueueRef.current.length === 0) return;
+        isProcessingQueueRef.current = true;
+
+        while (sentenceQueueRef.current.length > 0) {
+            const sentence = sentenceQueueRef.current.shift();
+            if (!sentence) continue;
+
+            try {
+                const response = await fetch('/api/assistant/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: sentence, voice: 'alloy' })
+                });
+
+                if (!response.ok) continue;
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                if (!audioRef.current) audioRef.current = new Audio();
+                const audio = audioRef.current;
+
+                await new Promise<void>((resolve, reject) => {
+                    audio.src = url;
+                    audio.onended = () => {
+                        URL.revokeObjectURL(url);
+                        resolve();
+                    };
+                    audio.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        reject();
+                    };
+                    audio.play().catch(reject);
+                });
+            } catch (err) {
+                console.error('[Assistant] TTS Chunk Error:', err);
+                // Fallback to basic speech for THIS sentence if premium fails
+                await new Promise<void>((resolve) => {
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = 'pt-BR';
+                    utterance.onend = () => resolve();
+                    utterance.onerror = () => resolve(); // Don't block queue on error
+                    window.speechSynthesis.speak(utterance);
+                });
+            }
+        }
+
+        isProcessingQueueRef.current = false;
+        setIsSpeaking(false);
+    };
+
+    // Text to Speech Logic (Turbo Sentence Chunking Upgrade)
     const speak = async (text: string) => {
         if (!text) return;
 
-        // Stop any current audio WITHOUT destroying the element
+        // 1. Immediately stop current playback and clear queue
         if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.src = "";
         }
+        sentenceQueueRef.current = [];
+        setIsSpeaking(true);
 
-        // 1. Advanced Text Cleaning (Hiding IDs and Markdown)
+        // 2. Advanced Text Cleaning (Hiding IDs and Markdown)
         const cleanText = text
             .replace(/\(ID:.*?\)/g, '')               // STRICT ID Removal
-            .replace(/[*#_\[\]()]/g, '')              // Clean basic markdown
+            .replace(/[*#_\[\]()]/g, ' ')             // Clean basic markdown
             .replace(/R\$\s?([\d.,]+)/g, (_, amountStr) => {
+                // Better Currency Expansion: ensure space and natural pauses
                 const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
                 if (isNaN(amount)) return amountStr;
                 const reals = Math.floor(amount);
@@ -187,57 +244,32 @@ export function FloatingAssistant() {
                 const parts = [];
                 if (reals > 0) parts.push(`${reals} ${reals === 1 ? 'real' : 'reais'}`);
                 if (cents > 0) parts.push(`${cents} ${cents === 1 ? 'centavo' : 'centavos'}`);
-                return parts.length > 0 ? parts.join(' e ') : "zero reais";
+                return (parts.length > 0 ? parts.join(' e ') : "zero reais") + ". ";
             })
-            .replace(/(\d+)x/gi, '$1 vezes')          // Pronounce installments (10x -> 10 vezes)
-            .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')   // Remove high-range emojis
-            .replace(/[\u{2700}-\u{27BF}]/gu, '')     // Remove dingbats
-            .replace(/[\u{1F600}-\u{1F64F}]/gu, '')   // Remove emoticons
+            .replace(/(\d+)x/gi, ' em $1 vezes')      // Pronounce installments
+            .replace(/[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}]/gu, '') // Remove emojis
             .replace(/\s+/g, ' ')                     // Normalize spacing
             .trim();
 
-        if (!cleanText) return;
-
-        try {
-            console.log('[Assistant] Generating Premium Speech...');
-            setIsSpeaking(true);
-
-            const response = await fetch('/api/assistant/tts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: cleanText, voice: 'alloy' }) // 'alloy' is generally faster
-            });
-
-            if (!response.ok) throw new Error('Failed to generate speech');
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-
-            // Use the persistent audio ref to avoid mobile blocks
-            if (!audioRef.current) audioRef.current = new Audio();
-            const audio = audioRef.current;
-            audio.src = url;
-
-            audio.onended = () => {
-                setIsSpeaking(false);
-                URL.revokeObjectURL(url);
-            };
-
-            audio.onerror = () => {
-                setIsSpeaking(false);
-                URL.revokeObjectURL(url);
-            };
-
-            await audio.play();
-        } catch (error) {
-            console.error('[Assistant] TTS Error:', error);
+        if (!cleanText) {
             setIsSpeaking(false);
-
-            // Fallback to basic speech if premium fails
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'pt-BR';
-            window.speechSynthesis.speak(utterance);
+            return;
         }
+
+        // 3. Split into sentences for low-latency streaming feel
+        // Break by period, newline, or multiple whitespace
+        const sentences = cleanText
+            .split(/[.!?]+\s+|\n+/)
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+
+        if (sentences.length === 0) {
+            setIsSpeaking(false);
+            return;
+        }
+
+        sentenceQueueRef.current = sentences;
+        processQueue();
     };
 
     const unlockAudio = () => {
