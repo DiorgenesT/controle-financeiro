@@ -605,7 +605,7 @@ export function FloatingAssistant() {
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
-                            className="absolute w-full h-full bg-emerald-500 rounded-full blur-xl"
+                            className="absolute w-full h-full bg-indigo-500 rounded-full blur-xl"
                         />
                         <motion.div
                             animate={{
@@ -618,11 +618,11 @@ export function FloatingAssistant() {
                                 ease: "easeInOut",
                                 delay: 0.5
                             }}
-                            className="absolute w-full h-full bg-teal-400 rounded-full blur-2xl"
+                            className="absolute w-full h-full bg-blue-400 rounded-full blur-2xl"
                         />
                     </div>
 
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.5)] border border-white/20 overflow-hidden">
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(79,70,229,0.6)] border border-white/20 overflow-hidden">
                         {/* Dynamic Background Layer */}
                         <motion.div
                             animate={{
@@ -637,15 +637,10 @@ export function FloatingAssistant() {
                             className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.3),transparent)]"
                         />
                         <Bot className="w-8 h-8 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] z-10" />
-
-                        {/* Premium Notification Dot */}
-                        <div className="absolute top-0 right-0 w-5 h-5 bg-emerald-400 rounded-full border-2 border-background flex items-center justify-center z-20 shadow-lg">
-                            <div className="w-2 h-2 bg-white rounded-full animate-ping" />
-                        </div>
                     </div>
 
                     {/* Hover Label Hint */}
-                    <div className="absolute -top-10 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
+                    <div className="absolute -top-10 right-0 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
                         Posso ajudar?
                     </div>
                 </motion.button>
