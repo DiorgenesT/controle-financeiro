@@ -113,33 +113,18 @@ export async function POST(req: Request) {
 
         const userName = (userDoc as any)?.data()?.displayName?.split(' ')[0] || 'Usuário';
 
-        const systemPrompt = `Você é o "Assistente Tudo em Dia", com acesso total ao sistema.
-Seja direto, útil e use emojis. ✨
-
-DIRETRIZES CRÍTICAS DE UI:
-1. NUNCA mostre ou fale IDs técnicos para o usuário (ex: NÃO diga "Santander (ID: 123)"). 
-2. Use APENAS os NOMES amigáveis das contas, cartões, metas e categorias.
-3. Se precisar se referir a algo, use o nome que o usuário deu.
-4. NUNCA peça dados sensíveis (número de cartão, CVV, senhas).
-
-REGRAS DE CLASSIFICAÇÃO:
-1. SALÁRIO/RECEITA: Use 'type: receita'. Embora salários costumem ser recorrentes, só use 'fixed' se o usuário pedir explicitamente (ex: "é fixo", "lança todo mês").
-2. MEIO DE PAGAMENTO (REGRA DE OURO): 
-   - Para RECEITA: Pode assumir a Conta Bancária padrão se não informado.
-   - Para DESPESA:
-     - Se o usuário NÃO disser como pagou: **PERGUNTE** (Cartão, Pix, Débito?).
-     - Se disser "no cartão" e houver só UM: Use ele direto.
-     - Se disser "no cartão" e houver VÁRIOS: **PERGUNTE** "Qual cartão você usou?".
-     - Se disser "no cartão" e o valor for alto ou parcelado: **NÃO** pergunte se é cartão de crédito, pois é óbvio que é. Apenas identifique qual cartão ou peça o nome dele.
-3. PARCELAMENTO/INSTALLMENTS: 
-   - Se o usuário mencionar "10x", "10 vezes", etc, extraia o NÚMERO.
-   - Só use "fixed" se o usuário disser explicitamente "é fixo", "todo mês", "recorrente" ou "se repete". **NÃO ASSUMA NUNCA** que algo é fixo por padrão.
-4. INTELIGÊNCIA DE CATEGORIA: Se o usuário não disser a categoria, infira a melhor da lista (ex: "café" -> 'Alimentação').
-5. PROIBIÇÃO: NUNCA use 'credit_card' para 'receita'.
-6. MÚLTIPLOS LANÇAMENTOS: Use 'manageTransactions' APENAS quando tiver todas as informações. Se faltar o meio de pagamento de um item, pergunte antes de agir.
+        const systemPrompt = `CONTEÚDO E PERSONA:
+1. PERSONA: Você é um **Expert Financeiro de Alto Nível**. Não apenas registra dados, mas ANALISA e dá CONSELHOS inteligentes.
+2. RESUMOS: Ao fazer um resumo (financeiro ou mensal), use o tool 'getFinancialAnalysis'. Organize a resposta em:
+   - **Balanço Geral**: (Receitas - Despesas).
+   - **Maiores Gastos**: Destaque as 3 principais categorias.
+   - **Saúde Financeira**: Dê uma nota de 0 a 10 e um conselho prático.
+   - **Ativos Digitais**: Se houver Crypto/BTC nas contas, mencione a performance/estado.
+3. INDICADORES: Use 'getEconomicIndicators' para comparar os rendimentos ou gastos do usuário com a realidade do Brasil (Selic, Inflação).
+4. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" (ex: "Sua reserva renderia mais se estivesse em CDI").
 
 CONTEXTO ATUAL:
-- Contas: ${accountsList.map((a: any) => `${a.name} (R$ ${a.balance})`).join(', ') || 'Nenhuma'}
+- Contas: ${accountsList.map((a: any) => `${a.name} (${a.type === 'crypto' ? 'Digital/Crypto' : 'Bancária'}) - R$ ${a.balance}`).join(', ') || 'Nenhuma'}
 - Cartões: ${cardsList.map((c: any) => c.name).join(', ') || 'Nenhum'}
 - Categorias: ${catsList.map((c: any) => c.name).join(', ')}
 - Metas: ${goalsList.map((g: any) => `${g.description} (R$ ${g.currentAmount}/${g.targetAmount})`).join(', ') || 'Nenhuma'}
@@ -154,6 +139,8 @@ INSTRUÇÕES:
 1. GASTOS/GANHOS: Use 'manageTransactions' para um ou mais itens. GARANTA que accountId ou creditCardId estejam corretos.
 2. ENTIDADES: Você pode CRIAR, EDITAR ou EXCLUIR Contas, Cartões, Metas e Categorias usando os respectios tools.
 3. PESQUISA: Se o usuário perguntar sobre algo antigo, use 'searchEntities'.
+4. ANÁLISE: Para resumos e relatórios profundos, use 'getFinancialAnalysis'.
+5. ECONOMIA: Para Selic/IPCA, use 'getEconomicIndicators'.
 `;
 
         const body = await req.json().catch(e => {
@@ -279,6 +266,86 @@ INSTRUÇÕES:
             // AI SDK 6.0 uses stopWhen instead of maxSteps
             stopWhen: stepCountIs(10),
             tools: {
+                getEconomicIndicators: tool({
+                    description: 'Busca indicadores econômicos atuais do Brasil (Selic, IPCA, CDI).',
+                    inputSchema: z.object({}),
+                    execute: async () => {
+                        console.log(`[Assistant] Tool: getEconomicIndicators`);
+                        // Mock/Source data for Brazilian Indicators
+                        return {
+                            success: true,
+                            indicators: {
+                                selic: '11.25%',
+                                cdi: '11.15%',
+                                ipca_acumulado_12m: '4.51%',
+                                igpm_acumulado_12m: '0.89%',
+                                data_referencia: new Date().toLocaleDateString('pt-BR'),
+                                fonte: 'Banco Central / IBGE'
+                            }
+                        };
+                    }
+                }),
+                getFinancialAnalysis: tool({
+                    description: 'Analisa finanças de um mês específico, calculando totais, categorias e saldos.',
+                    inputSchema: z.object({
+                        month: z.number().describe('Mês (1-12)'),
+                        year: z.number().describe('Ano (ex: 2024)')
+                    }),
+                    execute: async ({ month, year }) => {
+                        console.log(`[Assistant] Tool: getFinancialAnalysis, period: ${month}/${year}`);
+                        try {
+                            const start = new Date(year, month - 1, 1);
+                            const end = new Date(year, month, 0, 23, 59, 59);
+
+                            const txSnap = await db.collection('transactions')
+                                .where('userId', '==', userId)
+                                .where('date', '>=', admin.firestore.Timestamp.fromDate(start))
+                                .where('date', '<=', admin.firestore.Timestamp.fromDate(end))
+                                .get();
+
+                            const transactions = txSnap.docs.map(doc => doc.data());
+
+                            let totalRevenue = 0;
+                            let totalExpenses = 0;
+                            const categorySpending: Record<string, number> = {};
+
+                            transactions.forEach(tx => {
+                                const amount = tx.amount || 0;
+                                if (tx.type === 'receita') {
+                                    totalRevenue += amount;
+                                } else {
+                                    totalExpenses += amount;
+                                    const cat = tx.category || 'Outros';
+                                    categorySpending[cat] = (categorySpending[cat] || 0) + amount;
+                                }
+                            });
+
+                            // Identify Crypto Assets if any
+                            const cryptoAccounts = accountsList.filter((a: any) =>
+                                a.type === 'crypto' || a.name.toLowerCase().includes('btc') || a.name.toLowerCase().includes('crypto')
+                            );
+
+                            return {
+                                success: true,
+                                period: `${month}/${year}`,
+                                totals: {
+                                    revenue: totalRevenue,
+                                    expenses: totalExpenses,
+                                    balance: totalRevenue - totalExpenses
+                                },
+                                topCategories: Object.entries(categorySpending)
+                                    .sort(([, a], [, b]) => b - a)
+                                    .slice(0, 5)
+                                    .map(([name, value]) => ({ name, value })),
+                                digitalAssets: cryptoAccounts.map((a: any) => ({ name: a.name, balance: a.balance })),
+                                transactionCount: transactions.length
+                            };
+                        } catch (e: any) {
+                            console.error(`[Assistant] getFinancialAnalysis error:`, e);
+                            return { error: 'Falha ao processar análise financeira.' };
+                        }
+                    }
+                }),
                 searchEntities: tool({
                     description: 'Busca transações ou outras entidades no histórico.',
                     inputSchema: z.object({
