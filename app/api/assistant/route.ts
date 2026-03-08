@@ -113,33 +113,57 @@ export async function POST(req: Request) {
 
         const userName = (userDoc as any)?.data()?.displayName?.split(' ')[0] || 'Usuário';
 
-        const systemPrompt = `CONTEÚDO E PERSONA:
+        const now = new Date();
+        const accountsStr = accountsList.map((a: any) => a.name + ' (' + (a.type === 'crypto' || a.name.toLowerCase().includes('btc') ? 'Digital/Crypto' : 'Bancária') + ') - R$ ' + a.balance).join(', ') || 'Nenhuma';
+        const cardsStr = cardsList.map((c: any) => c.name).join(', ') || 'Nenhum';
+        const catsStr = catsList.map((c: any) => c.name).join(', ');
+        const goalsStr = goalsList.map((g: any) => g.description + ' (R$ ' + g.currentAmount + '/' + g.targetAmount + ')').join(', ') || 'Nenhuma';
+
+        const idMappingStr = [
+            '- Contas: ' + accountsList.map((a: any) => a.name + ': ' + a.id).join(' | '),
+            '- Cartões: ' + cardsList.map((c: any) => c.name + ': ' + c.id).join(' | '),
+            '- Metas: ' + goalsList.map((g: any) => g.description + ': ' + g.id).join(' | '),
+            '- Categorias: ' + catsList.map((c: any) => c.name + ': ' + c.id).join(' | ')
+        ].join('\n');
+
+        const systemPrompt = `DATA ATUAL: ${now.toLocaleDateString('pt-BR')} (Hoje é dia ${now.getDate()} de Março de 2026). Use sempre o mês/ano atual para resumos, a menos que o usuário peça outro período.
+
+CONTEÚDO E PERSONA:
 1. PERSONA: Você é um **Expert Financeiro de Alto Nível**. Não apenas registra dados, mas ANALISA e dá CONSELHOS inteligentes.
-2. RESUMOS: Ao fazer um resumo (financeiro ou mensal), use o tool 'getFinancialAnalysis'. Organize a resposta em:
-   - **Balanço Geral**: (Receitas - Despesas).
-   - **Maiores Gastos**: Destaque as 3 principais categorias.
-   - **Saúde Financeira**: Dê uma nota de 0 a 10 e um conselho prático.
-   - **Mercado Global e Moedas**: Use 'getMarketData' para trazer cotações do Dólar, Euro e Bitcoin se o usuário pedir ou se houver ativos digitais.
-   - **Indicadores Brasil**: Use 'getEconomicIndicators' para comparar os rendimentos do usuário com a Selic, IPCA e CDI.
-3. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" baseada nos indicadores econômicos reais.
+2. RESUMOS: Ao fazer um resumo (financeiro ou mensal), use o tool 'getFinancialAnalysis'. Organize a resposta estritamente nos seguintes KPIs:
+   - **Saldo Total**: Resultado líquido do mês.
+   - **Receitas**: Total de entradas.
+   - **Despesas**: Total de saídas.
+   - **Andamento das Metas**: Resumo do progresso dos objetivos.
+   - **Economia Mensal**: Valor poupado no período.
+   - **Saúde Financeira**: Nota de 0 a 10 e um conselho estratégico.
+   
+   ⚠️ **REGRA CRÍTICA 1**: NÃO liste transações individuais nos resumos mensais/financeiros. Foque apenas nos totais e KPIs acima.
+   ⚠️ **REGRA CRÍTICA 2**: Se uma ferramenta (tool) retornar um Erro Técnico, você deve informar o usuário que não conseguiu acessar os dados reais e NUNCA inventar valores ou usar meses anteriores (como Outubro) como exemplo.
+   ⚠️ **REGRA CRÍTICA 3**: Sempre que o usuário disser "fixa", "recorrente", "todo mês", "assinatura" ou "mensal", você OBRIGATORIAMENTE deve definir o campo 'installments' como 'fixed' ao chamar o tool 'addTransaction'. NUNCA esqueça isso.
+   
+3. MERCADO E INDICADORES:
+   - **Mercado Global**: Use 'getMarketData' para cotações (Dólar, Euro, BTC, ETH).
+   - **Indicadores Brasil**: Use 'getEconomicIndicators' para Selic, IPCA e CDI.
+4. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" baseada nos indicadores econômicos reais.
+
+INSTRUÇÕES DE ERRO:
+- Se 'getFinancialAnalysis' retornar um erro sobre "index" ou "índice", peça ao usuário para clicar no link de criação de índice que você (IA) não pode acessar.
 
 CONTEXTO ATUAL:
-- Contas: ${accountsList.map((a: any) => `${a.name} (${a.type === 'crypto' || a.name.toLowerCase().includes('btc') ? 'Digital/Crypto' : 'Bancária'}) - R$ ${a.balance}`).join(', ') || 'Nenhuma'}
-- Cartões: ${cardsList.map((c: any) => c.name).join(', ') || 'Nenhum'}
-- Categorias: ${catsList.map((c: any) => c.name).join(', ')}
-- Metas: ${goalsList.map((g: any) => `${g.description} (R$ ${g.currentAmount}/${g.targetAmount})`).join(', ') || 'Nenhuma'}
+- Contas: ${accountsStr}
+- Cartões: ${cardsStr}
+- Categorias: ${catsStr}
+- Metas: ${goalsStr}
 
 INTERNAL ID MAPPING (NUNCA MOSTRAR):
-- Contas: ${accountsList.map((a: any) => `${a.name}: ${a.id}`).join(' | ')}
-- Cartões: ${cardsList.map((c: any) => `${c.name}: ${c.id}`).join(' | ')}
-- Metas: ${goalsList.map((g: any) => `${g.description}: ${g.id}`).join(' | ')}
-- Categorias: ${catsList.map((c: any) => `${c.name}: ${c.id}`).join(' | ')}
+${idMappingStr}
 
 INSTRUÇÕES:
 1. ANÁLISE: Para resumos e relatórios profundos, use 'getFinancialAnalysis'.
 2. ECONOMIA: Para Selic/IPCA/CDI reais, use 'getEconomicIndicators'.
 3. MERCADO: Para cotações de Dólar/Euro/BTC/ETH, use 'getMarketData'.
-4. TRANSAÇÕES: Use 'manageTransactions' para salvar novos lançamentos.
+4. TRANSAÇÕES: Use 'manageTransactions' para salvar novos lançamentos ou buscar históricos.
 `;
 
         const body = await req.json().catch(e => {
@@ -262,7 +286,6 @@ INSTRUÇÕES:
             model: openai('gpt-4o-mini'),
             system: systemPrompt,
             messages: modelMessages,
-            // AI SDK 6.0 uses stopWhen instead of maxSteps
             stopWhen: stepCountIs(10),
             tools: {
                 getEconomicIndicators: tool({
@@ -334,7 +357,7 @@ INSTRUÇÕES:
                             const categorySpending: Record<string, number> = {};
 
                             transactions.forEach(tx => {
-                                const amount = tx.amount || 0;
+                                const amount = Number(tx.amount) || 0;
                                 if (tx.type === 'receita') {
                                     totalRevenue += amount;
                                 } else {
@@ -347,13 +370,25 @@ INSTRUÇÕES:
                             return {
                                 success: true,
                                 period: `${month}/${year}`,
-                                totals: { revenue: totalRevenue, expenses: totalExpenses, balance: totalRevenue - totalExpenses },
-                                topCategories: Object.entries(categorySpending).sort(([, a], [, b]) => b - a).slice(0, 5).map(([name, value]) => ({ name, value })),
+                                totals: {
+                                    revenue: totalRevenue,
+                                    expenses: totalExpenses,
+                                    balance: totalRevenue - totalExpenses
+                                },
+                                topCategories: Object.entries(categorySpending)
+                                    .sort(([, a], [, b]) => b - a)
+                                    .slice(0, 5)
+                                    .map(([name, value]) => ({ name, value })),
                                 txCount: transactions.length
                             };
                         } catch (e: any) {
                             console.error(`[Assistant] getFinancialAnalysis failure:`, e);
-                            return { error: `Erro na análise: ${e.message}` };
+                            // Log to file for deep inspection
+                            try {
+                                const fs = await import('fs');
+                                fs.appendFileSync('assistant_error.log', `[${new Date().toISOString()}] getFinancialAnalysis FAILED: ${e.message}\nStack: ${e.stack}\nDetails: ${JSON.stringify(e.details || {})}\n\n`);
+                            } catch (logErr) { }
+                            return { error: `Erro técnico na análise: ${e.message}` };
                         }
                     }
                 }),
@@ -396,7 +431,7 @@ INSTRUÇÕES:
                         paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
                         accountId: z.string().optional(),
                         creditCardId: z.string().optional(),
-                        installments: z.union([z.number(), z.string()]).optional(),
+                        installments: z.union([z.number(), z.string()]).optional().describe('Número de parcelas ou "fixed" para despesas recorrentes/mensais.'),
                         dueDate: z.string().optional(),
                     }),
                     execute: async (params) => {

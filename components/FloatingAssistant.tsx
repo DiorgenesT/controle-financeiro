@@ -171,48 +171,60 @@ export function FloatingAssistant() {
         if (isProcessingQueueRef.current || sentenceQueueRef.current.length === 0) return;
         isProcessingQueueRef.current = true;
 
-        while (sentenceQueueRef.current.length > 0) {
-            const sentence = sentenceQueueRef.current.shift();
-            if (!sentence) continue;
-
+        const preFetchSentence = async (text: string) => {
             try {
                 const response = await fetch('/api/assistant/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: sentence, voice: 'nova' })
+                    body: JSON.stringify({ text, voice: 'nova' })
                 });
-
-                if (!response.ok) continue;
-
+                if (!response.ok) return null;
                 const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
+                return URL.createObjectURL(blob);
+            } catch (e) { return null; }
+        };
 
-                if (!audioRef.current) audioRef.current = new Audio();
-                const audio = audioRef.current;
+        let currentPlayUrl: string | null = null;
+        let index = 0;
+        while (sentenceQueueRef.current.length > 0) {
+            const sentence = sentenceQueueRef.current.shift();
+            if (!sentence) continue;
 
-                await new Promise<void>((resolve, reject) => {
-                    audio.src = url;
-                    audio.onended = () => {
-                        URL.revokeObjectURL(url);
-                        resolve();
-                    };
-                    audio.onerror = () => {
-                        URL.revokeObjectURL(url);
-                        reject();
-                    };
-                    audio.play().catch(reject);
-                });
-            } catch (err) {
-                console.error('[Assistant] TTS Chunk Error:', err);
-                // Fallback to basic speech for THIS sentence if premium fails
-                await new Promise<void>((resolve) => {
-                    const utterance = new SpeechSynthesisUtterance(sentence);
-                    utterance.lang = 'pt-BR';
-                    utterance.onend = () => resolve();
-                    utterance.onerror = () => resolve(); // Don't block queue on error
-                    window.speechSynthesis.speak(utterance);
-                });
+            // Pre-fetch current if don't have it (first one)
+            if (!currentPlayUrl) {
+                currentPlayUrl = await preFetchSentence(sentence);
             }
+
+            // Next pre-fetch
+            const nextSentence = sentenceQueueRef.current[0];
+            const nextUrlPromise = nextSentence ? preFetchSentence(nextSentence) : Promise.resolve(null);
+
+            try {
+                // Natural Pause between sentences (300ms)
+                if (index > 0) await new Promise(res => setTimeout(res, 300));
+
+                if (!currentPlayUrl) {
+                    await new Promise<void>(res => {
+                        const u = new SpeechSynthesisUtterance(sentence);
+                        u.lang = 'pt-BR'; u.onend = () => res(); u.onerror = () => res();
+                        window.speechSynthesis.speak(u);
+                    });
+                } else {
+                    if (!audioRef.current) audioRef.current = new Audio();
+                    const audio = audioRef.current;
+                    await new Promise<void>((resolve) => {
+                        audio.src = currentPlayUrl!;
+                        audio.onended = () => { URL.revokeObjectURL(currentPlayUrl!); resolve(); };
+                        audio.onerror = () => { URL.revokeObjectURL(currentPlayUrl!); resolve(); };
+                        audio.play().catch(() => resolve());
+                    });
+                }
+            } catch (err) {
+                console.error('[Assistant] TTS Loop Error:', err);
+            }
+
+            currentPlayUrl = await nextUrlPromise;
+            index++;
         }
 
         isProcessingQueueRef.current = false;
@@ -236,15 +248,12 @@ export function FloatingAssistant() {
             .replace(/\(ID:.*?\)/g, '')               // STRICT ID Removal
             .replace(/[*#_\[\]()]/g, ' ')             // Clean basic markdown
             .replace(/R\$\s?([\d.,]+)/g, (_, amountStr) => {
-                // Better Currency Expansion: ensure space and natural pauses
-                const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
-                if (isNaN(amount)) return amountStr;
-                const reals = Math.floor(amount);
-                const cents = Math.round((amount - Math.floor(amount)) * 100);
-                const parts = [];
-                if (reals > 0) parts.push(`${reals} ${reals === 1 ? 'real' : 'reais'}`);
-                if (cents > 0) parts.push(`${cents} ${cents === 1 ? 'centavo' : 'centavos'}`);
-                return (parts.length > 0 ? parts.join(' e ') : "zero reais") + ". ";
+                const normalized = amountStr.replace(/\./g, '');
+                const [reais, centavos] = normalized.split(',');
+                if (!centavos || centavos === '00') {
+                    return `${reais} reais `;
+                }
+                return `${reais} reais e ${centavos} centavos `;
             })
             .replace(/(\d+)x/gi, ' em $1 vezes')      // Pronounce installments
             .replace(/[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}]/gu, '') // Remove emojis
@@ -257,7 +266,6 @@ export function FloatingAssistant() {
         }
 
         // 3. Split into sentences for low-latency streaming feel
-        // Break by period, newline, or multiple whitespace
         const sentences = cleanText
             .split(/[.!?]+\s+|\n+/)
             .map(s => s.trim())
@@ -273,12 +281,9 @@ export function FloatingAssistant() {
     };
 
     const unlockAudio = () => {
-        // A tiny silent WAV to "warm up" the audio context on mobile
         const silence = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-
         if (!audioRef.current) audioRef.current = new Audio();
         const a = audioRef.current;
-
         if (a.src === "" || a.src.startsWith("data:")) {
             a.src = silence;
             a.play().then(() => {
@@ -291,7 +296,7 @@ export function FloatingAssistant() {
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
-        unlockAudio(); // Important for mobile voice
+        unlockAudio();
         sendMessage({ text: input });
         setInput("");
     };
@@ -324,7 +329,7 @@ export function FloatingAssistant() {
                         className={cn(
                             "shadow-2xl overflow-hidden bg-background/95 backdrop-blur-xl flex flex-col",
                             "w-full h-[100dvh] md:w-[400px] md:h-[650px] md:max-h-[85vh] md:rounded-3xl md:border md:border-border/50 md:mb-4",
-                            "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]" // Native safe area support
+                            "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
                         )}
                     >
                         {/* Header */}
@@ -352,7 +357,7 @@ export function FloatingAssistant() {
                                     onClick={() => {
                                         const newValue = !autoSpeak;
                                         setAutoSpeak(newValue);
-                                        if (newValue) unlockAudio(); // Unlock on toggle
+                                        if (newValue) unlockAudio();
                                         if (!newValue) {
                                             if (audioRef.current) {
                                                 audioRef.current.pause();
@@ -403,7 +408,6 @@ export function FloatingAssistant() {
                                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-snug prose-p:my-1">
                                             {m.parts.map((part, idx) => {
                                                 if (part.type === 'text') {
-                                                    // Remove any accidental ID leaks from the UI
                                                     const displayText = part.text?.replace(/\(ID:.*?\)/g, '') || '';
                                                     return <ReactMarkdown key={idx}>{displayText}</ReactMarkdown>;
                                                 }
@@ -563,7 +567,6 @@ export function FloatingAssistant() {
                                         </div>
                                     </div>
                                 )}
-                                {/* Scroll Anchor */}
                                 <div ref={messagesEndRef} className="h-px" />
                             </div>
                         </div>
@@ -625,7 +628,6 @@ export function FloatingAssistant() {
                     onClick={() => setIsOpen(true)}
                     className="relative group cursor-pointer"
                 >
-                    {/* Pulsing Background Effects */}
                     <div className="absolute inset-0 flex items-center justify-center">
                         <motion.div
                             animate={{
@@ -639,39 +641,12 @@ export function FloatingAssistant() {
                             }}
                             className="absolute w-full h-full bg-indigo-500 rounded-full blur-xl"
                         />
-                        <motion.div
-                            animate={{
-                                scale: [1, 2.2, 1],
-                                opacity: [0.2, 0, 0.2],
-                            }}
-                            transition={{
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 0.5
-                            }}
-                            className="absolute w-full h-full bg-blue-400 rounded-full blur-2xl"
-                        />
                     </div>
 
                     <div className="relative w-16 h-16 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(79,70,229,0.6)] border border-white/20 overflow-hidden">
-                        {/* Dynamic Background Layer */}
-                        <motion.div
-                            animate={{
-                                opacity: [0.2, 0.5, 0.2],
-                                rotate: 360
-                            }}
-                            transition={{
-                                duration: 10,
-                                repeat: Infinity,
-                                ease: "linear"
-                            }}
-                            className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.3),transparent)]"
-                        />
                         <Bot className="w-8 h-8 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] z-10" />
                     </div>
 
-                    {/* Hover Label Hint */}
                     <div className="absolute -top-10 right-0 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
                         Posso ajudar?
                     </div>
@@ -693,7 +668,6 @@ export function FloatingAssistant() {
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #059669;
                 }
-                /* Firefox */
                 .custom-scrollbar {
                     scrollbar-width: thin;
                     scrollbar-color: #10b981 rgba(0, 0, 0, 0.05);
