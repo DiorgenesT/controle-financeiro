@@ -162,10 +162,10 @@ export function FloatingAssistant() {
     const speak = async (text: string) => {
         if (!text) return;
 
-        // Stop any current audio
+        // Stop any current audio WITHOUT destroying the element
         if (audioRef.current) {
             audioRef.current.pause();
-            audioRef.current = null;
+            audioRef.current.src = "";
         }
 
         // 1. Advanced Text Cleaning (Hiding IDs and Markdown)
@@ -234,15 +234,18 @@ export function FloatingAssistant() {
     };
 
     const unlockAudio = () => {
-        // Unlock audio context for mobile browsers (user gesture requirement)
-        if (audioRef.current) {
-            audioRef.current.play().then(() => {
-                audioRef.current?.pause();
-            }).catch(() => { });
-        } else {
-            const a = new Audio();
-            a.play().then(() => a.pause()).catch(() => { });
-            audioRef.current = a;
+        // A tiny silent WAV to "warm up" the audio context on mobile
+        const silence = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+
+        if (!audioRef.current) audioRef.current = new Audio();
+        const a = audioRef.current;
+
+        if (a.src === "" || a.src.startsWith("data:")) {
+            a.src = silence;
+            a.play().then(() => {
+                a.pause();
+                console.log("[Assistant] Audio Context Unlocked");
+            }).catch(e => console.warn("[Assistant] Audio Unlock Failed", e));
         }
     };
 
