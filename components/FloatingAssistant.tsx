@@ -128,18 +128,25 @@ export function FloatingAssistant() {
             recognitionRef.current.lang = 'pt-BR';
             recognitionRef.current.interimResults = false;
 
+            recognitionRef.current.onstart = () => setIsListening(true);
             recognitionRef.current.onresult = (event: any) => {
-                const transcript = event.results[0][0].transcript;
+                const transcript = event.results[event.results.length - 1][0].transcript;
                 setInput(transcript);
-                setIsListening(false);
-                // Auto-send if it's a clear command
-                if (transcript.length > 3) {
-                    sendMessage({ text: transcript });
-                    setInput("");
+
+                // If it's the final result, process it
+                if (event.results[0].isFinal) {
+                    setIsListening(false);
+                    if (transcript.trim().length > 3) {
+                        sendMessage({ text: transcript });
+                        setInput("");
+                    }
                 }
             };
 
-            recognitionRef.current.onerror = () => setIsListening(false);
+            recognitionRef.current.onerror = (err: any) => {
+                console.error("[Assistant] STT Error:", err);
+                setIsListening(false);
+            };
             recognitionRef.current.onend = () => setIsListening(false);
         }
     }, [sendMessage]);
@@ -198,7 +205,7 @@ export function FloatingAssistant() {
             const response = await fetch('/api/assistant/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: cleanText, voice: 'nova' })
+                body: JSON.stringify({ text: cleanText, voice: 'alloy' }) // 'alloy' is generally faster
             });
 
             if (!response.ok) throw new Error('Failed to generate speech');
@@ -272,19 +279,19 @@ export function FloatingAssistant() {
 
     return (
         <div className={cn(
-            "fixed z-50 flex flex-col items-end transition-all duration-300",
+            "fixed z-[100] flex flex-col items-end transition-all duration-500 ease-in-out",
             isOpen ? "inset-0 md:inset-auto md:bottom-6 md:right-6" : "bottom-6 right-6"
         )}>
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         className={cn(
                             "shadow-2xl overflow-hidden bg-background flex flex-col",
-                            "w-full h-full md:w-[350px] md:h-[500px] md:max-h-[80vh] md:rounded-2xl md:border md:border-border md:mb-4"
+                            "w-full h-full md:w-[380px] md:h-[600px] md:max-h-[85vh] md:rounded-2xl md:border md:border-border md:mb-4"
                         )}
                     >
                         {/* Header */}
