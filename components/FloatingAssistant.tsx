@@ -285,27 +285,31 @@ export function FloatingAssistant() {
             <AnimatePresence mode="wait">
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        initial={{ opacity: 0, y: 100, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                        exit={{ opacity: 0, y: 100, scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         className={cn(
-                            "shadow-2xl overflow-hidden bg-background flex flex-col",
-                            "w-full h-full md:w-[380px] md:h-[600px] md:max-h-[85vh] md:rounded-2xl md:border md:border-border md:mb-4"
+                            "shadow-2xl overflow-hidden bg-background/95 backdrop-blur-xl flex flex-col",
+                            "w-full h-[100dvh] md:w-[400px] md:h-[650px] md:max-h-[85vh] md:rounded-3xl md:border md:border-border/50 md:mb-4",
+                            "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]" // Native safe area support
                         )}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-md">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                                    <Bot className="w-5 h-5" />
+                        <div className="flex items-center justify-between p-4 md:p-5 border-b bg-muted/30 backdrop-blur-md">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                    <Bot className="w-6 h-6" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-foreground">Tudo em Dia - Assistente</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Consultor Inteligente</span>
+                                    <span className="text-base font-bold text-foreground">Assistente Financeiro</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                        <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">Online</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -332,19 +336,19 @@ export function FloatingAssistant() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground"
+                                    className="h-10 w-10 md:h-8 md:w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground transition-all active:scale-95"
                                     onClick={clearHistory}
                                     title="Limpar Histórico"
                                 >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-4 h-4 md:w-3.5 md:h-3.5" />
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
+                                    className="h-10 w-10 md:h-8 md:w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all text-foreground/80"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-5 h-5 md:w-4 md:h-4" />
                                 </Button>
                             </div>
                         </div>
@@ -358,10 +362,10 @@ export function FloatingAssistant() {
                                     <div
                                         key={m.id}
                                         className={cn(
-                                            "flex flex-col max-w-[90%] rounded-2xl px-4 py-3 text-sm transition-all duration-200",
+                                            "flex flex-col max-w-[85%] px-4 py-3 text-sm transition-all duration-200 shadow-sm",
                                             m.role === 'user'
-                                                ? "bg-emerald-600 text-white self-end rounded-tr-sm shadow-md"
-                                                : "bg-muted/50 text-foreground self-start rounded-tl-sm border border-border/50"
+                                                ? "bg-emerald-600 text-white self-end rounded-2xl rounded-tr-sm"
+                                                : "bg-muted text-foreground self-start rounded-2xl rounded-tl-sm border border-border/10"
                                         )}
                                     >
                                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-snug prose-p:my-1">
@@ -533,45 +537,45 @@ export function FloatingAssistant() {
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-4 border-t bg-background/80 backdrop-blur-sm">
+                        <div className="p-4 md:p-6 border-t bg-background/50 backdrop-blur-md">
                             <form
                                 onSubmit={handleSendMessage}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-3"
                             >
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
                                     className={cn(
-                                        "h-10 w-10 shrink-0 rounded-xl transition-all duration-300",
+                                        "h-12 w-12 shrink-0 rounded-2xl transition-all duration-300",
                                         isListening
-                                            ? "bg-red-500 text-white animate-pulse scale-110 shadow-lg shadow-red-500/20"
-                                            : "hover:bg-emerald-500/10 text-emerald-600"
+                                            ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/40"
+                                            : "hover:bg-emerald-500/10 text-emerald-600 bg-emerald-500/5 border border-emerald-500/10"
                                     )}
                                     onClick={toggleListening}
                                     disabled={isLoading}
                                 >
-                                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                                 </Button>
                                 <Input
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    placeholder={isListening ? "Ouvindo..." : "Fale ou digite..."}
-                                    className="flex-1 h-10 rounded-xl bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-emerald-500"
+                                    placeholder={isListening ? "Ouvindo..." : "Algo para hoje?"}
+                                    className="flex-1 h-12 rounded-2xl bg-muted/40 border-border/30 focus-visible:ring-1 focus-visible:ring-emerald-500 text-base"
                                     disabled={isLoading}
                                     autoFocus
                                 />
                                 <Button
                                     type="submit"
                                     size="icon"
-                                    className="h-10 w-10 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all duration-200"
+                                    className="h-12 w-12 shrink-0 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/30 transition-all duration-200"
                                     disabled={isLoading || !input.trim()}
                                 >
-                                    <Send className="w-4 h-4" />
+                                    <Send className="w-5 h-5" />
                                 </Button>
                             </form>
-                            <div className="mt-2 text-center text-[9px] text-muted-foreground/60 font-medium uppercase tracking-tight">
-                                Consultoria Inteligente Tudo Em Dia
+                            <div className="mt-3 text-center text-[10px] text-muted-foreground/50 font-semibold uppercase tracking-widest">
+                                Inteligência Artificial Tudo Em Dia
                             </div>
                         </div>
                     </motion.div>
