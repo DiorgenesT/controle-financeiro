@@ -114,10 +114,10 @@ export function FloatingAssistant() {
             }
         };
 
-        // Debounce/Delay slightly for animations
-        const timer = setTimeout(scrollToBottom, 100);
+        // Debounce/Delay slightly for animations (especially when opening)
+        const timer = setTimeout(scrollToBottom, 200);
         return () => clearTimeout(timer);
-    }, [messages, status]);
+    }, [messages, status, isOpen]);
 
     // Speech to Text Logic
     useEffect(() => {
