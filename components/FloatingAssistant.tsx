@@ -298,13 +298,13 @@ export function FloatingAssistant() {
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 md:p-5 border-b bg-muted/30 backdrop-blur-md">
                             <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">
                                     <Bot className="w-6 h-6" />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-base font-bold text-foreground">Assistente Financeiro</span>
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
                                         <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">Online</span>
                                     </div>
                                 </div>
@@ -315,7 +315,7 @@ export function FloatingAssistant() {
                                     size="icon"
                                     className={cn(
                                         "h-8 w-8 rounded-full transition-colors",
-                                        autoSpeak ? "text-emerald-500 bg-emerald-500/10" : "text-muted-foreground"
+                                        autoSpeak ? "text-indigo-500 bg-indigo-500/10" : "text-muted-foreground"
                                     )}
                                     onClick={() => {
                                         const newValue = !autoSpeak;
@@ -381,8 +381,8 @@ export function FloatingAssistant() {
                                                     if (!res) return null;
 
                                                     return (
-                                                        <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-emerald-500/20 shadow-sm animate-in fade-in duration-300">
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
+                                                        <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-indigo-500/20 shadow-sm animate-in fade-in duration-300">
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
                                                                 <Bot className="w-3 h-3" />
                                                                 <span>Confirmação</span>
                                                             </div>
@@ -422,8 +422,8 @@ export function FloatingAssistant() {
                                                     if (!res) return null;
 
                                                     return (
-                                                        <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-emerald-500/20 shadow-sm animate-in fade-in duration-300">
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
+                                                        <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-indigo-500/20 shadow-sm animate-in fade-in duration-300">
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
                                                                 <Bot className="w-3 h-3" />
                                                                 <span>Confirmação em Lote</span>
                                                             </div>
@@ -433,9 +433,9 @@ export function FloatingAssistant() {
                                                                 </p>
 
                                                                 {res.action === 'requires_confirmation' && res.transactions && (
-                                                                    <div className="mt-2 space-y-2 border-y border-emerald-500/10 py-2 max-h-[200px] overflow-y-auto">
+                                                                    <div className="mt-2 space-y-2 border-y border-indigo-500/10 py-2 max-h-[200px] overflow-y-auto">
                                                                         {res.transactions.map((tx: any, tIdx: number) => (
-                                                                            <div key={tIdx} className="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                                                                            <div key={tIdx} className="bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10">
                                                                                 <div className="flex items-center justify-between text-[11px] mb-1">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className={cn("w-1.5 h-1.5 rounded-full", tx.type === 'receita' ? 'bg-emerald-500' : 'bg-red-500')} />
@@ -516,8 +516,8 @@ export function FloatingAssistant() {
                                 ))}
                                 {isLoading && (
                                     <div className="bg-muted/50 text-foreground self-start rounded-2xl rounded-tl-sm border border-border/50 px-4 py-3 flex items-center gap-2">
-                                        <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
-                                        <span className="text-xs text-muted-foreground animate-pulse font-medium underline underline-offset-4 decoration-emerald-500/30">Pensando...</span>
+                                        <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                                        <span className="text-xs text-muted-foreground animate-pulse font-medium underline underline-offset-4 decoration-indigo-500/30">Pensando...</span>
                                     </div>
                                 )}
                                 {error && (
