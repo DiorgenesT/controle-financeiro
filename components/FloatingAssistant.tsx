@@ -586,21 +586,67 @@ export function FloatingAssistant() {
             {!isOpen && (
                 <motion.button
                     id="ai-chat-trigger"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    whileHover={{ scale: 1.15, rotate: 5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setIsOpen(true)}
                     className="relative group cursor-pointer"
                 >
-                    <div className="absolute inset-0 bg-emerald-500 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center shadow-2xl border border-white/10 overflow-hidden">
-                        {/* Robot Brain Animation Layer */}
-                        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.1),transparent)] group-hover:bg-[radial-gradient(circle,rgba(255,255,255,0.2),transparent)] transition-all" />
-                        <Bot className="w-8 h-8 text-white drop-shadow-md z-10" />
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-background flex items-center justify-center z-20">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                    {/* Pulsing Background Effects */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.6, 1],
+                                opacity: [0.4, 0, 0.4],
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                            className="absolute w-full h-full bg-emerald-500 rounded-full blur-xl"
+                        />
+                        <motion.div
+                            animate={{
+                                scale: [1, 2.2, 1],
+                                opacity: [0.2, 0, 0.2],
+                            }}
+                            transition={{
+                                duration: 4,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: 0.5
+                            }}
+                            className="absolute w-full h-full bg-teal-400 rounded-full blur-2xl"
+                        />
+                    </div>
+
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.5)] border border-white/20 overflow-hidden">
+                        {/* Dynamic Background Layer */}
+                        <motion.div
+                            animate={{
+                                opacity: [0.2, 0.5, 0.2],
+                                rotate: 360
+                            }}
+                            transition={{
+                                duration: 10,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                            className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.3),transparent)]"
+                        />
+                        <Bot className="w-8 h-8 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] z-10" />
+
+                        {/* Premium Notification Dot */}
+                        <div className="absolute top-0 right-0 w-5 h-5 bg-emerald-400 rounded-full border-2 border-background flex items-center justify-center z-20 shadow-lg">
+                            <div className="w-2 h-2 bg-white rounded-full animate-ping" />
                         </div>
+                    </div>
+
+                    {/* Hover Label Hint */}
+                    <div className="absolute -top-10 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
+                        Posso ajudar?
                     </div>
                 </motion.button>
             )}
