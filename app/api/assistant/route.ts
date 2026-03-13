@@ -154,21 +154,20 @@ CONTEÚDO E PERSONA:
    - Campos essenciais para Transações: Descrição, Valor, Tipo (Receita/Despesa), Categoria, Forma de Pagamento (Débito, Pix, Cartão, Boleto) e Conta/Cartão.
    - **CONTAS**: Ao criar contas, use os códigos: nubank, itau, bradesco, bb, santander, inter, c6, picpay. O sistema preencherá o resto.
     - Sempre verifique se o usuário quer atribuir a transação a uma **Pessoa** específica (ou se é da Família).
-    - **REGRA DE INDEPENDÊNCIA (CRÍTICO)**: Em pedidos de múltiplas transações (ex: "Salário fixo + compra de café"), atributos como "fixa", "cartão", "conta" ou uma "Pessoa" se aplicam **APENAS** ao item explicitamente vinculado no texto.
-    - **NUNCA** propague 'isRecurring: true' ou parcelas para outros itens do lote se não houver comando explícito para todos. Cada item do array deve ser isolado.
+    - **REGRA DE INDEPENDÊNCIA ABSOLUTA (MANDATÓRIO)**: Em pedidos múltiplos, trate cada item como um universo isolado. Atributos (fixa, cartão, pessoa) NÃO se propagam. Se um item é fixo, o PRÓXIMO deve ser assumido como NUNCA FIXO ('isRecurring: false') a menos que o usuário peça explicitamente para ele também.
+    - **PAGAMENTOS**: Sempre identifique se a despesa é no Débito (conta) ou no Crédito (cartão). Se for no cartão, identifique o 'creditCardId'.
    
 3. RESUMOS E ANÁLISE:
    - Use 'getFinancialAnalysis' para relatórios. Organize em KPIs: Saldo Total, Receitas, Despesas, Metas, Economia e Saúde Financeira (0-10).
    ⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
+⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
 
 4. REGRAS CRÍTICAS:
-    - Se disser "fixa", "recorrente", "todo mês", "assinatura", defina 'isRecurring' como true APENAS para o item mencionado.
-    - **EXEMPLO DE FALHA A EVITAR**: No pedido "Salário de 5000 é fixo e comprei uma TV de 2000", **isRecurring: true** deve ser aplicado APENAS ao Salário. A TV deve ser 'false'.
-    - **CONFIRMAÇÃO DE LANÇAMENTOS (CRÍTICO)**:
-      1. Para Múltiplos itens (2+), use SEMPRE 'manageTransactions(action: "prepare")'.
-      2. As ferramentas agora retornarão 'action: "prepared"'. Isso NÃO mostra botões na UI.
-      3. Você deve apresentar o resumo dos itens preparados e perguntar "Posso confirmar?" APENAS UMA VEZ no seu texto final.
-      4. Somente após o usuário dizer "Sim" ou "Ok", use 'saveTransaction(action: "create")' ou 'manageTransactions(action: "execute")' para persistir os dados.
+    - **FLUXO DE CONFIRMAÇÃO EM DOIS PASSOS (OBRIGATÓRIO)**:
+      1. **PASSO 1 (PREPARAR)**: Use 'manageTransactions(action: "prepare")' para 2+ itens ou 'addTransaction' para 1. NUNCA chame 'execute' ou 'create' neste turno.
+      2. **PASSO 2 (EXECUTAR)**: Após o usuário digitar "Sim", "Pode lançar" ou "Ok" especificamente para o que foi preparado, use 'manageTransactions(action: "execute")' ou 'saveTransaction(action: "create")'.
+      - **PROIBIDO**: Lançar/Persistir dados sem que o usuário tenha visto o resumo preparado e dado um "Sim" posterior.
+    - **EXEMPLO DE ERRO A EVITAR**: Se o usuário diz "Salário fixo e comprei um café", o Salário tem 'isRecurring: true' e o café TEM QUE TER 'isRecurring: false'.
     - Se houver erro técnico (ex: index), peça ao usuário para clicar no link de criação de índice. NUNCA invente dados.
    - Use 'getMarketData' e 'getEconomicIndicators' para dados reais de mercado e economia (Selic, IPCA, CDI).
 
@@ -551,7 +550,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                                     return { error: `Falha total: ${errors.join(', ')}` };
                                 }
                                 return {
-                                    message: `✅ ${successCount} lançamentos realizados com sucesso!${errors.length > 0 ? ` (Erros: ${errors.join(', ')})` : ''}`
+                                    message: `✅ ${successCount > 1 ? 'Lançamentos realizados' : 'Lançamento realizado'} com sucesso!`
                                 };
                             }
                             return { error: 'Ação não suportada.' };

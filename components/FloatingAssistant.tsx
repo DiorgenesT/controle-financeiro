@@ -414,7 +414,7 @@ export function FloatingAssistant() {
 
                                                 if (part.type === 'tool-addTransaction') {
                                                     const res = part.output as AssistantUITools['addTransaction']['output'];
-                                                    if (!res) return null;
+                                                    if (!res || res.action !== 'requires_confirmation') return null;
 
                                                     return (
                                                         <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-indigo-500/20 shadow-sm animate-in fade-in duration-300">
@@ -426,28 +426,25 @@ export function FloatingAssistant() {
                                                                 <p className="text-xs font-medium leading-tight text-foreground/90">
                                                                     {res.message?.replace(/\(ID:.*?\)/g, '') || ''}
                                                                 </p>
-
-                                                                {res.action === 'requires_confirmation' && (
-                                                                    <div className="flex gap-2 pt-1">
-                                                                        <Button
-                                                                            size="sm"
-                                                                            className="h-8 flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] gap-1.5"
-                                                                            onClick={() => sendMessage({ text: "Sim, pode confirmar o cadastro." })}
-                                                                        >
-                                                                            <Check className="w-3.5 h-3.5" />
-                                                                            Sim
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="outline"
-                                                                            className="h-8 flex-1 text-[11px] gap-1.5 border-border/50"
-                                                                            onClick={() => sendMessage({ text: "Não, cancele por favor." })}
-                                                                        >
-                                                                            <X className="w-3.5 h-3.5" />
-                                                                            Não
-                                                                        </Button>
-                                                                    </div>
-                                                                )}
+                                                                <div className="flex gap-2 pt-1">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="h-8 flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] gap-1.5"
+                                                                        onClick={() => sendMessage({ text: "Sim, pode confirmar o cadastro." })}
+                                                                    >
+                                                                        <Check className="w-3.5 h-3.5" />
+                                                                        Sim
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="h-8 flex-1 text-[11px] gap-1.5 border-border/50"
+                                                                        onClick={() => sendMessage({ text: "Não, cancele por favor." })}
+                                                                    >
+                                                                        <X className="w-3.5 h-3.5" />
+                                                                        Não
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );
@@ -457,22 +454,36 @@ export function FloatingAssistant() {
                                                     const res = part.output as AssistantUITools['manageTransactions']['output'];
                                                     if (!res) return null;
 
-                                                    return (
-                                                        <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-indigo-500/20 shadow-sm animate-in fade-in duration-300">
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
-                                                                <Bot className="w-3 h-3" />
-                                                                <span>Confirmação em Lote</span>
+                                                    if (res.action === 'prepared' || (res.success && !res.action)) {
+                                                        const isSuccess = res.success && !res.action;
+                                                        return (
+                                                            <div key={idx} className={cn("mt-2 p-3 rounded-xl border shadow-sm", isSuccess ? "bg-emerald-500/10 border-emerald-500/20" : "bg-background/50 border-indigo-500/20")}>
+                                                                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider mb-2 text-indigo-600 dark:text-indigo-400">
+                                                                    <CircleCheck className="w-3 h-3 text-emerald-500" />
+                                                                    <span>{isSuccess ? 'Lançado com Sucesso' : 'Itens Preparados'}</span>
+                                                                </div>
+                                                                {isSuccess && res.message && (
+                                                                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{res.message}</p>
+                                                                )}
                                                             </div>
-                                                            <div className="space-y-2">
-                                                                <p className="text-xs font-medium leading-tight text-foreground/90">
-                                                                    {res.message?.replace(/\(ID:.*?\)/g, '') || ''}
-                                                                </p>
+                                                        );
+                                                    }
 
-                                                                {res.action === 'requires_confirmation' && res.transactions && (
-                                                                    <div className="mt-2 space-y-2 border-y border-indigo-500/10 py-2 max-h-[200px] overflow-y-auto">
+                                                    if (res.action === 'requires_confirmation' && res.transactions) {
+                                                        return (
+                                                            <div key={idx} className="mt-2 p-3 bg-background/50 rounded-xl border border-indigo-500/20 shadow-sm animate-in fade-in duration-300">
+                                                                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
+                                                                    <Bot className="w-3 h-3" />
+                                                                    <span>Confirmação em Lote</span>
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <p className="text-xs font-medium leading-tight text-foreground/90">
+                                                                        {res.message?.replace(/\(ID:.*?\)/g, '') || ''}
+                                                                    </p>
+                                                                    <div className="mt-2 space-y-2 border-y border-indigo-500/10 py-2 max-h-[200px] overflow-y-auto font-sans">
                                                                         {res.transactions.map((tx: any, tIdx: number) => (
-                                                                            <div key={tIdx} className="bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10">
-                                                                                <div className="flex items-center justify-between text-[11px] mb-1">
+                                                                            <div key={tIdx} className="bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10 text-xs">
+                                                                                <div className="flex items-center justify-between mb-1">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className={cn("w-1.5 h-1.5 rounded-full", tx.type === 'receita' ? 'bg-emerald-500' : 'bg-red-500')} />
                                                                                         <span className="font-bold text-foreground/80 truncate max-w-[140px]">{tx.description}</span>
@@ -481,7 +492,7 @@ export function FloatingAssistant() {
                                                                                         R$ {tx.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                                                     </span>
                                                                                 </div>
-                                                                                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-muted-foreground ml-3.5">
+                                                                                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-muted-foreground ml-3.5 uppercase font-bold tracking-tight">
                                                                                     <span className="flex items-center gap-1">
                                                                                         <Tag className="w-2.5 h-2.5" />
                                                                                         {tx.categoryName || tx.category || 'Sem categoria'}
@@ -494,16 +505,6 @@ export function FloatingAssistant() {
                                                                             </div>
                                                                         ))}
                                                                     </div>
-                                                                )}
-
-                                                                {res.success && !res.action && (
-                                                                    <div className="flex items-center gap-2 text-[11px] text-emerald-600 font-medium py-1">
-                                                                        <CircleCheck className="w-4 h-4" />
-                                                                        <span>Concluído</span>
-                                                                    </div>
-                                                                )}
-
-                                                                {res.action === 'requires_confirmation' && (
                                                                     <div className="flex gap-2 pt-1">
                                                                         <Button
                                                                             size="sm"
@@ -523,10 +524,11 @@ export function FloatingAssistant() {
                                                                             Cancelar
                                                                         </Button>
                                                                     </div>
-                                                                )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    );
+                                                        );
+                                                    }
+                                                    return null;
                                                 }
 
                                                 if (part.type === 'tool-saveTransaction') {
