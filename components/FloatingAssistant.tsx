@@ -13,12 +13,12 @@ import ReactMarkdown from "react-markdown";
 
 // Custom types for the AI Assistant component
 export type AssistantUITools = {
-    addTransaction: {
+    prepareTransaction: {
         input: { description: string; amount: number; type: 'receita' | 'despesa'; category: string };
         output: { success: boolean; action: string; data: any; message: string };
     };
-    saveTransaction: {
-        input: { description: string; amount: number; type: 'receita' | 'despesa'; category: string };
+    executeSave: {
+        input: { action: 'create' | 'update' | 'delete'; transactionId?: string; data?: any };
         output: { success: boolean; message: string };
     };
     searchEntities: {
@@ -412,8 +412,8 @@ export function FloatingAssistant() {
                                                     return <ReactMarkdown key={idx}>{displayText}</ReactMarkdown>;
                                                 }
 
-                                                if (part.type === 'tool-addTransaction') {
-                                                    const res = part.output as AssistantUITools['addTransaction']['output'];
+                                                if (part.type === 'tool-prepareTransaction') {
+                                                    const res = part.output as AssistantUITools['prepareTransaction']['output'];
                                                     if (!res || res.action !== 'requires_confirmation') return null;
 
                                                     return (
@@ -531,8 +531,8 @@ export function FloatingAssistant() {
                                                     return null;
                                                 }
 
-                                                if (part.type === 'tool-saveTransaction') {
-                                                    const res = part.output as AssistantUITools['saveTransaction']['output'];
+                                                if (part.type === 'tool-executeSave') {
+                                                    const res = part.output as AssistantUITools['executeSave']['output'];
                                                     if (!res) return null;
 
                                                     return (

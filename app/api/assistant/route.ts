@@ -141,35 +141,23 @@ export async function POST(req: Request) {
             '- Pessoas: ' + peopleList.map((p: any) => p.name + ': ' + p.id).join(' | ')
         ].join('\n');
 
-        const systemPrompt = `DATA ATUAL: ${now.toLocaleDateString('pt-BR')} (Hoje é dia ${now.getDate()} de Março de 2026). Use sempre o mês/ano atual para resumos, a menos que o usuário peça outro período.
+        const systemPrompt = `DATA ATUAL: ${now.toLocaleDateString('pt-BR')} (Hoje é dia ${now.getDate()} de Março de 2026).
 
-CONTEÚDO E PERSONA:
-1. PERSONA: Você é um **Assistente Executivo Financeiro de Elite**. Sua missão é gerenciar TUDO no sistema com precisão cirúrgica.
-2. INTELIGÊNCIA E MODAIS:
-   - Você tem poder total para Criar, Editar e Excluir qualquer entidade (Transações, Contas, Cartões, Metas, Categorias e Pessoas).
-   - **REGRA DE OURO**: Se o usuário pedir para criar/editar algo e você não tiver todos os dados necessários para o "modal" (parâmetros da ferramenta), peça os dados faltantes.
-   - **EXCEÇÃO DE OURO (IMPORTANTE)**: 
-     1. Para **Contas** de bancos conhecidos (ex: Nubank, Itaú), use os padrões de Nome, Cor e Ícone. Peça APENAS o saldo inicial se não informado.
-     2. Para **Metas**, se a descrição sugerir uma categoria (ex: "Viagem", "Carro", "Casa"), defina 'category', 'icon' e 'color' automaticamente. Peça APENAS o valor alvo e prazo se faltarem.
-   - Campos essenciais para Transações: Descrição, Valor, Tipo (Receita/Despesa), Categoria, Forma de Pagamento (Débito, Pix, Cartão, Boleto) e Conta/Cartão.
-   - **CONTAS**: Ao criar contas, use os códigos: nubank, itau, bradesco, bb, santander, inter, c6, picpay. O sistema preencherá o resto.
-    - Sempre verifique se o usuário quer atribuir a transação a uma **Pessoa** específica (ou se é da Família).
-    - **REGRA DE INDEPENDÊNCIA ABSOLUTA (MANDATÓRIO)**: Em pedidos múltiplos, trate cada item como um universo isolado. Atributos (fixa, cartão, pessoa) NÃO se propagam. Se um item é fixo, o PRÓXIMO deve ser assumido como NUNCA FIXO ('isRecurring: false') a menos que o usuário peça explicitamente para ele também.
-    - **PAGAMENTOS**: Sempre identifique se a despesa é no Débito (conta) ou no Crédito (cartão). Se for no cartão, identifique o 'creditCardId'.
-   
-3. RESUMOS E ANÁLISE:
-   - Use 'getFinancialAnalysis' para relatórios. Organize em KPIs: Saldo Total, Receitas, Despesas, Metas, Economia e Saúde Financeira (0-10).
-   ⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
-⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
+⚠️ REGRAS CRÍTICAS DE SEGURANÇA (MANDATÓRIO):
+1. **PROTOCOLO DE LANÇAMENTO EM DOIS TURNOS**:
+   - **TURNO 1**: Use APENAS 'prepareTransaction' (única) ou 'manageTransactions(action: "prepare")' (múltiplas). NUNCA chame ferramentas de persistência ou execução neste turno.
+   - **ESPERA**: Após preparar, apresente o resumo e pergunte "Posso confirmar?". PARE de chamar ferramentas e aguarde a resposta do usuário.
+   - **TURNO 2**: Somente após o usuário dizer "Sim", "Ok" ou similar, use 'executeSave' ou 'manageTransactions(action: "execute")'.
+   - **PROIBIDO**: Chamar 'prepare' e 'execute' na mesma resposta.
 
-4. REGRAS CRÍTICAS:
-    - **FLUXO DE CONFIRMAÇÃO EM DOIS PASSOS (OBRIGATÓRIO)**:
-      1. **PASSO 1 (PREPARAR)**: Use 'manageTransactions(action: "prepare")' para 2+ itens ou 'addTransaction' para 1. NUNCA chame 'execute' ou 'create' neste turno.
-      2. **PASSO 2 (EXECUTAR)**: Após o usuário digitar "Sim", "Pode lançar" ou "Ok" especificamente para o que foi preparado, use 'manageTransactions(action: "execute")' ou 'saveTransaction(action: "create")'.
-      - **PROIBIDO**: Lançar/Persistir dados sem que o usuário tenha visto o resumo preparado e dado um "Sim" posterior.
-    - **EXEMPLO DE ERRO A EVITAR**: Se o usuário diz "Salário fixo e comprei um café", o Salário tem 'isRecurring: true' e o café TEM QUE TER 'isRecurring: false'.
-    - Se houver erro técnico (ex: index), peça ao usuário para clicar no link de criação de índice. NUNCA invente dados.
-   - Use 'getMarketData' e 'getEconomicIndicators' para dados reais de mercado e economia (Selic, IPCA, CDI).
+2. **ISOLAMENTO ABSOLUTO DE ATRIBUTOS**:
+   - Em pedidos múltiplos (ex: "Salário fixo e comprei um pão"), trate cada item como um átomo isolado.
+   - Atributos (fixa/recorrente, pessoa, cartão) **NÃO se propagam**.
+   - Se um item é fixo, o PRÓXIMO deve ser explicitamente 'isRecurring: false' a menos que o usuário peça o contrário para ele também.
+
+3. **PERSONA E PRECISÃO**:
+   - Você é um Assistente Executivo Financeiro. Nunca invente dados. Peça o que faltar.
+   - Use 'getMarketData' para Selic/IPCA/CDI reais.
 
 CONTEXTO ATUAL:
 - Contas: ${accountsStr}
@@ -178,14 +166,15 @@ CONTEXTO ATUAL:
 - Metas: ${goalsStr}
 - Pessoas: ${peopleStr}
 
-INTERNAL ID MAPPING (NUNCA MOSTRAR IDs PRO USUÁRIO):
+INTERNAL ID MAPPING (NUNCA MOSTRAR IDs):
 ${idMappingStr}
 
 INSTRUÇÕES DE FERRAMENTAS:
-1. TRANSAÇÕES: Use 'addTransaction' para preparar um lançamento único ou 'manageTransactions' para múltiplos.
-2. CRUD GERAL: Use 'manageAccount', 'manageCreditCard', 'manageCategory', 'manageGoal' e 'managePerson' conforme a necessidade.
-3. PAGAMENTOS: Use 'payInvoice' especificamente para pagar faturas de cartão de crédito.
-4. RECORRÊNCIA: Use 'manageRecurring' para configurar ou editar regras de gastos fixos.
+- 'prepareTransaction': PREPARA um lançamento único. Use sempre como 1º passo.
+- 'executeSave': PERSISTE um lançamento único. Use APENAS após confirmação do usuário.
+- 'manageTransactions': Multi-ferramenta. Use 'prepare' para lote inicial e 'execute' para o 'Sim' do usuário.
+- 'payInvoice': Para pagar faturas de cartão.
+- 'manageRecurring': Para regras de gastos fixos mestre.
 `;
 
         const body = await req.json().catch(e => {
@@ -443,8 +432,8 @@ INSTRUÇÕES DE FERRAMENTAS:
                         }
                     }
                 }),
-                addTransaction: tool({
-                    description: 'Prepara uma transação para confirmação.',
+                prepareTransaction: tool({
+                    description: 'PASSO 1: Prepara uma transação única para conferência. Chame esta ANTES de salvar.',
                     inputSchema: z.object({
                         description: z.string().describe('O que foi comprado ou recebido'),
                         amount: z.number().describe('Valor em reais'),
@@ -467,8 +456,8 @@ INSTRUÇÕES DE FERRAMENTAS:
                         };
                     }
                 }),
-                saveTransaction: tool({
-                    description: 'Salva ou remove transações.',
+                executeSave: tool({
+                    description: 'PASSO 2: Salva permanentemente uma transação confirmada. Use APENAS após o usuário dizer SIM.',
                     inputSchema: z.object({
                         action: z.enum(['create', 'update', 'delete']),
                         transactionId: z.string().optional(),
@@ -493,7 +482,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                     }
                 }),
                 manageTransactions: tool({
-                    description: 'Prepara ou salva múltiplos lançamentos. IMPORTANTE: trate cada item como independente. Não propague atributos como "fixo" ou "Pessoa" de um item para outro no lote se não houver pedido explícito para todos.',
+                    description: 'Gerencia múltiplos lançamentos. Use action="prepare" para o 1º turno e action="execute" para o 2º turno (após Sim). Trate cada item como independente (isRecurring: false por padrão).',
                     inputSchema: z.object({
                         action: z.enum(['prepare', 'execute']),
                         transactions: z.array(z.object({
