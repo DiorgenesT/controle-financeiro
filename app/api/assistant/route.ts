@@ -5,6 +5,18 @@ import * as admin from 'firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 
+// Bank codes for defaults
+const BANK_DEFAULTS: Record<string, { name: string, color: string, icon: string }> = {
+    nubank: { name: 'Nubank', color: '#8B5CF6', icon: 'creditcard' },
+    itau: { name: 'Itaú', color: '#FF6B00', icon: 'landmark' },
+    bradesco: { name: 'Bradesco', color: '#CC092F', icon: 'landmark' },
+    bb: { name: 'Banco do Brasil', color: '#FFCC00', icon: 'landmark' },
+    santander: { name: 'Santander', color: '#EC0000', icon: 'landmark' },
+    inter: { name: 'Inter', color: '#FF7A00', icon: 'creditcard' },
+    c6: { name: 'C6 Bank', color: '#1A1A1A', icon: 'creditcard' },
+    picpay: { name: 'PicPay', color: '#21C25E', icon: 'wallet' },
+};
+
 // =========================================================================
 // HELPER FUNCTIONS (SERVER-SIDE)
 // =========================================================================
@@ -103,12 +115,13 @@ export async function POST(req: Request) {
             }
         };
 
-        const [userDoc, accountsList, cardsList, catsList, goalsList] = await Promise.all([
+        const [userDoc, accountsList, cardsList, catsList, goalsList, peopleList] = await Promise.all([
             db.collection('users').doc(userId).get().catch(() => null),
             fetchSafe('accounts'),
             fetchSafe('creditCards'),
             fetchSafe('categories'),
             fetchSafe('goals'),
+            fetchSafe('people'),
         ]);
 
         const userName = (userDoc as any)?.data()?.displayName?.split(' ')[0] || 'Usuário';
@@ -118,52 +131,54 @@ export async function POST(req: Request) {
         const cardsStr = cardsList.map((c: any) => c.name).join(', ') || 'Nenhum';
         const catsStr = catsList.map((c: any) => c.name).join(', ');
         const goalsStr = goalsList.map((g: any) => g.description + ' (R$ ' + g.currentAmount + '/' + g.targetAmount + ')').join(', ') || 'Nenhuma';
+        const peopleStr = peopleList.map((p: any) => p.name).join(', ') || 'Ninguém (Apenas Família)';
 
         const idMappingStr = [
             '- Contas: ' + accountsList.map((a: any) => a.name + ': ' + a.id).join(' | '),
             '- Cartões: ' + cardsList.map((c: any) => c.name + ': ' + c.id).join(' | '),
             '- Metas: ' + goalsList.map((g: any) => g.description + ': ' + g.id).join(' | '),
-            '- Categorias: ' + catsList.map((c: any) => c.name + ': ' + c.id).join(' | ')
+            '- Categorias: ' + catsList.map((c: any) => c.name + ': ' + c.id).join(' | '),
+            '- Pessoas: ' + peopleList.map((p: any) => p.name + ': ' + p.id).join(' | ')
         ].join('\n');
 
         const systemPrompt = `DATA ATUAL: ${now.toLocaleDateString('pt-BR')} (Hoje é dia ${now.getDate()} de Março de 2026). Use sempre o mês/ano atual para resumos, a menos que o usuário peça outro período.
 
 CONTEÚDO E PERSONA:
-1. PERSONA: Você é um **Expert Financeiro de Alto Nível**. Não apenas registra dados, mas ANALISA e dá CONSELHOS inteligentes.
-2. RESUMOS: Ao fazer um resumo (financeiro ou mensal), use o tool 'getFinancialAnalysis'. Organize a resposta estritamente nos seguintes KPIs:
-   - **Saldo Total**: Resultado líquido do mês.
-   - **Receitas**: Total de entradas.
-   - **Despesas**: Total de saídas.
-   - **Andamento das Metas**: Resumo do progresso dos objetivos.
-   - **Economia Mensal**: Valor poupado no período.
-   - **Saúde Financeira**: Nota de 0 a 10 e um conselho estratégico.
+1. PERSONA: Você é um **Assistente Executivo Financeiro de Elite**. Sua missão é gerenciar TUDO no sistema com precisão cirúrgica.
+2. INTELIGÊNCIA E MODAIS:
+   - Você tem poder total para Criar, Editar e Excluir qualquer entidade (Transações, Contas, Cartões, Metas, Categorias e Pessoas).
+   - **REGRA DE OURO**: Se o usuário pedir para criar/editar algo e você não tiver todos os dados necessários para o "modal" (parâmetros da ferramenta), peça os dados faltantes.
+   - **EXCEÇÃO DE OURO (IMPORTANTE)**: 
+     1. Para **Contas** de bancos conhecidos (ex: Nubank, Itaú), use os padrões de Nome, Cor e Ícone. Peça APENAS o saldo inicial se não informado.
+     2. Para **Metas**, se a descrição sugerir uma categoria (ex: "Viagem", "Carro", "Casa"), defina 'category', 'icon' e 'color' automaticamente. Peça APENAS o valor alvo e prazo se faltarem.
+   - Campos essenciais para Transações: Descrição, Valor, Tipo (Receita/Despesa), Categoria, Forma de Pagamento (Débito, Pix, Cartão, Boleto) e Conta/Cartão.
+   - **CONTAS**: Ao criar contas, use os códigos: nubank, itau, bradesco, bb, santander, inter, c6, picpay. O sistema preencherá o resto.
+   - Sempre verifique se o usuário quer atribuir a transação a uma **Pessoa** específica (ou se é da Família).
    
-   ⚠️ **REGRA CRÍTICA 1**: NÃO liste transações individuais nos resumos mensais/financeiros. Foque apenas nos totais e KPIs acima.
-   ⚠️ **REGRA CRÍTICA 2**: Se uma ferramenta (tool) retornar um Erro Técnico, você deve informar o usuário que não conseguiu acessar os dados reais e NUNCA inventar valores ou usar meses anteriores (como Outubro) como exemplo.
-   ⚠️ **REGRA CRÍTICA 3**: Sempre que o usuário disser "fixa", "recorrente", "todo mês", "assinatura" ou "mensal", você OBRIGATORIAMENTE deve definir o campo 'installments' como 'fixed' ao chamar o tool 'addTransaction'. NUNCA esqueça isso.
-   
-3. MERCADO E INDICADORES:
-   - **Mercado Global**: Use 'getMarketData' para cotações (Dólar, Euro, BTC, ETH).
-   - **Indicadores Brasil**: Use 'getEconomicIndicators' para Selic, IPCA e CDI.
-4. DICAS: Toda interação de resumo DEVE terminar com uma "Dica de Expert" baseada nos indicadores econômicos reais.
+3. RESUMOS E ANÁLISE:
+   - Use 'getFinancialAnalysis' para relatórios. Organize em KPIs: Saldo Total, Receitas, Despesas, Metas, Economia e Saúde Financeira (0-10).
+   ⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
 
-INSTRUÇÕES DE ERRO:
-- Se 'getFinancialAnalysis' retornar um erro sobre "index" ou "índice", peça ao usuário para clicar no link de criação de índice que você (IA) não pode acessar.
+4. REGRAS CRÍTICAS:
+   - Se disser "fixa", "recorrente", "todo mês", "assinatura", defina 'isRecurring' como true (e use o tool 'manageRecurring' se for para criar uma regra mestre).
+   - Se houver erro técnico (ex: index), peça ao usuário para clicar no link de criação de índice. NUNCA invente dados.
+   - Use 'getMarketData' e 'getEconomicIndicators' para dados reais de mercado e economia (Selic, IPCA, CDI).
 
 CONTEXTO ATUAL:
 - Contas: ${accountsStr}
 - Cartões: ${cardsStr}
 - Categorias: ${catsStr}
 - Metas: ${goalsStr}
+- Pessoas: ${peopleStr}
 
-INTERNAL ID MAPPING (NUNCA MOSTRAR):
+INTERNAL ID MAPPING (NUNCA MOSTRAR IDs PRO USUÁRIO):
 ${idMappingStr}
 
-INSTRUÇÕES:
-1. ANÁLISE: Para resumos e relatórios profundos, use 'getFinancialAnalysis'.
-2. ECONOMIA: Para Selic/IPCA/CDI reais, use 'getEconomicIndicators'.
-3. MERCADO: Para cotações de Dólar/Euro/BTC/ETH, use 'getMarketData'.
-4. TRANSAÇÕES: Use 'manageTransactions' para salvar novos lançamentos ou buscar históricos.
+INSTRUÇÕES DE FERRAMENTAS:
+1. TRANSAÇÕES: Use 'addTransaction' para preparar um lançamento único ou 'manageTransactions' para múltiplos.
+2. CRUD GERAL: Use 'manageAccount', 'manageCreditCard', 'manageCategory', 'manageGoal' e 'managePerson' conforme a necessidade.
+3. PAGAMENTOS: Use 'payInvoice' especificamente para pagar faturas de cartão de crédito.
+4. RECORRÊNCIA: Use 'manageRecurring' para configurar ou editar regras de gastos fixos.
 `;
 
         const body = await req.json().catch(e => {
@@ -424,19 +439,22 @@ INSTRUÇÕES:
                 addTransaction: tool({
                     description: 'Prepara uma transação para confirmação.',
                     inputSchema: z.object({
-                        description: z.string(),
-                        amount: z.number(),
+                        description: z.string().describe('O que foi comprado ou recebido'),
+                        amount: z.number().describe('Valor em reais'),
                         type: z.enum(['receita', 'despesa']),
-                        category: z.string(),
+                        category: z.string().describe('Nome ou ID da categoria'),
                         paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
-                        accountId: z.string().optional(),
-                        creditCardId: z.string().optional(),
-                        installments: z.union([z.number(), z.string()]).optional().describe('Número de parcelas ou "fixed" para despesas recorrentes/mensais.'),
-                        dueDate: z.string().optional(),
+                        accountId: z.string().optional().describe('ID da conta bancária (obrigatório para débito/pix/boleto pago)'),
+                        creditCardId: z.string().optional().describe('ID do cartão de crédito (obrigatório para despesa no cartão)'),
+                        installments: z.union([z.number(), z.string()]).optional().describe('Número de parcelas ou "fixed" para gastos fixos.'),
+                        isRecurring: z.boolean().optional().describe('Se é uma transação fixa/mensal'),
+                        personId: z.string().optional().describe('ID da pessoa (ou "family")'),
+                        dueDate: z.string().optional().describe('Data de vencimento (YYYY-MM-DD) para boletos'),
                     }),
                     execute: async (params) => {
                         console.log(`[Assistant] Tool: addTransaction`);
-                        const msg = `Preparei o lançamento de ${params.type === 'receita' ? 'uma receita' : 'uma despesa'} de R$ ${params.amount} (${params.description}). Posso confirmar o cadastro?`;
+                        const person = (peopleList.find((p: any) => p.id === params.personId) as any)?.name || 'Família';
+                        const msg = `Preparei o lançamento de ${params.type === 'receita' ? 'uma receita' : 'uma despesa'} de R$ ${params.amount} vinculada a ${person}. (${params.description}). Posso confirmar?`;
                         return {
                             success: true,
                             action: 'requires_confirmation',
@@ -483,6 +501,8 @@ INSTRUÇÕES:
                             accountId: z.string().optional(),
                             creditCardId: z.string().optional(),
                             installments: z.union([z.number(), z.string()]).optional(),
+                            isRecurring: z.boolean().optional(),
+                            personId: z.string().optional(),
                             dueDate: z.string().optional(),
                         }))
                     }),
@@ -495,11 +515,13 @@ INSTRUÇÕES:
                                     const acc = accountsList.find((a: any) => a.id === tx.accountId) as any;
                                     const card = cardsList.find((c: any) => c.id === tx.creditCardId) as any;
                                     const cat = catsList.find((c: any) => c.id === tx.category || c.name === tx.category) as any;
+                                    const p = peopleList.find((p: any) => p.id === tx.personId) as any;
                                     return {
                                         ...tx,
                                         accountName: acc?.name,
                                         creditCardName: card?.name,
-                                        categoryName: cat?.name || tx.category
+                                        categoryName: cat?.name || tx.category,
+                                        personName: p?.name || 'Família'
                                     };
                                 });
 
@@ -542,8 +564,9 @@ INSTRUÇÕES:
                         action: z.enum(['create', 'update', 'delete']),
                         accountId: z.string().optional(),
                         data: z.object({
+                            bankCode: z.string().optional().describe('Código do banco (ex: nubank, itau, inter)'),
                             name: z.string().optional(),
-                            type: z.string().optional(),
+                            type: z.string().optional().describe('Default: checking'),
                             balance: z.number().optional(),
                             color: z.string().optional(),
                             icon: z.string().optional(),
@@ -554,12 +577,21 @@ INSTRUÇÕES:
                         console.log(`[Assistant] Tool: manageAccount, action: ${action}`);
                         try {
                             if (action === 'create' && data) {
+                                // Apply bank defaults if applicable
+                                let finalData = { ...data, type: data.type || 'checking' };
+                                if (data.bankCode && BANK_DEFAULTS[data.bankCode]) {
+                                    const defaults = BANK_DEFAULTS[data.bankCode];
+                                    finalData.name = data.name || defaults.name;
+                                    finalData.color = data.color || defaults.color;
+                                    finalData.icon = data.icon || defaults.icon;
+                                }
+
                                 const res = await db.collection('accounts').add({
-                                    ...data, userId,
+                                    ...finalData, userId,
                                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                                     updatedAt: admin.firestore.FieldValue.serverTimestamp()
                                 });
-                                return { message: `✅ Conta '${data.name}' criada com sucesso! (ID: ${res.id})` };
+                                return { message: `✅ Conta '${finalData.name}' criada com sucesso!` };
                             }
                             if (action === 'update' && accountId && data) {
                                 await db.collection('accounts').doc(accountId).update({
@@ -655,32 +687,172 @@ INSTRUÇÕES:
                         action: z.enum(['create', 'update', 'delete']),
                         goalId: z.string().optional(),
                         data: z.object({
-                            description: z.string().optional(),
+                            title: z.string().optional().describe('Título curto da meta (ex: Viagem para Guarapari)'),
+                            description: z.string().optional().describe('Descrição longa ou observações'),
                             targetAmount: z.number().optional(),
                             currentAmount: z.number().optional(),
-                            deadline: z.string().optional(),
+                            deadline: z.string().optional().describe('Formato YYYY-MM-DD'),
                             category: z.string().optional(),
                             color: z.string().optional(),
                             icon: z.string().optional(),
+                            linkedAccountId: z.string().optional().describe('ID da conta vinculada a esta meta'),
                         }).optional(),
                     }),
                     execute: async ({ action, goalId, data }) => {
                         console.log(`[Assistant] Tool: manageGoal, action: ${action}`);
                         try {
                             if (action === 'create' && data) {
-                                const res = await db.collection('goals').add({ ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp(), status: 'em_progresso' });
-                                return { message: `🎯 Meta "${data.description}" criada.` };
+                                const cleanData: any = { ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp(), status: 'em_progresso' };
+                                if (data.deadline) cleanData.deadline = admin.firestore.Timestamp.fromDate(new Date(data.deadline));
+                                const res = await db.collection('goals').add(cleanData);
+                                return { message: `🎯 Meta "${data.title || data.description}" criada!` };
                             }
                             if (action === 'delete' && goalId) {
                                 await db.collection('goals').doc(goalId).delete();
                                 return { message: '🗑️ Meta removida.' };
                             }
                             if (action === 'update' && goalId && data) {
-                                await db.collection('goals').doc(goalId).update({ ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+                                const updateData: any = { ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+                                if (data.deadline) updateData.deadline = admin.firestore.Timestamp.fromDate(new Date(data.deadline));
+                                await db.collection('goals').doc(goalId).update(updateData);
                                 return { message: '🎯 Meta atualizada.' };
                             }
                             return { error: 'Falha.' };
                         } catch (e) { return { error: 'Erro ao gerenciar meta.' }; }
+                    }
+                }),
+                managePerson: tool({
+                    description: 'Cria, edita ou exclui pessoas (membros da família).',
+                    inputSchema: z.object({
+                        action: z.enum(['create', 'update', 'delete']),
+                        personId: z.string().optional(),
+                        data: z.object({
+                            name: z.string().optional(),
+                        }).optional(),
+                    }),
+                    execute: async ({ action, personId, data }) => {
+                        console.log(`[Assistant] Tool: managePerson, action: ${action}`);
+                        try {
+                            if (action === 'create' && data) {
+                                const res = await db.collection('people').add({ ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+                                return { message: `👤 Pessoa "${data.name}" cadastrada!` };
+                            }
+                            if (action === 'delete' && personId) {
+                                await db.collection('people').doc(personId).delete();
+                                return { message: '🗑️ Pessoa removida.' };
+                            }
+                            if (action === 'update' && personId && data) {
+                                await db.collection('people').doc(personId).update({ ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+                                return { message: '👤 Dados atualizados.' };
+                            }
+                            return { error: 'Falha.' };
+                        } catch (e) { return { error: 'Erro ao gerenciar pessoa.' }; }
+                    }
+                }),
+                payInvoice: tool({
+                    description: 'Registra o pagamento de uma fatura de cartão de crédito.',
+                    inputSchema: z.object({
+                        creditCardId: z.string(),
+                        accountId: z.string(),
+                        amount: z.number(),
+                        month: z.number(),
+                        year: z.number(),
+                    }),
+                    execute: async ({ creditCardId, accountId, amount, month, year }) => {
+                        console.log(`[Assistant] Tool: payInvoice`);
+                        try {
+                            const card = cardsList.find((c: any) => c.id === creditCardId) as any;
+                            const acc = accountsList.find((a: any) => a.id === accountId) as any;
+                            if (!card || !acc) return { error: 'Conta ou Cartão não encontrados.' };
+
+                            // 1. Encontrar a fatura
+                            const invSnap = await db.collection('invoices')
+                                .where('userId', '==', userId)
+                                .where('creditCardId', '==', creditCardId)
+                                .where('month', '==', month)
+                                .where('year', '==', year)
+                                .limit(1)
+                                .get();
+
+                            if (invSnap.empty) return { error: 'Fatura não encontrada.' };
+                            const invoiceId = invSnap.docs[0].id;
+
+                            // 2. Criar transação de pagamento
+                            await db.collection('transactions').add({
+                                userId,
+                                type: 'despesa',
+                                description: `Pagamento Fatura ${card.name} - ${month}/${year}`,
+                                amount,
+                                category: 'Cartão de Crédito',
+                                date: admin.firestore.Timestamp.fromDate(new Date()),
+                                paymentMethod: 'debit',
+                                accountId: accountId,
+                                createdAt: admin.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            // 3. Atualizar saldo da conta
+                            await db.collection('accounts').doc(accountId).update({
+                                balance: admin.firestore.FieldValue.increment(-amount),
+                                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            // 4. Marcar fatura como paga
+                            await db.collection('invoices').doc(invoiceId).update({
+                                status: 'paid',
+                                paidAt: admin.firestore.FieldValue.serverTimestamp(),
+                                paidFromAccountId: accountId
+                            });
+
+                            return { message: `💳 Fatura de ${card.name} (${month}/${year}) paga com sucesso usando a conta ${acc.name}!` };
+                        } catch (e) { return { error: 'Erro ao processar pagamento de fatura.' }; }
+                    }
+                }),
+                manageRecurring: tool({
+                    description: 'Gerencia regras de gastos fixos/recorrentes.',
+                    inputSchema: z.object({
+                        action: z.enum(['create', 'update', 'delete', 'list']),
+                        recurringId: z.string().optional(),
+                        data: z.object({
+                            description: z.string().optional(),
+                            amount: z.number().optional(),
+                            type: z.enum(['receita', 'despesa']).optional(),
+                            category: z.string().optional(),
+                            day: z.number().optional(),
+                            paymentMethod: z.enum(['debit', 'pix', 'credit', 'boleto']).optional(),
+                            accountId: z.string().optional(),
+                            creditCardId: z.string().optional(),
+                            personId: z.string().optional(),
+                            active: z.boolean().optional(),
+                        }).optional()
+                    }),
+                    execute: async ({ action, recurringId, data }) => {
+                        console.log(`[Assistant] Tool: manageRecurring, action: ${action}`);
+                        try {
+                            if (action === 'list') {
+                                const snap = await db.collection('recurring_transactions').where('userId', '==', userId).get();
+                                return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            }
+                            if (action === 'create' && data) {
+                                const res = await db.collection('recurring_transactions').add({
+                                    ...data, userId,
+                                    active: true,
+                                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                                });
+                                return { message: `🔄 Regra fixa "${data.description}" criada!` };
+                            }
+                            if (action === 'update' && recurringId && data) {
+                                await db.collection('recurring_transactions').doc(recurringId).update({
+                                    ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                                });
+                                return { message: `🔄 Regra fixa atualizada.` };
+                            }
+                            if (action === 'delete' && recurringId) {
+                                await db.collection('recurring_transactions').doc(recurringId).delete();
+                                return { message: '🗑️ Regra fixa removida.' };
+                            }
+                            return { error: 'Ação inválida.' };
+                        } catch (e) { return { error: 'Erro ao gerenciar recorrência.' }; }
                     }
                 })
             }

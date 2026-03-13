@@ -381,7 +381,7 @@ export default function MetasPage() {
                                     <Label className="text-muted-foreground">Título da Meta</Label>
                                     <Input
                                         placeholder="Ex: Fundo de Emergência"
-                                        value={newMeta.title}
+                                        value={newMeta.title || ""}
                                         onChange={(e) => setNewMeta({ ...newMeta, title: e.target.value })}
                                         className="bg-muted/50 border-input text-foreground"
                                         required
@@ -391,7 +391,7 @@ export default function MetasPage() {
                                     <Label className="text-muted-foreground">Descrição (opcional)</Label>
                                     <Input
                                         placeholder="Ex: 6 meses de despesas"
-                                        value={newMeta.description}
+                                        value={newMeta.description || ""}
                                         onChange={(e) => setNewMeta({ ...newMeta, description: e.target.value })}
                                         className="bg-muted/50 border-input text-foreground"
                                     />
@@ -404,7 +404,7 @@ export default function MetasPage() {
                                             step="0.01"
                                             min="1"
                                             placeholder="0,00"
-                                            value={newMeta.targetAmount}
+                                            value={newMeta.targetAmount || ""}
                                             onChange={(e) => setNewMeta({ ...newMeta, targetAmount: e.target.value })}
                                             className="bg-muted/50 border-input text-foreground"
                                             required
@@ -414,7 +414,7 @@ export default function MetasPage() {
                                         <Label className="text-muted-foreground">Prazo</Label>
                                         <Input
                                             type="date"
-                                            value={newMeta.deadline}
+                                            value={newMeta.deadline || ""}
                                             onChange={(e) => setNewMeta({ ...newMeta, deadline: e.target.value })}
                                             className="bg-muted/50 border-input text-foreground"
                                             required
