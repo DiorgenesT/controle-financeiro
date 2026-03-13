@@ -25,7 +25,9 @@ import {
   Sparkles,
   MessageSquare,
   LogIn,
-  CheckCircle
+  CheckCircle,
+  Bot,
+  Brain
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -81,10 +83,12 @@ export default function Home() {
       router.push("/dashboard");
     }
   }, [user, loading, router]);
-
-
-
   const features = [
+    {
+      icon: Bot,
+      title: "Agente IA Financeiro",
+      description: "Um assistente que faz o trabalho por você: registre gastos ou pague faturas apenas conversando."
+    },
     {
       icon: TrendingUp,
       title: "Controle Total",
@@ -104,11 +108,6 @@ export default function Home() {
       icon: Shield,
       title: "Seguro e Privado",
       description: "Seus dados protegidos com criptografia de ponta."
-    },
-    {
-      icon: Smartphone,
-      title: "100% Responsivo",
-      description: "Acesse de qualquer dispositivo, quando e onde precisar."
     },
     {
       icon: Zap,
@@ -701,6 +700,74 @@ export default function Home() {
                 description={feature.description}
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Agent Section */}
+      <section className="py-24 px-6 bg-gradient-to-b from-zinc-50 to-emerald-50/30 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+          <div className="flex-1 space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 font-bold text-sm">
+              <Sparkles className="w-4 h-4" />
+              Tecnologia de Ponta
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+              Seu próprio <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Agente Financeiro</span> com IA
+            </h2>
+            <p className="text-xl text-zinc-600 leading-relaxed">
+              Não é apenas um chat. É um agente que entende suas finanças e executa ações reais por você.
+            </p>
+            <ul className="space-y-4">
+              {[
+                { title: "Execução Autônoma", desc: "Peça para pagar faturas ou criar metas e o agente faz o trabalho duro." },
+                { title: "Inteligência de Contexto", desc: "Ele conhece seus bancos, limites e membros da família para agir com precisão." },
+                { title: "Solicitação Proativa", desc: "Faltou um dado? Ele pergunta exatamente o que precisa antes de realizar a ação." }
+              ].map((item, i) => (
+                <li key={i} className="flex gap-4">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-1">
+                    <Check className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-zinc-800">{item.title}</h4>
+                    <p className="text-zinc-600">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex-1 relative">
+            <div className="relative z-10 rounded-3xl border border-emerald-500/20 bg-white p-8 shadow-2xl shadow-emerald-500/10">
+              <div className="flex items-center gap-3 mb-6 border-b pb-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                  <Bot className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-zinc-900">Assistente Tudo Em Dia</h3>
+                  <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Agente Online
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700">
+                  Crie uma meta: Viagem para Guarapari, 10 mil reais até julho.
+                </div>
+                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium">
+                  Com certeza! Criei a meta "Viagem para Guarapari". Já selecionei o ícone de avião e a categoria Viagem para você. 🎯
+                </div>
+                <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700">
+                  Obrigado! Agora pague minha fatura do Nubank.
+                </div>
+                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium">
+                  Entendido. Usarei sua conta do BB para pagar a fatura de R$ 1.250,00. Confirmar pagamento? ✅
+                </div>
+              </div>
+            </div>
+            {/* Decorative blobs */}
+            <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-200/30 rounded-full blur-3xl -z-10 animate-pulse" />
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-teal-200/20 rounded-full blur-3xl -z-10" />
           </div>
         </div>
       </section>
