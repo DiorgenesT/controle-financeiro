@@ -27,7 +27,8 @@ import {
   LogIn,
   CheckCircle,
   Bot,
-  Brain
+  Mic,
+  Volume2
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -713,16 +714,16 @@ export default function Home() {
               Tecnologia de Ponta
             </div>
             <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-              Seu próprio <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Agente Financeiro</span> com IA
+              Seu próprio <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Agente Financeiro</span> por voz
             </h2>
             <p className="text-xl text-zinc-600 leading-relaxed">
-              Não é apenas um chat. É um agente que entende suas finanças e executa ações reais por você.
+              Não é apenas um chat. É um agente que **te ouve e te responde**, entende suas finanças e executa ações reais por você.
             </p>
             <ul className="space-y-4">
               {[
-                { title: "Execução Autônoma", desc: "Peça para pagar faturas ou criar metas e o agente faz o trabalho duro." },
-                { title: "Inteligência de Contexto", desc: "Ele conhece seus bancos, limites e membros da família para agir com precisão." },
-                { title: "Solicitação Proativa", desc: "Faltou um dado? Ele pergunta exatamente o que precisa antes de realizar a ação." }
+                { title: "Comandos por Voz", desc: "Registre gastos ou peça relatórios apenas falando, sem precisar digitar nada." },
+                { title: "Resposta em Áudio", desc: "O agente confirma suas ações e responde suas dúvidas com voz natural e humana." },
+                { title: "Execução Real", desc: "Ele não apenas sugere; ele paga faturas, cria metas e organiza contas de verdade." }
               ].map((item, i) => (
                 <li key={i} className="flex gap-4">
                   <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-1">
@@ -751,17 +752,25 @@ export default function Home() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700">
-                  Crie uma meta: Viagem para Guarapari, 10 mil reais até julho.
+                <div className="flex items-start gap-2">
+                  <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700 flex items-center gap-2">
+                    <Mic className="w-4 h-4 text-emerald-500 animate-pulse" />
+                    "Crie uma meta: Viagem para Paris, 20 mil reais até 2026."
+                  </div>
                 </div>
-                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium">
-                  Com certeza! Criei a meta "Viagem para Guarapari". Já selecionei o ícone de avião e a categoria Viagem para você. 🎯
+                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 shrink-0" />
+                  <span>Com certeza! Criei a meta "Viagem para Paris". Já selecionei o ícone de avião e a categoria Viagem. 🗼✈️</span>
                 </div>
-                <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700">
-                  Obrigado! Agora pague minha fatura do Nubank.
+                <div className="flex items-start gap-2">
+                  <div className="bg-zinc-100 p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm text-zinc-700 flex items-center gap-2">
+                    <Mic className="w-4 h-4 text-emerald-500 animate-pulse" />
+                    "Obrigado! Agora pague minha fatura do Nubank."
+                  </div>
                 </div>
-                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium">
-                  Entendido. Usarei sua conta do BB para pagar a fatura de R$ 1.250,00. Confirmar pagamento? ✅
+                <div className="bg-emerald-500 text-white p-4 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-sm shadow-md font-medium flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 shrink-0" />
+                  <span>Entendido. Usarei sua conta do BB para pagar a fatura de R$ 1.250,00. Vou processar agora? ✅</span>
                 </div>
               </div>
             </div>
