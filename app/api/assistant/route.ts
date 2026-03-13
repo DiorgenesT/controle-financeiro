@@ -162,9 +162,14 @@ CONTEÚDO E PERSONA:
    ⚠️ **NÃO liste transações individuais nos resumos**. Foque em totais e estratégia.
 
 4. REGRAS CRÍTICAS:
-    - Se disser "fixa", "recorrente", "todo mês", "assinatura", defina 'isRecurring' como true (e use o tool 'manageRecurring' se for para criar uma regra mestre) APENAS para o item mencionado.
+    - Se disser "fixa", "recorrente", "todo mês", "assinatura", defina 'isRecurring' como true APENAS para o item mencionado.
     - **EXEMPLO DE FALHA A EVITAR**: No pedido "Salário de 5000 é fixo e comprei uma TV de 2000", **isRecurring: true** deve ser aplicado APENAS ao Salário. A TV deve ser 'false'.
-   - Se houver erro técnico (ex: index), peça ao usuário para clicar no link de criação de índice. NUNCA invente dados.
+    - **CONFIRMAÇÃO DE LANÇAMENTOS (CRÍTICO)**:
+      1. Para Múltiplos itens (2+), use SEMPRE 'manageTransactions(action: "prepare")'.
+      2. As ferramentas agora retornarão 'action: "prepared"'. Isso NÃO mostra botões na UI.
+      3. Você deve apresentar o resumo dos itens preparados e perguntar "Posso confirmar?" APENAS UMA VEZ no seu texto final.
+      4. Somente após o usuário dizer "Sim" ou "Ok", use 'saveTransaction(action: "create")' ou 'manageTransactions(action: "execute")' para persistir os dados.
+    - Se houver erro técnico (ex: index), peça ao usuário para clicar no link de criação de índice. NUNCA invente dados.
    - Use 'getMarketData' e 'getEconomicIndicators' para dados reais de mercado e economia (Selic, IPCA, CDI).
 
 CONTEXTO ATUAL:
@@ -456,13 +461,10 @@ INSTRUÇÕES DE FERRAMENTAS:
                     }),
                     execute: async (params) => {
                         console.log(`[Assistant] Tool: addTransaction`);
-                        const person = (peopleList.find((p: any) => p.id === params.personId) as any)?.name || 'Família';
-                        const msg = `Preparei o lançamento de ${params.type === 'receita' ? 'uma receita' : 'uma despesa'} de R$ ${params.amount} vinculada a ${person}. (${params.description}). Posso confirmar?`;
                         return {
                             success: true,
-                            action: 'requires_confirmation',
-                            data: params,
-                            message: msg
+                            action: 'prepared',
+                            data: params
                         };
                     }
                 }),
@@ -528,12 +530,10 @@ INSTRUÇÕES DE FERRAMENTAS:
                                     };
                                 });
 
-                                const msg = `Preparei ${transactions.length} lançamentos para você conferir. Posso confirmar todos?`;
                                 return {
                                     success: true,
-                                    action: 'requires_confirmation',
-                                    transactions: enriched,
-                                    message: msg
+                                    action: 'prepared',
+                                    transactions: enriched
                                 };
                             }
                             if (action === 'execute') {
