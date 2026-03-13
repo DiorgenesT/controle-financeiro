@@ -150,10 +150,11 @@ export async function POST(req: Request) {
    - **TURNO 2**: Somente após o usuário dizer "Sim", "Ok" ou similar, use 'executeSave' ou 'manageTransactions(action: "execute")'.
    - **PROIBIDO**: Chamar 'prepare' e 'execute' na mesma resposta.
 
-2. **ISOLAMENTO ABSOLUTO DE ATRIBUTOS**:
-   - Em pedidos múltiplos (ex: "Salário fixo e comprei um pão"), trate cada item como um átomo isolado.
-   - Atributos (fixa/recorrente, pessoa, cartão) **NÃO se propagam**.
-   - Se um item é fixo, o PRÓXIMO deve ser explicitamente 'isRecurring: false' a menos que o usuário peça o contrário para ele também.
+2. **TESTE DO FONE E ALMOÇO (ISOLAMENTO ABSOLUTO)**:
+   - "Se eu recebi um Salário Fixo e comprei um Café, o Café é ÚNICO."
+   - Atributos (fixa/recorrente, pessoa, cartão) **NOMEADAMENTE NUNCA se propagam**.
+   - Para arquivos em lote, você **DEVE** marcar explicitamente 'isRecurring: false' para cada item que não foi pedido como fixo.
+   - Hallucinar 'isRecurring: true' em itens comuns resultará em erro crítico no sistema.
 
 3. **PERSONA E PRECISÃO**:
    - Você é um Assistente Executivo Financeiro. Nunca invente dados. Peça o que faltar.
@@ -191,7 +192,23 @@ INSTRUÇÕES DE FERRAMENTAS:
 
         const executeTransactionSave = async (params: any) => {
             const now = new Date();
-            const baseTx: any = { ...params, userId, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+            // ZERO-TRUST SANITIZATION: Derive isRecurring solely from installments
+            const isFixed = params.installments === 'fixed';
+
+            // Reconstruct clean object to avoid LLM hallucination leakage
+            const baseTx: any = {
+                userId,
+                description: params.description,
+                amount: params.amount,
+                type: params.type,
+                category: params.category,
+                paymentMethod: params.paymentMethod,
+                accountId: params.accountId,
+                creditCardId: params.creditCardId,
+                personId: params.personId || 'family',
+                isRecurring: isFixed, // FORCED logic
+                createdAt: admin.firestore.FieldValue.serverTimestamp()
+            };
 
             if (params.paymentMethod === 'credit_card') {
                 if (params.type === 'receita') {
@@ -442,8 +459,8 @@ INSTRUÇÕES DE FERRAMENTAS:
                         paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
                         accountId: z.string().optional().describe('ID da conta bancária (obrigatório para débito/pix/boleto pago)'),
                         creditCardId: z.string().optional().describe('ID do cartão de crédito (obrigatório para despesa no cartão)'),
-                        installments: z.union([z.number(), z.string()]).optional().describe('Número de parcelas ou "fixed" para gastos fixos.'),
-                        isRecurring: z.boolean().optional().describe('Se é uma transação fixa/mensal'),
+                        installments: z.union([z.number(), z.string()]).default(1).describe('Número de parcelas ou "fixed" para gastos fixos.'),
+                        isRecurring: z.boolean().default(false).describe('Obrigatório marcar false se não for fixo.'),
                         personId: z.string().optional().describe('ID da pessoa (ou "family")'),
                         dueDate: z.string().optional().describe('Data de vencimento (YYYY-MM-DD) para boletos'),
                     }),
@@ -493,8 +510,8 @@ INSTRUÇÕES DE FERRAMENTAS:
                             paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
                             accountId: z.string().optional(),
                             creditCardId: z.string().optional(),
-                            installments: z.union([z.number(), z.string()]).optional(),
-                            isRecurring: z.boolean().optional(),
+                            installments: z.union([z.number(), z.string()]).default(1),
+                            isRecurring: z.boolean().default(false),
                             personId: z.string().optional(),
                             dueDate: z.string().optional(),
                         }))
