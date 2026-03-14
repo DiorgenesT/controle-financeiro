@@ -34,9 +34,10 @@ function convertToWords(amountStr: string, decimalStr: string = '00'): string {
 }
 
 function sanitizePhonetics(text: string): string {
-    // We removed hyphenated phonetic armor as OpenAI HD works better with clean Portuguese
+    // V20: PURE PORTUGUESE. No hyphens, no artificial phonetic 'armor'.
+    // The American accent was triggered by syllable breaks (hyphens).
     return text
-        // Mandatory Translations for Technical/English triggers
+        // Mandatory Translations (Common English triggers from LLMs)
         .replace(/\bpix\b/gi, 'pícs')
         .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bcredit_card\b/gi, 'cartão de crédito')
@@ -44,6 +45,9 @@ function sanitizePhonetics(text: string): string {
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bcashback\b/gi, 'dinheiro de volta')
         .replace(/\boff\b/gi, 'desligado')
+        .replace(/\boverview\b/gi, 'panorama')
+        .replace(/\bsummary\b/gi, 'resumo')
+        .replace(/\binsight\b/gi, 'percepção')
 
         // Symbols
         .replace(/([\d.]+)\s?%/g, '$1 por cento')
@@ -72,17 +76,22 @@ export async function POST(req: Request) {
         }
 
         const cleanText = sanitizePhonetics(text);
-        // Added strong padding to prevent "word eating" at start/end
-        const phoneticText = ` . , ${cleanText} , . `;
 
-        console.log(`[TTS-OpenAI-HD-v19] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v19] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        /**
+         * ANTI-CLIPPING PADDING (V20)
+         * Using dots and spaces to force the TTS engine to stabilize 
+         * before emitting the first syllable and after the last.
+         */
+        const phoneticText = ` . . . ${cleanText} . . . `;
+
+        console.log(`[TTS-OpenAI-HD-v20] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v20] Phonetic: "${phoneticText.substring(0, 50)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 1.0, // Natural Speed 1.0 is best for HD clarity
+            speed: 1.0, // Reverting to natural speed as it yields best results for 'nova'
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -94,7 +103,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v19] Error:', error);
+        console.error('[TTS-OpenAI-HD-v20] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
