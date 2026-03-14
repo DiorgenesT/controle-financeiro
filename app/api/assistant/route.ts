@@ -145,21 +145,23 @@ export async function POST(req: Request) {
 
 ⚠️ REGRAS CRÍTICAS DE SEGURANÇA E INTELIGÊNCIA (MANDATÓRIO):
 1. **PROTOCOLO DE LANÇAMENTO EM DOIS TURNOS**:
-   - **TURNO 1**: Use APENAS 'prepareTransaction' (única) ou 'manageTransactions(action: "prepare")'. Apresente o resumo e **PARE**.
-   - **TURNO 2**: Após o usuário dizer "Sim", "Ok" ou similar, chame 'executeSave' ou 'manageTransactions(action: "execute")' **IMEDIATAMENTE**. NÃO responda com texto perguntando de novo.
-   - **PROIBIDO**: Chamar 'prepare' e 'execute' no mesmo turno inicial.
+   - **TURNO 1 (PREPARO)**: Use 'prepareTransaction' ou 'manageTransactions(action: "prepare")'. Responda com um resumo EXTREMAMENTE conciso e PARE.
+   - **TURNO 2 (EXECUÇÃO)**: Após "Sim/Ok", chame 'executeSave' ou 'manageTransactions(action: "execute")' e finalize com "✅ Lançamento realizado!". **PROIBIDO** perguntar de novo ou pedir mais dados se já preparou.
 
-2. **INTELIGÊNCIA E AUTOMAÇÃO (MÁXIMA SIMPLICIDADE)**:
-   - **Categorização Automática**: NUNCA pergunte a categoria. Use seu conhecimento para inferir (ex: "Boné" -> "Vestuário", "Café" -> "Alimentação").
-   - **Pessoa Padrão**: Se não houver pessoa no pedido, use sempre 'personId: "family"' (Família) sem perguntar.
-   - **Omissão de Dados**: Se o usuário não disser a conta, use a primeira da lista. Se não disser o método, use "pix" ou "debit" para gastos pequenos.
+2. **INTELIGÊNCIA TOTAL (ZERO PERGUNTA)**:
+   - **Categorização**: NUNCA diga "Não especificada". Inferir sempre (Ex: "Calça" -> "Vestuário", "Almoço" -> "Alimentação").
+   - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.
+   - **Omissão**: Se faltar conta/cartão, use a primeira conta disponível ('nubank' ou similar).
 
-3. **RESUMOS CONCISOS (NADA DE RUÍDO TÉCNICO)**:
-   - Apresente apenas: Descrição, Valor, Categoria e Conta/Cartão.
-   - **PROIBIDO** mostrar: "Recorrente: Não", "Data: N/A", "ID: 123", ou qualquer campo negativo/nulo. Seja breve e executivo.
+3. **TONALIDADE "EXECUTIVE" (RUÍDO ZERO)**:
+   - **PROIBIDO** listar: "Recorrente: Não", "Parcelas: 1", "Tipo: Despesa", "ID: ...".
+   - **EXEMPLO DE RESUMO IDEAL**: "Preparei o lançamento: Calça (Vestuário) por R$ 45,00 no Nubank. Posso confirmar?"
 
 4. **TESTE DO FONE E ALMOÇO (ISOLAMENTO)**:
-   - Atributos (fixa, pessoa, cartão) **NUNCA** se propagam em lote. Cada item é um átomo independente.
+   - Atributos NUNCA se propagam. Cada item é independente.
+
+5. **SUCESSO SILENCIOSO**:
+   - Após o Passo 2 (Execução), sua resposta deve conter APENAS "✅ Lançamento realizado!" (ou no plural). Não adicione "Se precisar de mais algo...".
 
 CONTEXTO ATUAL:
 - Contas: ${accountsStr}
@@ -456,13 +458,13 @@ INSTRUÇÕES DE FERRAMENTAS:
                         description: z.string().describe('O que foi comprado ou recebido'),
                         amount: z.number().describe('Valor em reais'),
                         type: z.enum(['receita', 'despesa']),
-                        category: z.string().describe('Nome ou ID da categoria'),
+                        category: z.string().describe('Categorize automaticamente se o usuário não disser (Ex: "Calça" -> "Vestuário"). Nunca deixe "Não especificada".'),
                         paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
-                        accountId: z.string().optional().describe('ID da conta bancária (obrigatório para débito/pix/boleto pago)'),
-                        creditCardId: z.string().optional().describe('ID do cartão de crédito (obrigatório para despesa no cartão)'),
-                        installments: z.union([z.number(), z.string()]).default(1).describe('Número de parcelas ou "fixed" para gastos fixos.'),
-                        isRecurring: z.boolean().default(false).describe('Obrigatório marcar false se não for fixo.'),
-                        personId: z.string().optional().describe('ID da pessoa (ou "family")'),
+                        accountId: z.string().optional().describe('Conta bancária.'),
+                        creditCardId: z.string().optional().describe('Cartão de crédito.'),
+                        installments: z.union([z.number(), z.string()]).default(1).describe('Parcelas ou "fixed".'),
+                        isRecurring: z.boolean().default(false),
+                        personId: z.string().optional().describe('ID da pessoa. Use sempre "family" se não houver um nome no pedido.'),
                         dueDate: z.string().optional().describe('Data de vencimento (YYYY-MM-DD) para boletos'),
                     }),
                     execute: async (params) => {
@@ -475,7 +477,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                     }
                 }),
                 executeSave: tool({
-                    description: 'PASSO 2: Salva permanentemente uma transação confirmada. Use APENAS após o usuário dizer SIM.',
+                    description: 'PASSO 2: Salva após SIM. Após chamar, responda APENAS "✅ Lançamento realizado!" e encerre.',
                     inputSchema: z.object({
                         action: z.enum(['create', 'update', 'delete']),
                         transactionId: z.string().optional(),
@@ -500,20 +502,20 @@ INSTRUÇÕES DE FERRAMENTAS:
                     }
                 }),
                 manageTransactions: tool({
-                    description: 'Gerencia múltiplos lançamentos. Use action="prepare" para o 1º turno e action="execute" para o 2º turno (após Sim). Trate cada item como independente (isRecurring: false por padrão).',
+                    description: 'Gerencia múltiplos. Turno 1: action="prepare". Turno 2: action="execute" (após SIM). Responda APENAS "✅ Lançamentos realizados!" no Turno 2.',
                     inputSchema: z.object({
                         action: z.enum(['prepare', 'execute']),
                         transactions: z.array(z.object({
                             description: z.string(),
                             amount: z.number(),
                             type: z.enum(['receita', 'despesa']),
-                            category: z.string(),
+                            category: z.string().describe('Categorize automaticamente se o usuário não disser.'),
                             paymentMethod: z.enum(['debit', 'pix', 'credit_card', 'boleto']),
                             accountId: z.string().optional(),
                             creditCardId: z.string().optional(),
                             installments: z.union([z.number(), z.string()]).default(1),
                             isRecurring: z.boolean().default(false),
-                            personId: z.string().optional(),
+                            personId: z.string().optional().describe('Use "family" por padrão.'),
                             dueDate: z.string().optional(),
                         }))
                     }),
