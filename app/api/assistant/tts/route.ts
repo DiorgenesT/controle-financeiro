@@ -28,24 +28,30 @@ function convertToWords(amountStr: string, decimalStr: string = '00'): string {
     }
 
     const suffix = reais === 1 ? 'real' : 'reais';
-    if (centavos === 0) return `${phonetic} ${suffix}`;
-    return `${phonetic} ${suffix} e ${centavos} centavos`;
+    // Brazilian Phonetic Armor: Stretch vowels in key words to force open sounds
+    const suffixPhonetic = suffix === 'real' ? 'rre-ál' : 'rre-áis';
+
+    if (centavos === 0) return `${phonetic} ${suffixPhonetic}`;
+    return `${phonetic} ${suffixPhonetic} e ${centavos} centavos`;
 }
 
 function sanitizePhonetics(text: string): string {
     return text
-        // Technical & UI Term Cleanup (Natural Brazilian Overrides)
-        // We REMOVED hyphenated versions because they triggered English pronunciation
+        // Brazilian Phonetic Armor (Doubling vowels to prevent English flattening)
+        .replace(/\bassistant\b/gi, 'as-sis-tenn-te')
+        .replace(/\bfinanceiro\b/gi, 'fi-nann-cêi-ro')
+        .replace(/\brelatório\b/gi, 'rre-la-tó-rio')
+        .replace(/\bmarço\b/gi, 'marr-ço')
         .replace(/\bpix\b/gi, 'pícs')
         .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bcredit_card\b/gi, 'cartão de crédito')
         .replace(/\bnubank\b/gi, 'nubânqui')
         .replace(/\binter\b/gi, 'ínter')
-        .replace(/\bbradesco\b/gi, 'bradêsco')
-        .replace(/\bsantander\b/gi, 'santandér')
+        .replace(/\bdólar\b/gi, 'dó-larr')
+        .replace(/\bselic\b/gi, 'se-líc')
 
         // Conversions
-        .replace(/([\d.]+)\s?%/g, '$1 por cento')
+        .replace(/([\d.]+)\s?%/g, '$1 pur-cen-to') // Force open 'o'
 
         .replace(/^[\d.]+\s+/gm, '')
         .replace(/\b\d+\.\.\./g, '')
@@ -70,14 +76,14 @@ export async function POST(req: Request) {
         }
 
         const phoneticText = sanitizePhonetics(text);
-        console.log(`[TTS-OpenAI-HD-v17] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v17] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        console.log(`[TTS-OpenAI-HD-v18] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v18] Phonetic: "${phoneticText.substring(0, 50)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 1.0, // Reverted to standard natural speed to avoid American accent highlights
+            speed: 1.0, // Reverted to 1.0 to avoid American-accent highlights found in slower speeds
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -89,7 +95,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v17] Error:', error);
+        console.error('[TTS-OpenAI-HD-v18] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
