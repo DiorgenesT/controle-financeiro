@@ -23,8 +23,9 @@ function convertToWords(amountStr: string, decimalStr: string = '00'): string {
     const formattedReais = cleanInteger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
 
     const suffix = reais === 1 ? 'real' : 'reais';
-    if (centavos === 0) return `${formattedReais} ${suffix}`;
-    return `${formattedReais} ${suffix} e ${centavos} centavos`;
+    // Add commas around the value for phonetic padding (forces a pause)
+    if (centavos === 0) return `, ${formattedReais} ${suffix} ,`;
+    return `, ${formattedReais} ${suffix} e ${centavos} centavos ,`;
 }
 
 function sanitizePhonetics(text: string): string {
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
             model: 'tts-1',
             voice: voice as any,
             input: phoneticText,
+            speed: 0.9, // 10% slower for better clarity and less "atropelo"
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());

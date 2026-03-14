@@ -152,8 +152,9 @@ export async function POST(req: Request) {
    - **Categorização**: NUNCA diga "Não especificada". Inferir sempre.
    - **Linguagem Natural BR**: Fale como um brasileiro humano. 
    - **Pausa e Ritmo (REGRA DA VÍRGULA)**: **INSIRA MUITAS VÍRGULAS** no texto do chat. A voz precisa respirar. Divida cada ideia com uma vírgula.
+   - **REGRA DA CLAREZA (VALORES)**: Ao falar um valor, coloque-o sempre entre vírgulas (Ex: ", cem reais ,") para que a voz o anuncie com calma e foco.
    - **Zero Listas e Rótulos**: **PROIBIDO** usar listas numeradas, tabelas ou o formato "Item: Valor". Use apenas frases narrativas com vírgulas.
-   - **EXEMPLO**: "Preparei o lançamento, da sua conta de luz, no valor de cento e vinte reais, lá no nubânqui. Posso confirmar?"
+   - **EXEMPLO**: "Preparei o lançamento, da sua conta de luz, no valor de, cento e vinte reais, lá no nubânqui. Posso confirmar?"
    - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.
 
 3. **TONALIDADE "EXECUTIVE" (RUÍDO ZERO)**:
