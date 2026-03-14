@@ -61,33 +61,33 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const reaisWords = integerToWords(reais, 'm');
     const suffix = reais === 1 ? 'real' : 'reais';
 
-    if (centavos === 0) return `${reaisWords} ${suffix}`;
+    if (centavos === 0) return `, ${reaisWords} ${suffix} ,`; // V25: Adding comma anchors for pause
     const centavosWords = integerToWords(centavos, 'm');
-    return `${reaisWords} ${suffix} e ${centavosWords} centavos`;
+    return `, ${reaisWords} ${suffix} e ${centavosWords} centavos ,`;
 }
 
 function sanitizePhonetics(text: string): string {
-    // V24: EXTREME PORTECTION SHIELD
+    // V25: CALM & CLEAR SHIELD (REDUCED HYPHENS)
     let result = text
         /**
-         * 1. PRE-CLEANING & PADDING
+         * 1. PRE-CLEANING
          */
         .replace(/\.{2,}/g, '.')
         .replace(/[:]/g, ',')
-        .replace(/[!]/g, '.') // Eliminate "!" to avoid American entonation peaks
+        .replace(/[!]/g, '.')
 
         /**
          * 2. EXTREMITY SHIELDS (PHONETIC LOCK)
-         * We enforce PT-BR spelling for words at the very start/end.
+         * Using open vowels instead of aggressive hyphens to avoid "eating words".
          */
         .replace(/^Em\b/gi, 'Êm')
-        .replace(/estou aqui/gi, 'istô a-quí')
-        .replace(/ajuda/gi, 'a-jú-da')
-        .replace(/avisar/gi, 'a-vi-sár')
-        .replace(/precisar/gi, 'pre-ci-sár')
-        .replace(/disposição/gi, 'dis-po-zi-ssão')
-        .replace(/confirmado/gi, 'con-fir-má-du')
-        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu rre-a-li-sa-du')
+        .replace(/estou aqui/gi, 'istô aqui')
+        .replace(/ajuda/gi, 'ajúda')
+        .replace(/avisar/gi, 'avisár')
+        .replace(/precisar/gi, 'precisár')
+        .replace(/disposição/gi, 'dis-pozzi-ssão')
+        .replace(/confirmado/gi, 'confir-má-du')
+        .replace(/Lançamento realizado/gi, 'Lan-ssamén-tu rre-alizado')
 
         /**
          * 3. TRANSLATIONS
@@ -95,25 +95,29 @@ function sanitizePhonetics(text: string): string {
         .replace(/\bpix\b/gi, 'píquice')
         .replace(/\bnubank\b/gi, 'nubânqui')
         .replace(/\boff\b/gi, 'desligado')
-        .replace(/\boverview\b/gi, 'panorama')
 
         /**
-         * 4. GENDER & NUMBERS
+         * 4. GENDER & NUMBERS (WITH PAUSE ANCHORS)
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return integerToWords(parseInt(n), 'f') + ' ' + word;
+            return `, ${integerToWords(parseInt(n), 'f')} , ${word}`;
         })
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, '')), 'm') + ' por cento')
-        .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n), 'm'))
+        .replace(/([\d.]+)\s?%/g, (_, n) => `, ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento ,`)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => `, ${integerToWords(parseInt(n), 'm')} ,`)
 
         /**
-         * 5. VOWEL OPENING (FORCING BR ACCENT)
+         * 5. VOWEL OPENING
          */
-        .replace(/março/gi, 'marr-çô')
-        .replace(/receita/gi, 'rre-ceita')
-        .replace(/relatório/gi, 'rre-la-tó-ri-o')
+        .replace(/março/gi, 'marrço')
+        .replace(/receita/gi, 'rreceita')
+        .replace(/relatório/gi, 'rrela-tório')
+
+        /**
+         * 6. CLEANING DOUBLE COMMAS
+         */
+        .replace(/,{2,}/g, ',')
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -131,21 +135,18 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * STABILIZER ANCHORING (V24)
-         * Adding a short Portuguese natural starter for every segment to "anchor" the voice.
-         * This uses common fillers that sound human and 100% Brazilian.
+         * STABILIZER ANCHORING (V25)
+         * Adding natural pauses at the start.
          */
-        const starters = ['Tudo certo. ', 'Pois bem. ', 'Olha só. '];
+        const starters = ['Tudo certo. ', 'Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        // We use the starter only if it's the beginning of a larger response or for success
-        // This prevents English inflections in short segments like "Lançamento realizado"
-        const phoneticText = `${randomStarter} ${cleanText} .`;
+        const phoneticText = `  ${randomStarter} , ${cleanText} .  `;
 
-        console.log(`\n####################################`);
-        console.log(`[TTS-FORCE-v24] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[TTS-FORCE-v24] Phonetic: "${phoneticText.substring(0, 150)}..."`);
-        console.log(`####################################\n`);
+        console.log(`\n====================================`);
+        console.log(`[TTS-FORCE-v25-STABLE] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[TTS-FORCE-v25-STABLE] Phonetic: "${phoneticText.substring(0, 150)}..."`);
+        console.log(`====================================\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -163,7 +164,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-v24] Error:', error);
+        console.error('[TTS-v25] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
