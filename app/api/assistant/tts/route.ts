@@ -1,14 +1,8 @@
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
 
-// Initialize the Google Cloud TTS client with the credentials from the environment
-// We'll use the service account already present in FIREBASE_ADMIN_PRIVATE_KEY
-const client = new TextToSpeechClient({
-    credentials: {
-        client_email: process.env.FIREBASE_CLIENT_EMAIL,
-        private_key: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    },
-    projectId: process.env.FIREBASE_PROJECT_ID,
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
 /**
@@ -32,6 +26,7 @@ function sanitizePhonetics(text: string): string {
         .replace(/\bsantander\b/gi, 'santandér')
         .replace(/^[\d.]+\s+/gm, '') // Remove leading list numbers like "1. "
         .replace(/\b\d+\.\.\./g, '') // Remove list symbols like "1..." or "2..."
+        .replace(/[:\-]/g, ',')      // Replace colons and hyphens with commas for natural pauses
 
         // Currency & Large Numbers Logic
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => {
@@ -39,16 +34,14 @@ function sanitizePhonetics(text: string): string {
             const reais = parseInt(cleanInteger);
             const centavos = parseInt(decimal);
             const suffix = reais === 1 ? 'real' : 'reais';
-            // Space injection for better thousand recognition by TTS
-            const formattedReais = cleanInteger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
-            if (centavos === 0) return `${formattedReais} ${suffix}`;
-            return `${formattedReais} ${suffix} e ${centavos} centavos`;
+            if (reais === 0 && centavos > 0) return `${centavos} centavos`;
+            if (centavos === 0) return `${reais} ${suffix}`;
+            return `${reais} ${suffix} e ${centavos} centavos`;
         })
         .replace(/R\$\s?([\d.]+)/g, (_, val) => {
             const clean = val.replace(/\./g, '');
             const reais = parseInt(clean);
-            const formatted = clean.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
-            return `${formatted} ${reais === 1 ? 'real' : 'reais'}`;
+            return `${reais} ${reais === 1 ? 'real' : 'reais'}`;
         })
         .replace(/(\d{1,3})\.(\d{3})/g, '$1$2') // Final safety for leftovers like 10.000
         .replace(/\s+/g, ' ')
@@ -57,29 +50,23 @@ function sanitizePhonetics(text: string): string {
 
 export async function POST(req: Request) {
     try {
-        const { text } = await req.json();
+        const { text, voice = 'nova' } = await req.json();
 
         if (!text) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
         const phoneticText = sanitizePhonetics(text);
-        console.log(`[TTS-Google] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-Google] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        console.log(`[TTS-OpenAI] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI] Phonetic: "${phoneticText.substring(0, 50)}..."`);
 
-        const request = {
-            input: { text: phoneticText },
-            // Voice selection: pt-BR-Neural2-A is one of the most natural Brazilian voices
-            voice: { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A' },
-            audioConfig: {
-                audioEncoding: 'MP3' as const,
-                pitch: 0,
-                speakingRate: 1.05 // Slightly faster for a more agile feel
-            },
-        };
+        const mp3 = await openai.audio.speech.create({
+            model: 'tts-1',
+            voice: voice as any,
+            input: phoneticText,
+        });
 
-        const [response] = await client.synthesizeSpeech(request);
-        const buffer = response.audioContent as Buffer;
+        const buffer = Buffer.from(await mp3.arrayBuffer());
 
         return new Response(buffer, {
             headers: {
@@ -88,9 +75,9 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-Google] Error:', error);
+        console.error('[TTS-OpenAI] Error:', error);
         return NextResponse.json({
-            error: 'Failed to generate speech with Google Cloud',
+            error: 'Failed to generate speech with OpenAI',
             details: error.message
         }, { status: 500 });
     }

@@ -150,13 +150,14 @@ export async function POST(req: Request) {
 
 2. **INTELIGÊNCIA TOTAL E VOZ HUMANA (ZERO PERGUNTA)**:
    - **Categorização**: NUNCA diga "Não especificada". Inferir sempre (Ex: "Calça" -> "Vestuário", "Almoço" -> "Alimentação").
-   - **Linguagem Natural BR**: Fale como um brasileiro humano. Use "45 reais" ou "R$ 45,00". NUNCA use termos técnicos em inglês no texto (Ex: fale "débito", nunca "debit").
-   - **Pausa e Ritmo**: **PROIBIDO** usar listas numeradas (1., 2., 3.). Use apenas texto corrido ou marcadores de ponto (-). Use vírgulas e pontos estratégicos para pausas naturais.
+   - **Linguagem Natural BR**: Fale como um brasileiro humano. Use "reais" por extenso sempre que possível. NUNCA use termos técnicos em inglês no texto.
+   - **Pausa e Ritmo (CRÍTICO)**: **USE MUITAS VÍRGULAS**. A voz 'nova' precisa de vírgulas para respirar. Pontue o texto para que a leitura seja natural.
+   - **Zero Listas**: **PROIBIDO** usar listas numeradas (1. 2. 3.) ou tabelas. Use apenas frases conversacionais. Ex: "Você gastou cem reais em vestuário", nunca "Vestuário: R$ 100".
    - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.
 
 3. **TONALIDADE "EXECUTIVE" (RUÍDO ZERO)**:
    - **PROIBIDO** listar: "Recorrente: Não", "Parcelas: 1", "Tipo: Despesa", "ID: ...".
-   - **Resumo Ideal**: "Preparei o lançamento: Blusa (Vestuário) por R$ 29,00 no Nubank. Posso confirmar?"
+   - **Resumo Ideal**: "Preparei o lançamento, da blusa no vestuário, por vinte e nove reais, no nubânqui. Posso confirmar?"
 
 4. **TESTE DO FONE E ALMOÇO (ISOLAMENTO)**:
    - Atributos NUNCA se propagam. Cada item é independente.
