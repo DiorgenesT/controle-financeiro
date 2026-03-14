@@ -25,8 +25,6 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
     if (n >= 1000) {
         const t = Math.floor(n / 1000);
-        // "mil" doesn't change gender, but "dois mil" vs "duas mil" depends on context
-        // Usually counts of items take the item's gender.
         words += (t === 1 ? 'mil' : integerToWords(t, gender) + ' mil');
         n %= 1000;
         if (n > 0) words += (n < 100 || n % 100 === 0) ? ' e ' : ' ';
@@ -70,7 +68,7 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
 }
 
 function sanitizePhonetics(text: string): string {
-    // V22: GENDER AGREEMENT & PHONETIC ANCHORING
+    // V23: NATURAL PURITY & GENDER FIX
     let result = text
         /**
          * 1. PRE-CLEANING
@@ -79,7 +77,19 @@ function sanitizePhonetics(text: string): string {
         .replace(/[:\-]/g, ',')
 
         /**
-         * 2. TRANSLATIONS & ANCHORING OVERRIDES
+         * 2. PHONETIC ARMOR (CRITICAL PHRASES)
+         * We override success and common phrases to lock the engine into BR entonation.
+         */
+        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu rre-a-li-sa-du')
+        .replace(/confirmado/gi, 'con-fir-má-du')
+        .replace(/estou aqui/gi, 'is-tô a-quí')
+        .replace(/se precisar/gi, 'se pre-ci-sár')
+        .replace(/ajuda/gi, 'a-jú-da')
+        .replace(/Em março/gi, 'Êm marr-çô')
+        .replace(/Março de/gi, 'Marr-çô de')
+
+        /**
+         * 3. TRANSLATIONS
          */
         .replace(/\bpix\b/gi, 'píquice')
         .replace(/\bdebit\b/gi, 'débito')
@@ -89,19 +99,14 @@ function sanitizePhonetics(text: string): string {
         .replace(/\boff\b/gi, 'desligado')
         .replace(/\boverview\b/gi, 'panorama')
 
-        // Phonetic Polish for Brazilian sounds
-        .replace(/\brelatório\b/gi, 'rre-lató-rio')
-        .replace(/\breceita\b/gi, 'rre-ceita')
-        .replace(/\bmarço\b/gi, 'marr-ço')
-        .replace(/\bprecisar\b/gi, 'precisár')
-        .replace(/\bestou\b/gi, 'istô')
-        .replace(/\bajuda\b/gi, 'ajúda')
-        .replace(/\baqui\b/gi, 'aquí')
-        .replace(/\bdisposição\b/gi, 'dis-po-si-ção')
-
         /**
-         * 3. NUMBER EXPANSION WITH GENDER
+         * 4. NUMBER EXPANSION WITH GENDER (PRIORITY TRANSACÕES)
          */
+        // Specific feminine count for transactions to fix "vinte e dois transações"
+        .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
+            return integerToWords(parseInt(n), 'f') + ' ' + word;
+        })
+
         // Currency (Masculine)
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
@@ -109,17 +114,13 @@ function sanitizePhonetics(text: string): string {
         // Percentages (Masculine)
         .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, '')), 'm') + ' por cento')
 
-        // Counts (Feminine for "transações")
-        .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return integerToWords(parseInt(n), 'f') + ' ' + word;
-        })
-
         // Remaining Integers (Years, etc - usually masculine)
         .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n), 'm'))
 
         /**
-         * 4. FINAL CLEANUP
+         * 5. FINAL POLISH
          */
+        .replace(/disposição/gi, 'dis-po-si-ção')
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -137,14 +138,13 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * PHONETIC ANCHORING (V22)
-         * Injected a subtle Brazilian anchor at the start to lock the engine into PT-BR.
-         * The trailing dot and space after "Bom," ensures a natural pause.
+         * NATURAL STABILIZATION (V23)
+         * Removed the forced "Bom." anchor. Using triple spaces for engine stabilization.
          */
-        const phoneticText = `    Bom. ${cleanText}    `;
+        const phoneticText = `   ${cleanText}   `;
 
-        console.log(`[TTS-OpenAI-HD-v22] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v22] Phonetic: "${phoneticText.substring(0, 100)}..."`);
+        console.log(`[TTS-OpenAI-HD-v23] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v23] Phonetic: "${phoneticText.substring(0, 100)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -162,7 +162,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v22] Error:', error);
+        console.error('[TTS-OpenAI-HD-v23] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message

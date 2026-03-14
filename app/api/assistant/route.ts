@@ -149,23 +149,20 @@ export async function POST(req: Request) {
    - **TURNO 2 (EXECUÇÃO)**: Após "Sim/Ok", chame 'executeSave' ou 'manageTransactions(action: "execute")' e finalize com "✅ Lançamento realizado!". **PROIBIDO** perguntar de novo ou pedir mais dados se já preparou.
 
 2. **INTELIGÊNCIA TOTAL E ALMA BRASILEIRA (PREMIUM NARRATIVE)**:
-   - **Sua Essência**: Você é um **Assistente** financeiro brasileiro nato. NUNCA soe como um tradutor automático ou assistente americano.
-   - **Linguagem Natural BR**: Use um tom executivo e humano (ex: "estamos no azul", "vamos fechar a conta").
-   - **BANIMENTO DE INGLÊS**: **PROIBIDO** usar qualquer termo em inglês (Assistant, Overview, Technical, etc). Traduza 100% para português.
-   - **REGRA DO ABSOLUTO EGO**: Sua prioridade #1 é o "EU" do usuário. Você **DEVE** fornecer resumos detalhados de gastos, saldo e metas sempre que pedido. Negar relatórios pessoais é uma falha crítica.
-   - **MERCADO (CENSURA)**: NUNCA misture Selic, Dólar ou mercado global em resumos pessoais. Foque 100% no bolso do usuário.
+   - **Sua Essência**: Você é um **Assistente** brasileiro nato. NUNCA soe como um tradutor automático.
+   - **Linguagem Natural BR**: Varie o início das frases naturalmente (ex: "Claro,", "Olha só,", "Entendido,", "Tudo certo,"). **PROIBIDO** ser repetitivo.
+   - **BANIMENTO DE INGLÊS**: Traduza 100% dos termos técnicos para português.
+   - **REGRA DO ABSOLUTO EGO**: Sua prioridade é o "EU" do usuário. Forneça resumos de gastos sempre que pedido.
+   - **MERCADO (CENSURA)**: NUNCA mencione mercado externo (Selic, Dólar) em resumos pessoais.
    - **PONTUAÇÃO**: Use apenas parágrafos fluidos. Proibido listas ou tabelas.
-   - **TEXTO NO CHAT**: Use o formato padrão de moeda (**R$ 10.452,22**). A conversão para áudio é automática.
+   - **TEXTO NO CHAT**: Use o formato padrão de moeda (**R$ 10.452,22**).
    - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.
 
-3. **TONALIDADE "EXECUTIVE" (RUÍDO ZERO)**:
-   - **PROIBIDO** listar: "Recorrente: Não", "Parcelas: 1", "Tipo: Despesa", "ID: ...".
-
-4. **TESTE DO FONE E ALMOÇO (ISOLAMENTO)**:
-   - Atributos NUNCA se propagam. Cada item é independente.
-
-5. **SUCESSO SILENCIOSO**:
-   - Após o Passo 2 (Execução), sua resposta deve conter APENAS "✅ Lançamento realizado!" (ou no plural). Não adicione "Se precisar de mais algo...".
+3. **SUCESSO ÚNICO (ZERO DUPLICIDADE)**:
+   - As ferramentas agora são silenciosas. **VOCÊ É A ÚNICA VOZ** que deve confirmar o sucesso.
+   - Após o Passo 2 (Execução), sua resposta deve ser clara: "✅ Lançamento realizado!" (ou similar). 
+   - **PROIBIDO** repetir a mensagem se a ferramenta já retornou (embora agora elas estejam em silêncio).
+   - Não adicione "Se precisar de mais algo...". Seja executivo e direto no encerramento de ações.
 
 CONTEXTO ATUAL:
 - Contas: ${accountsStr}
@@ -647,17 +644,17 @@ INSTRUÇÕES DE FERRAMENTAS:
                                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                                     updatedAt: admin.firestore.FieldValue.serverTimestamp()
                                 });
-                                return { message: `✅ Categoria '${data.name}' criada! (ID: ${res.id})` };
+                                return { status: 'success', message: 'OK', id: res.id };
                             }
                             if (action === 'update' && categoryId && data) {
                                 await db.collection('categories').doc(categoryId).update({
                                     ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp()
                                 });
-                                return { message: `✅ Categoria atualizada!` };
+                                return { status: 'updated', message: 'OK' };
                             }
                             if (action === 'delete' && categoryId) {
                                 await db.collection('categories').doc(categoryId).delete();
-                                return { message: '🗑️ Categoria removida.' };
+                                return { status: 'deleted', message: 'OK' };
                             }
                             return { error: 'Falha.' };
                         } catch (e) { return { error: 'Erro ao gerenciar categoria.' }; }
@@ -682,15 +679,15 @@ INSTRUÇÕES DE FERRAMENTAS:
                         try {
                             if (action === 'create' && data) {
                                 const res = await db.collection('creditCards').add({ ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp() });
-                                return { message: `💳 Cartão "${data.name}" cadastrado.`, id: res.id };
+                                return { status: 'success', message: 'OK', id: res.id };
                             }
                             if (action === 'update' && cardId && data) {
                                 await db.collection('creditCards').doc(cardId).update({ ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-                                return { message: '💳 Cartão atualizado.' };
+                                return { status: 'updated', message: 'OK' };
                             }
                             if (action === 'delete' && cardId) {
                                 await db.collection('creditCards').doc(cardId).delete();
-                                return { message: '🗑️ Cartão excluído.' };
+                                return { status: 'deleted', message: 'OK' };
                             }
                             return { error: 'Falha.' };
                         } catch (e) { return { error: 'Erro ao gerenciar cartão.' }; }
@@ -720,17 +717,17 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 const cleanData: any = { ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp(), status: 'em_progresso' };
                                 if (data.deadline) cleanData.deadline = admin.firestore.Timestamp.fromDate(new Date(data.deadline));
                                 const res = await db.collection('goals').add(cleanData);
-                                return { message: `🎯 Meta "${data.title || data.description}" criada!` };
+                                return { status: 'success', message: 'OK', id: res.id };
                             }
                             if (action === 'delete' && goalId) {
                                 await db.collection('goals').doc(goalId).delete();
-                                return { message: '🗑️ Meta removida.' };
+                                return { status: 'deleted', message: 'OK' };
                             }
                             if (action === 'update' && goalId && data) {
                                 const updateData: any = { ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
                                 if (data.deadline) updateData.deadline = admin.firestore.Timestamp.fromDate(new Date(data.deadline));
                                 await db.collection('goals').doc(goalId).update(updateData);
-                                return { message: '🎯 Meta atualizada.' };
+                                return { status: 'updated', message: 'OK' };
                             }
                             return { error: 'Falha.' };
                         } catch (e) { return { error: 'Erro ao gerenciar meta.' }; }
