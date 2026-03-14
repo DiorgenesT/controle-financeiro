@@ -457,11 +457,13 @@ export function FloatingAssistant() {
                                                     if (res.action === 'prepared' || (res.success && !res.action)) {
                                                         const isSuccess = res.success && !res.action;
                                                         return (
-                                                            <div key={idx} className={cn("mt-2 p-3 rounded-xl border shadow-sm", isSuccess ? "bg-emerald-500/10 border-emerald-500/20" : "bg-background/50 border-indigo-500/20")}>
-                                                                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider mb-2 text-indigo-600 dark:text-indigo-400">
-                                                                    <CircleCheck className="w-3 h-3 text-emerald-500" />
-                                                                    <span>{isSuccess ? 'Lançado com Sucesso' : 'Itens Preparados'}</span>
-                                                                </div>
+                                                            <div key={idx} className={cn("mt-2 p-3 rounded-xl border shadow-sm", isSuccess ? "bg-emerald-500/10 border-emerald-500/20 animate-in zoom-in-95 duration-200" : "bg-background/50 border-indigo-500/20")}>
+                                                                {!isSuccess && (
+                                                                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider mb-2 text-indigo-600 dark:text-indigo-400">
+                                                                        <CircleCheck className="w-3 h-3 text-emerald-500" />
+                                                                        <span>Itens Preparados</span>
+                                                                    </div>
+                                                                )}
                                                                 {isSuccess && res.message && (
                                                                     <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{res.message}</p>
                                                                 )}
@@ -536,12 +538,8 @@ export function FloatingAssistant() {
                                                     if (!res) return null;
 
                                                     return (
-                                                        <div key={idx} className="mt-2 p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shadow-sm">
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                                                                <CircleCheck className="w-3 h-3" />
-                                                                <span>Salvo</span>
-                                                            </div>
-                                                            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                                                        <div key={idx} className="mt-2 p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shadow-sm animate-in zoom-in-95 duration-200">
+                                                            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                                                                 {res.message?.replace(/\(ID:.*?\)/g, '') || ''}
                                                             </p>
                                                         </div>
