@@ -457,7 +457,7 @@ export function FloatingAssistant() {
                                                     if (res.action === 'prepared' || (res.success && !res.action)) {
                                                         const isSuccess = res.success && !res.action;
                                                         return (
-                                                            <div key={idx} className={cn("mt-2 p-3 rounded-xl border shadow-sm", isSuccess ? "bg-emerald-500/10 border-emerald-500/20 animate-in zoom-in-95 duration-200" : "bg-background/50 border-indigo-500/20")}>
+                                                            <div key={idx} className={cn("mt-2", isSuccess ? "animate-in slide-in-from-top-1 duration-200" : "p-3 rounded-xl border border-indigo-500/20 bg-background/50 shadow-sm")}>
                                                                 {!isSuccess && (
                                                                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider mb-2 text-indigo-600 dark:text-indigo-400">
                                                                         <CircleCheck className="w-3 h-3 text-emerald-500" />
@@ -465,7 +465,9 @@ export function FloatingAssistant() {
                                                                     </div>
                                                                 )}
                                                                 {isSuccess && res.message && (
-                                                                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{res.message}</p>
+                                                                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 ml-1">
+                                                                        {res.message}
+                                                                    </p>
                                                                 )}
                                                             </div>
                                                         );
@@ -538,8 +540,8 @@ export function FloatingAssistant() {
                                                     if (!res) return null;
 
                                                     return (
-                                                        <div key={idx} className="mt-2 p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shadow-sm animate-in zoom-in-95 duration-200">
-                                                            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                                                        <div key={idx} className="mt-2 animate-in slide-in-from-top-1 duration-200 ml-1">
+                                                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                                                                 {res.message?.replace(/\(ID:.*?\)/g, '') || ''}
                                                             </p>
                                                         </div>
