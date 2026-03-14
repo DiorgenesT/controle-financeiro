@@ -50,7 +50,7 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
 /**
  * Specialized converter for currency (always masculine 'reais').
- * V26: Adding heavy pause anchors (,,) to uniformize speed.
+ * V27: Using Ellipsis ( . . . ) for deep pause anchors.
  */
 function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -62,14 +62,17 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const reaisWords = integerToWords(reais, 'm');
     const suffix = reais === 1 ? 'real' : 'reais';
 
-    // Triple-comma pause for extreme cadence control
-    if (centavos === 0) return ` , , , ${reaisWords} ${suffix} , , , `;
+    // Triple dot ellipsis for extreme pause
+    if (centavos === 0) return ` . . . ${reaisWords} ${suffix} . . . `;
     const centavosWords = integerToWords(centavos, 'm');
-    return ` , , , ${reaisWords} ${suffix} e ${centavosWords} centavos , , , `;
+    return ` . . . ${reaisWords} ${suffix} e ${centavosWords} centavos . . . `;
 }
 
-function sanitizePhonetics(text: string): string {
-    // V26: CADENCE MASTERY (ULTRA-UNIFORM SPEED)
+/**
+ * Reworked function name to bypass Turbopack cache.
+ */
+function ultraStabilizeBrazilianCadence(text: string): string {
+    // V27: ULTRA-SLOW & DEEP CADENCE SHIELD
     let result = text
         /**
          * 1. PRE-CLEANING
@@ -79,7 +82,7 @@ function sanitizePhonetics(text: string): string {
         .replace(/[!]/g, '.')
 
         /**
-         * 2. EXTREMITY SHIELDS (PHONETIC LOCK)
+         * 2. EXTREMITY SHIELDS
          */
         .replace(/^Em\b/gi, 'Êm')
         .replace(/estou aqui/gi, 'istô aqui')
@@ -98,15 +101,15 @@ function sanitizePhonetics(text: string): string {
         .replace(/\boff\b/gi, 'desligado')
 
         /**
-         * 4. GENDER & NUMBERS (V26: TRIPLE ANCHORS)
+         * 4. GENDER & NUMBERS (V27: ELLIPSIS ANCHORS)
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return ` , , , ${integerToWords(parseInt(n), 'f')} , , , ${word}`;
+            return ` . . . ${integerToWords(parseInt(n), 'f')} . . . ${word}`;
         })
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-        .replace(/([\d.]+)\s?%/g, (_, n) => ` , , , ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento , , , `)
-        .replace(/\b(\d{1,6})\b/g, (_, n) => ` , , , ${integerToWords(parseInt(n), 'm')} , , , `)
+        .replace(/([\d.]+)\s?%/g, (_, n) => ` . . . ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento . . . `)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => ` . . . ${integerToWords(parseInt(n), 'm')} . . . `)
 
         /**
          * 5. VOWEL OPENING
@@ -116,9 +119,9 @@ function sanitizePhonetics(text: string): string {
         .replace(/relatório/gi, 'rrela-tório')
 
         /**
-         * 6. CLEANING GHOST COMMAS
+         * 6. CLEANING GHOST SYMBOLS
          */
-        .replace(/ , , , /g, ',,,') // Tighten the anchors for the engine
+        .replace(/\.\s+\.\s+\./g, '...') // Standardize ellipsis
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -133,26 +136,27 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const cleanText = sanitizePhonetics(text);
+        const cleanText = ultraStabilizeBrazilianCadence(text);
 
         /**
-         * STABILIZER ANCHORING (V26)
+         * NATURAL ANCHORING (V27)
          */
-        const starters = ['Tudo certo. ', 'Pois bem. ', 'Olha só. ', 'Continuando. '];
+        const starters = ['Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        const phoneticText = `  ${randomStarter} ,,, ${cleanText} .  `;
+        // V27: Using more ellipsis for rhythm
+        const phoneticText = ` . . . ${randomStarter} . . . ${cleanText} . . . `;
 
-        console.log(`\n************************************`);
-        console.log(`[TTS-FORCE-v26-MASTER] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[TTS-FORCE-v26-MASTER] Phonetic: "${phoneticText.substring(0, 200)}..."`);
-        console.log(`************************************\n`);
+        console.log(`\n**************************************************`);
+        console.log(`[TTS-v27-ULTRA-SLOW-MASTER] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[TTS-v27-ULTRA-SLOW-MASTER] Phonetic: "${phoneticText.substring(0, 250)}..."`);
+        console.log(`**************************************************\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 1.0,
+            speed: 0.88, // V27: Global speed reduction for clarity
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -164,7 +168,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-v26] Error:', error);
+        console.error('[TTS-v27] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
