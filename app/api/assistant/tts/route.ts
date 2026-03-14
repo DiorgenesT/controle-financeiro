@@ -6,39 +6,68 @@ const openai = new OpenAI({
 });
 
 /**
- * Converts a numeric string to natural Brazilian words for specific bridges.
+ * Converts any integer to Portuguese words.
+ * Handles up to 999,999 for years, counts, etc.
  */
-function convertToWords(amountStr: string, decimalStr: string = '00'): string {
+function integerToWords(n: number): string {
+    if (n === 0) return 'zero';
+    if (n === 100) return 'cem';
+
+    const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+    const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+    const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+    const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+    let words = '';
+
+    if (n >= 1000) {
+        const t = Math.floor(n / 1000);
+        words += (t === 1 ? 'mil' : integerToWords(t) + ' mil');
+        n %= 1000;
+        if (n > 0) words += (n < 100 || n % 100 === 0) ? ' e ' : ' ';
+    }
+
+    if (n >= 100) {
+        words += hundreds[Math.floor(n / 100)];
+        n %= 100;
+        if (n > 0) words += ' e ';
+    }
+
+    if (n >= 20) {
+        words += tens[Math.floor(n / 10)];
+        n %= 10;
+        if (n > 0) words += ' e ' + units[n];
+    } else if (n >= 10) {
+        words += teens[n - 10];
+    } else if (n > 0) {
+        words += units[n];
+    }
+
+    return words.trim();
+}
+
+/**
+ * Specialized converter for currency.
+ */
+function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
     const reais = parseInt(cleanInteger);
     const centavos = parseInt(decimalStr);
 
     if (isNaN(reais)) return '';
 
-    // Literal thousands bridge to ensure perfect pronunciation in HD model
-    let phonetic = cleanInteger;
-    if (reais >= 1000) {
-        const thousands = Math.floor(reais / 1000);
-        const remainder = reais % 1000;
-        if (remainder === 0) {
-            phonetic = `${thousands} mil`;
-        } else {
-            phonetic = `${thousands} mil e ${remainder}`;
-        }
-    }
-
+    const reaisWords = integerToWords(reais);
     const suffix = reais === 1 ? 'real' : 'reais';
 
-    if (centavos === 0) return `${phonetic} ${suffix}`;
-    return `${phonetic} ${suffix} e ${centavos} centavos`;
+    if (centavos === 0) return `${reaisWords} ${suffix}`;
+    const centavosWords = integerToWords(centavos);
+    return `${reaisWords} ${suffix} e ${centavosWords} centavos`;
 }
 
 function sanitizePhonetics(text: string): string {
-    // V20: PURE PORTUGUESE. No hyphens, no artificial phonetic 'armor'.
-    // The American accent was triggered by syllable breaks (hyphens).
-    return text
-        // Mandatory Translations (Common English triggers from LLMs)
-        .replace(/\bpix\b/gi, 'pícs')
+    let result = text
+        // Technical Cleanup (Natural Overrides)
+        .replace(/\bpix\b/gi, 'píquice')
         .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bcredit_card\b/gi, 'cartão de crédito')
         .replace(/\bnubank\b/gi, 'nubânqui')
@@ -46,25 +75,26 @@ function sanitizePhonetics(text: string): string {
         .replace(/\bcashback\b/gi, 'dinheiro de volta')
         .replace(/\boff\b/gi, 'desligado')
         .replace(/\boverview\b/gi, 'panorama')
-        .replace(/\bsummary\b/gi, 'resumo')
-        .replace(/\binsight\b/gi, 'percepção')
 
         // Symbols
-        .replace(/([\d.]+)\s?%/g, '$1 por cento')
+        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, ''))) + ' por cento')
 
-        // Technical Cleanup
+        // Currency (Priority handling)
+        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
+        .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
+
+        // Remaining Digits (Years, Counts, etc)
+        // Convert any sequence of 1-6 digits to words to prevent engine acceleration
+        .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n)))
+
+        // Cleanup
         .replace(/^[\d.]+\s+/gm, '')
         .replace(/\b\d+\.\.\./g, '')
         .replace(/[:\-]/g, ',')
-
-        // Currency & Large Numbers Logic (Full phonetic expansion)
-        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => convertToWords(integer, decimal))
-        .replace(/R\$\s?([\d.]+)/g, (_, val) => convertToWords(val))
-
-        // Final safety for large numbers
-        .replace(/(\d{1,3})\.(\d{3})/g, '$1$2')
         .replace(/\s+/g, ' ')
         .trim();
+
+    return result;
 }
 
 export async function POST(req: Request) {
@@ -78,20 +108,19 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * ANTI-CLIPPING PADDING (V20)
-         * Using dots and spaces to force the TTS engine to stabilize 
-         * before emitting the first syllable and after the last.
+         * STABILIZATION PADDING (V21)
+         * Added simple spacing to stabilize the start and end of the speech.
          */
-        const phoneticText = ` . . . ${cleanText} . . . `;
+        const phoneticText = `    ${cleanText}    `;
 
-        console.log(`[TTS-OpenAI-HD-v20] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v20] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        console.log(`[TTS-OpenAI-HD-v21] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v21] Phonetic: "${phoneticText.substring(0, 100)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 1.0, // Reverting to natural speed as it yields best results for 'nova'
+            speed: 1.0,
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -103,7 +132,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v20] Error:', error);
+        console.error('[TTS-OpenAI-HD-v21] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
