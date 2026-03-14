@@ -176,7 +176,7 @@ export function FloatingAssistant() {
                 const response = await fetch('/api/assistant/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, voice: 'nova' })
+                    body: JSON.stringify({ text, voice: 'shimmer' })
                 });
                 if (!response.ok) return null;
                 const blob = await response.blob();
@@ -247,14 +247,6 @@ export function FloatingAssistant() {
         const cleanText = text
             .replace(/\(ID:.*?\)/g, '')               // STRICT ID Removal
             .replace(/[*#_\[\]()]/g, ' ')             // Clean basic markdown
-            .replace(/R\$\s?([\d.,]+)/g, (_, amountStr) => {
-                const normalized = amountStr.replace(/\./g, '');
-                const [reais, centavos] = normalized.split(',');
-                if (!centavos || centavos === '00') {
-                    return `${reais} reais `;
-                }
-                return `${reais} reais e ${centavos} centavos `;
-            })
             .replace(/(\d+)x/gi, ' em $1 vezes')      // Pronounce installments
             .replace(/[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}]/gu, '') // Remove emojis
             .replace(/\s+/g, ' ')                     // Normalize spacing

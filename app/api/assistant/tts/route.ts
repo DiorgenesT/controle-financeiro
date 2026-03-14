@@ -11,20 +11,34 @@ const openai = new OpenAI({
  */
 function sanitizePhonetics(text: string): string {
     return text
+        // Technical & UI Term Cleanup
         .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bcredit_card\b/gi, 'cartão de crédito')
         .replace(/\bpix\b/gi, 'pícs')
         .replace(/\bboleto\b/gi, 'bolêto')
         .replace(/\bincome\b/gi, 'receita')
         .replace(/\bexpense\b/gi, 'despesa')
-        .replace(/\binstallments\b/gi, 'parcelas')
         .replace(/\bfixed\b/gi, 'fixo')
         .replace(/\bnubank\b/gi, 'nubânqui')
         .replace(/\bitau\b/gi, 'itaú')
         .replace(/\binter\b/gi, 'ínter')
-        .replace(/R\$/g, 'reais')
-        .replace(/(\d+),(\d{2})/g, '$1 reais e $2 centavos')
-        .replace(/(\d+)\s?reais e 00 centavos/g, '$1 reais')
+        .replace(/\bbradesco\b/gi, 'bradêsco')
+        .replace(/\bsantander\b/gi, 'santandér')
+
+        // Currency & Large Numbers Logic
+        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => {
+            const cleanInteger = integer.replace(/\./g, '');
+            const reais = parseInt(cleanInteger);
+            const suffix = reais === 1 ? 'real' : 'reais';
+            if (decimal === '00') return `${cleanInteger} ${suffix}`;
+            return `${cleanInteger} ${suffix} e ${decimal} centavos`;
+        })
+        .replace(/R\$\s?([\d.]+)/g, (_, val) => {
+            const clean = val.replace(/\./g, '');
+            const reais = parseInt(clean);
+            return `${clean} ${reais === 1 ? 'real' : 'reais'}`;
+        })
+        .replace(/(\d{1,3})\.(\d{3})/g, '$1$2') // Final safety for leftovers like 10.000
         .replace(/\s+/g, ' ')
         .trim();
 }
