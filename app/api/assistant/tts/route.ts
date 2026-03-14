@@ -6,11 +6,7 @@ const openai = new OpenAI({
 });
 
 /**
- * Sanitize text for natural PT-BR speech.
- * Replaces tech terms, symbols and English words with phonetic Portuguese.
- */
-/**
- * Converts a numeric string to natural Brazilian words for currency.
+ * Converts a numeric string to natural Brazilian words for specific bridges.
  */
 function convertToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -19,13 +15,21 @@ function convertToWords(amountStr: string, decimalStr: string = '00'): string {
 
     if (isNaN(reais)) return '';
 
-    // Space injection for better thousand recognition by OpenAI TTS
-    const formattedReais = cleanInteger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+    // Literal thousands bridge to ensure perfect pronunciation in HD model
+    let phonetic = cleanInteger;
+    if (reais >= 1000) {
+        const thousands = Math.floor(reais / 1000);
+        const remainder = reais % 1000;
+        if (remainder === 0) {
+            phonetic = `${thousands} mil`;
+        } else {
+            phonetic = `${thousands} mil e ${remainder}`;
+        }
+    }
 
     const suffix = reais === 1 ? 'real' : 'reais';
-    // Add commas around the value for phonetic padding (forces a pause)
-    if (centavos === 0) return `, ${formattedReais} ${suffix} ,`;
-    return `, ${formattedReais} ${suffix} e ${centavos} centavos ,`;
+    if (centavos === 0) return `${phonetic} ${suffix}`;
+    return `${phonetic} ${suffix} e ${centavos} centavos`;
 }
 
 function sanitizePhonetics(text: string): string {
@@ -43,9 +47,9 @@ function sanitizePhonetics(text: string): string {
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bbradesco\b/gi, 'bradêsco')
         .replace(/\bsantander\b/gi, 'santandér')
-        .replace(/^[\d.]+\s+/gm, '') // Remove leading list numbers
-        .replace(/\b\d+\.\.\./g, '') // Remove list symbols
-        .replace(/[:\-]/g, ',')      // Replace colons/dashes with commas
+        .replace(/^[\d.]+\s+/gm, '')
+        .replace(/\b\d+\.\.\./g, '')
+        .replace(/[:\-]/g, ',')
 
         // Currency & Large Numbers Logic (Full phonetic expansion)
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => convertToWords(integer, decimal))
@@ -66,14 +70,14 @@ export async function POST(req: Request) {
         }
 
         const phoneticText = sanitizePhonetics(text);
-        console.log(`[TTS-OpenAI] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        console.log(`[TTS-OpenAI-HD] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD] Phonetic: "${phoneticText.substring(0, 50)}..."`);
 
         const mp3 = await openai.audio.speech.create({
-            model: 'tts-1',
+            model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 0.9, // 10% slower for better clarity and less "atropelo"
+            speed: 1.0,
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -85,9 +89,9 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI] Error:', error);
+        console.error('[TTS-OpenAI-HD] Error:', error);
         return NextResponse.json({
-            error: 'Failed to generate speech with OpenAI',
+            error: 'Failed to generate speech with OpenAI HD',
             details: error.message
         }, { status: 500 });
     }
