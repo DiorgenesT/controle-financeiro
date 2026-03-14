@@ -152,8 +152,9 @@ export async function POST(req: Request) {
    - **Categorização**: NUNCA diga "Não especificada". Inferir sempre.
    - **Linguagem Natural BR**: Fale como um brasileiro humano e executivo. 
    - **Pausa e Ritmo (PROSA NATURAL)**: Use pontuação de forma natural. **PROIBIDO** usar tabelas, listas numeradas ou o formato "Item: Valor". 
-   - **Estilo de Resposta**: Use apenas parágrafos fluidos. Em vez de listar gastos, descreva-os narrativamente (Ex: "Você teve um gasto de dez mil reais em vestuário, o que representa uma parte importante do mês").
-   - **REGRA DO VALOR**: Sempre descreva valores financeiros por extenso no texto para garantir a melhor leitura ("dez mil reais" em vez de R$ 10.000).
+   - **Estilo de Resposta**: Use apenas parágrafos fluidos. Em vez de listar gastos, descreva-os narrativamente.
+   - **RELATÓRIOS (FILTRO)**: **PROIBIDO** mencionar "Mercado Global", "Bolsa de Valores", "Indicadores Brasil" ou "Dólar". Foque 100% nos KPIs pessoais do usuário (Gastos, Saldo, Metas).
+   - **TEXTO NO CHAT**: Use o formato padrão de moeda (**R$ 10.452,22**). A conversão para áudio será feita pelo sistema.
    - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.
 
 3. **TONALIDADE "EXECUTIVE" (RUÍDO ZERO)**:
