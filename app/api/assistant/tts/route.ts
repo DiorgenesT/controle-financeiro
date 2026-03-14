@@ -6,14 +6,17 @@ const openai = new OpenAI({
 });
 
 /**
- * Converts any integer to Portuguese words.
+ * Converts any integer to Portuguese words with gender support.
  * Handles up to 999,999.
  */
-function integerToWords(n: number): string {
+function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
     if (n === 100) return 'cem';
 
-    const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+    const unitsM = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+    const unitsF = ['', 'uma', 'duas', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+    const units = gender === 'm' ? unitsM : unitsF;
+
     const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
     const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
     const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
@@ -22,7 +25,9 @@ function integerToWords(n: number): string {
 
     if (n >= 1000) {
         const t = Math.floor(n / 1000);
-        words += (t === 1 ? 'mil' : integerToWords(t) + ' mil');
+        // "mil" doesn't change gender, but "dois mil" vs "duas mil" depends on context
+        // Usually counts of items take the item's gender.
+        words += (t === 1 ? 'mil' : integerToWords(t, gender) + ' mil');
         n %= 1000;
         if (n > 0) words += (n < 100 || n % 100 === 0) ? ' e ' : ' ';
     }
@@ -47,7 +52,7 @@ function integerToWords(n: number): string {
 }
 
 /**
- * Specialized converter for currency.
+ * Specialized converter for currency (always masculine 'reais').
  */
 function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -56,25 +61,25 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
 
     if (isNaN(reais)) return '';
 
-    const reaisWords = integerToWords(reais);
+    const reaisWords = integerToWords(reais, 'm');
     const suffix = reais === 1 ? 'real' : 'reais';
 
     if (centavos === 0) return `${reaisWords} ${suffix}`;
-    const centavosWords = integerToWords(centavos);
+    const centavosWords = integerToWords(centavos, 'm');
     return `${reaisWords} ${suffix} e ${centavosWords} centavos`;
 }
 
 function sanitizePhonetics(text: string): string {
-    // V21.1: ROBUST CLEANING PIPELINE
+    // V22: GENDER AGREEMENT & PHONETIC ANCHORING
     let result = text
         /**
-         * 1. PRE-CLEANING: Strip trailing/leading extra dots that cause clipping
+         * 1. PRE-CLEANING
          */
-        .replace(/\.{2,}/g, '.') // Convert ... or .. to single dot
-        .replace(/[:\-]/g, ',')  // Convert colons/hyphens to commas for natural pauses
+        .replace(/\.{2,}/g, '.')
+        .replace(/[:\-]/g, ',')
 
         /**
-         * 2. TRANSLATIONS: Mandatory terms
+         * 2. TRANSLATIONS & ANCHORING OVERRIDES
          */
         .replace(/\bpix\b/gi, 'píquice')
         .replace(/\bdebit\b/gi, 'débito')
@@ -84,28 +89,36 @@ function sanitizePhonetics(text: string): string {
         .replace(/\boff\b/gi, 'desligado')
         .replace(/\boverview\b/gi, 'panorama')
 
-        /**
-         * 3. NUMBER EXPANSION: Convert all digits to words to prevent engine acceleration
-         */
-        // Currency
-        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
-        .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-
-        // Percentages
-        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, ''))) + ' por cento')
-
-        // Remaining Integers (Years, Counts)
-        .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n)))
-
-        /**
-         * 4. PHONETIC POLISH: Force open Brazilian vowels and rolling R
-         */
+        // Phonetic Polish for Brazilian sounds
         .replace(/\brelatório\b/gi, 'rre-lató-rio')
         .replace(/\breceita\b/gi, 'rre-ceita')
         .replace(/\bmarço\b/gi, 'marr-ço')
+        .replace(/\bprecisar\b/gi, 'precisár')
+        .replace(/\bestou\b/gi, 'istô')
+        .replace(/\bajuda\b/gi, 'ajúda')
+        .replace(/\baqui\b/gi, 'aquí')
+        .replace(/\bdisposição\b/gi, 'dis-po-si-ção')
 
         /**
-         * 5. FINAL CLEANUP
+         * 3. NUMBER EXPANSION WITH GENDER
+         */
+        // Currency (Masculine)
+        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
+        .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
+
+        // Percentages (Masculine)
+        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, '')), 'm') + ' por cento')
+
+        // Counts (Feminine for "transações")
+        .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
+            return integerToWords(parseInt(n), 'f') + ' ' + word;
+        })
+
+        // Remaining Integers (Years, etc - usually masculine)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n), 'm'))
+
+        /**
+         * 4. FINAL CLEANUP
          */
         .replace(/\s+/g, ' ')
         .trim();
@@ -124,13 +137,14 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * STABILIZATION PADDING (V21.1)
-         * Using clean spaces to stabilize the engine without jittery punctuation.
+         * PHONETIC ANCHORING (V22)
+         * Injected a subtle Brazilian anchor at the start to lock the engine into PT-BR.
+         * The trailing dot and space after "Bom," ensures a natural pause.
          */
-        const phoneticText = `    ${cleanText}    `;
+        const phoneticText = `    Bom. ${cleanText}    `;
 
-        console.log(`[TTS-OpenAI-HD-v21.1] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v21.1] Phonetic: "${phoneticText.substring(0, 100)}..."`);
+        console.log(`[TTS-OpenAI-HD-v22] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v22] Phonetic: "${phoneticText.substring(0, 100)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -148,7 +162,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v21.1] Error:', error);
+        console.error('[TTS-OpenAI-HD-v22] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
