@@ -50,6 +50,7 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
 /**
  * Specialized converter for currency (always masculine 'reais').
+ * V26: Adding heavy pause anchors (,,) to uniformize speed.
  */
 function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -61,13 +62,14 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const reaisWords = integerToWords(reais, 'm');
     const suffix = reais === 1 ? 'real' : 'reais';
 
-    if (centavos === 0) return `, ${reaisWords} ${suffix} ,`; // V25: Adding comma anchors for pause
+    // Triple-comma pause for extreme cadence control
+    if (centavos === 0) return ` , , , ${reaisWords} ${suffix} , , , `;
     const centavosWords = integerToWords(centavos, 'm');
-    return `, ${reaisWords} ${suffix} e ${centavosWords} centavos ,`;
+    return ` , , , ${reaisWords} ${suffix} e ${centavosWords} centavos , , , `;
 }
 
 function sanitizePhonetics(text: string): string {
-    // V25: CALM & CLEAR SHIELD (REDUCED HYPHENS)
+    // V26: CADENCE MASTERY (ULTRA-UNIFORM SPEED)
     let result = text
         /**
          * 1. PRE-CLEANING
@@ -78,7 +80,6 @@ function sanitizePhonetics(text: string): string {
 
         /**
          * 2. EXTREMITY SHIELDS (PHONETIC LOCK)
-         * Using open vowels instead of aggressive hyphens to avoid "eating words".
          */
         .replace(/^Em\b/gi, 'Êm')
         .replace(/estou aqui/gi, 'istô aqui')
@@ -97,15 +98,15 @@ function sanitizePhonetics(text: string): string {
         .replace(/\boff\b/gi, 'desligado')
 
         /**
-         * 4. GENDER & NUMBERS (WITH PAUSE ANCHORS)
+         * 4. GENDER & NUMBERS (V26: TRIPLE ANCHORS)
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return `, ${integerToWords(parseInt(n), 'f')} , ${word}`;
+            return ` , , , ${integerToWords(parseInt(n), 'f')} , , , ${word}`;
         })
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-        .replace(/([\d.]+)\s?%/g, (_, n) => `, ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento ,`)
-        .replace(/\b(\d{1,6})\b/g, (_, n) => `, ${integerToWords(parseInt(n), 'm')} ,`)
+        .replace(/([\d.]+)\s?%/g, (_, n) => ` , , , ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento , , , `)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => ` , , , ${integerToWords(parseInt(n), 'm')} , , , `)
 
         /**
          * 5. VOWEL OPENING
@@ -115,9 +116,9 @@ function sanitizePhonetics(text: string): string {
         .replace(/relatório/gi, 'rrela-tório')
 
         /**
-         * 6. CLEANING DOUBLE COMMAS
+         * 6. CLEANING GHOST COMMAS
          */
-        .replace(/,{2,}/g, ',')
+        .replace(/ , , , /g, ',,,') // Tighten the anchors for the engine
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -135,18 +136,17 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * STABILIZER ANCHORING (V25)
-         * Adding natural pauses at the start.
+         * STABILIZER ANCHORING (V26)
          */
         const starters = ['Tudo certo. ', 'Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        const phoneticText = `  ${randomStarter} , ${cleanText} .  `;
+        const phoneticText = `  ${randomStarter} ,,, ${cleanText} .  `;
 
-        console.log(`\n====================================`);
-        console.log(`[TTS-FORCE-v25-STABLE] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[TTS-FORCE-v25-STABLE] Phonetic: "${phoneticText.substring(0, 150)}..."`);
-        console.log(`====================================\n`);
+        console.log(`\n************************************`);
+        console.log(`[TTS-FORCE-v26-MASTER] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[TTS-FORCE-v26-MASTER] Phonetic: "${phoneticText.substring(0, 200)}..."`);
+        console.log(`************************************\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-v25] Error:', error);
+        console.error('[TTS-v26] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
