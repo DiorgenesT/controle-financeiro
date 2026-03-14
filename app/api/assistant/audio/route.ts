@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words with gender support.
- * V28: Selective "Stretching" for slower pronunciation of digits.
+ * V29: Fixed hundred handling to prevent "150" becoming "50".
  */
 function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
@@ -19,7 +19,7 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
     const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
     const tens = ['', '', 'vinn-te', 'trinn-ta', 'quarenn-ta', 'cinquen-ta', 'sessen-ta', 'seten-ta', 'oitenn-ta', 'noven-ta'];
-    const hundreds = ['', 'cento', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
+    const hundreds = ['', 'cen-to', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
 
     let words = '';
 
@@ -51,7 +51,6 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
 /**
  * Specialized converter for currency.
- * V28: Strategic punctuation (dots and commas) to slow down only these segments.
  */
 function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -63,14 +62,13 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const reaisWords = integerToWords(reais, 'm');
     const suffix = reais === 1 ? 're-al' : 're-ais';
 
-    // Using dot and comma combo to force a natural but slow explanation
-    if (centavos === 0) return ` , . . ${reaisWords} ${suffix} . . , `;
+    if (centavos === 0) return ` , . ${reaisWords} ${suffix} . , `;
     const centavosWords = integerToWords(centavos, 'm');
-    return ` , . . ${reaisWords} ${suffix} e ${centavosWords} centavos . . , `;
+    return ` , . ${reaisWords} ${suffix} e ${centavosWords} centavos . , `;
 }
 
-function vocalPurifyV28(text: string): string {
-    // V28: SELECTIVE STRETCHING & CACHE-KILLER PATH
+function vocalPurifyV29(text: string): string {
+    // V29: DIGIT CLARITY & AUDIO-PATH-KILLER
     let result = text
         .replace(/\.{2,}/g, '.')
         .replace(/[:]/g, ',')
@@ -89,15 +87,15 @@ function vocalPurifyV28(text: string): string {
         .replace(/Lançamento realizado/gi, 'Lan-ssamén-tu rre-alizado')
 
         /**
-         * 2. ANALYTICAL SLOWDOWN for Numbers
+         * 2. ANALYTICAL SLOWDOWN (STRETCHED PHONETICS)
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return ` , . . ${integerToWords(parseInt(n), 'f')} . . , ${word}`;
+            return ` , . ${integerToWords(parseInt(n), 'f')} . , ${word}`;
         })
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-        .replace(/([\d.]+)\s?%/g, (_, n) => ` , . . ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento . . , `)
-        .replace(/\b(\d{1,6})\b/g, (_, n) => ` , . . ${integerToWords(parseInt(n), 'm')} . . , `)
+        .replace(/([\d.]+)\s?%/g, (_, n) => ` , . ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento . , `)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => ` , . ${integerToWords(parseInt(n), 'm')} . , `)
 
         /**
          * 3. VOWEL OPENING
@@ -120,25 +118,24 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const cleanText = vocalPurifyV28(text);
+        const cleanText = vocalPurifyV29(text);
 
         const starters = ['Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        // V28: The "Stabilizer" pause
         const phoneticText = ` . . . ${randomStarter} , ${cleanText} . . . `;
 
         console.log(`\n##################################################`);
-        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Path: /api/assistant/vocal`);
-        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Phonetic: "${phoneticText.substring(0, 250)}..."`);
+        console.log(`[AUDIO-v29-DIGIT-CLARITY] Path: /api/assistant/audio`);
+        console.log(`[AUDIO-v29-DIGIT-CLARITY] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[AUDIO-v29-DIGIT-CLARITY] Phonetic: "${phoneticText.substring(0, 250)}..."`);
         console.log(`##################################################\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 1.0, // Back to normal speed for text, phonetics handle numbers
+            speed: 1.0,
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -150,7 +147,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[VOCAL-v28] Error:', error);
+        console.error('[AUDIO-v29] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
