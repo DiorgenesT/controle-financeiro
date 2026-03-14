@@ -152,7 +152,8 @@ export async function POST(req: Request) {
    - **Categorização**: NUNCA diga "Não especificada". Inferir sempre.
    - **Linguagem Natural BR**: Fale como um brasileiro humano e executivo. 
    - **Pausa e Ritmo (PROSA NATURAL)**: Use pontuação de forma natural. **PROIBIDO** usar tabelas, listas numeradas ou o formato "Item: Valor". 
-   - **RELATÓRIOS (ISOLAMENTO TOTAL)**: **NUNCA** mencione Selic, IPCA, Dólar, Bolsa de Valores ou Mercado Global. Ignore esses dados se vierem nas ferramentas. Foque 100% nos gastos, saldo e metas do usuário.
+   - **RELATÓRIOS (PESSOAIS SÃO OBRIGATÓRIOS)**: Você **DEVE** fornecer resumos e relatórios sobre os gastos, saldo e metas do usuário.
+   - **ISOLAMENTO EXTERNO**: **NUNCA** mencione Selic, IPCA, Dólar, Bolsa de Valores ou Mercado Global. Ignore esses dados se vierem nas ferramentas.
    - **Estilo de Resposta**: Use apenas parágrafos fluidos. Descreva os gastos narrativamente.
    - **TEXTO NO CHAT**: Use o formato padrão de moeda (**R$ 10.452,22**). A conversão para áudio será feita pelo sistema.
    - **Pessoa**: Use sempre 'family' (Família) se o nome não for citado.

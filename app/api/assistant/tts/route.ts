@@ -34,21 +34,18 @@ function convertToWords(amountStr: string, decimalStr: string = '00'): string {
 
 function sanitizePhonetics(text: string): string {
     return text
-        // Technical & UI Term Cleanup (Phonetic Overrides for Brazilian Purity)
-        .replace(/\bassistant\b/gi, 'as-sis-tên-te')
-        .replace(/\bfinancial\b/gi, 'fi-nan-cei-ro')
-        .replace(/\breport\b/gi, 're-la-tó-rio')
-        .replace(/\bdólar\b/gi, 'dó-lar')
-        .replace(/\bselic\b/gi, 'se-líc')
-        .replace(/\bipca\b/gi, 'i-pe-cê-á')
+        // Technical & UI Term Cleanup (Natural Brazilian Overrides)
+        // We REMOVED hyphenated versions because they triggered English pronunciation
         .replace(/\bpix\b/gi, 'pícs')
         .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bcredit_card\b/gi, 'cartão de crédito')
         .replace(/\bnubank\b/gi, 'nubânqui')
         .replace(/\binter\b/gi, 'ínter')
+        .replace(/\bbradesco\b/gi, 'bradêsco')
+        .replace(/\bsantander\b/gi, 'santandér')
 
         // Conversions
-        .replace(/([\d.]+)\s?%/g, '$1 por cento') // 10% -> 10 por cento
+        .replace(/([\d.]+)\s?%/g, '$1 por cento')
 
         .replace(/^[\d.]+\s+/gm, '')
         .replace(/\b\d+\.\.\./g, '')
@@ -72,15 +69,15 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const phoneticText = `  ${sanitizePhonetics(text)}  `; // Padding to prevent clipping
-        console.log(`[TTS-OpenAI-HD-v16] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v16] Phonetic: "${phoneticText.substring(0, 50)}..."`);
+        const phoneticText = sanitizePhonetics(text);
+        console.log(`[TTS-OpenAI-HD-v17] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v17] Phonetic: "${phoneticText.substring(0, 50)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 0.95, // Sweet spot for clarity vs natural rhythm
+            speed: 1.0, // Reverted to standard natural speed to avoid American accent highlights
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -92,7 +89,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v16] Error:', error);
+        console.error('[TTS-OpenAI-HD-v17] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
