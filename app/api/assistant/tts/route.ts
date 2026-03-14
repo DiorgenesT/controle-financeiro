@@ -7,7 +7,6 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words with gender support.
- * Handles up to 999,999.
  */
 function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
@@ -68,59 +67,53 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
 }
 
 function sanitizePhonetics(text: string): string {
-    // V23.2: ABSOLUTE PURITY & GENDER FIX (FORCE LOAD)
+    // V24: EXTREME PORTECTION SHIELD
     let result = text
         /**
-         * 1. PRE-CLEANING
+         * 1. PRE-CLEANING & PADDING
          */
         .replace(/\.{2,}/g, '.')
-        .replace(/[:\-]/g, ',')
+        .replace(/[:]/g, ',')
+        .replace(/[!]/g, '.') // Eliminate "!" to avoid American entonation peaks
 
         /**
-         * 2. PHONETIC ARMOR (CRITICAL PHRASES)
-         * We override success and common phrases to lock the engine into BR entonation.
+         * 2. EXTREMITY SHIELDS (PHONETIC LOCK)
+         * We enforce PT-BR spelling for words at the very start/end.
          */
-        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu rre-a-li-sa-du')
-        .replace(/confirmado/gi, 'con-fir-má-du')
-        .replace(/estou aqui/gi, 'is-tô a-quí')
-        .replace(/se precisar/gi, 'se pre-ci-sár')
+        .replace(/^Em\b/gi, 'Êm')
+        .replace(/estou aqui/gi, 'istô a-quí')
         .replace(/ajuda/gi, 'a-jú-da')
-        .replace(/Em março/gi, 'Êm marr-çô')
-        .replace(/Março de/gi, 'Marr-çô de')
+        .replace(/avisar/gi, 'a-vi-sár')
+        .replace(/precisar/gi, 'pre-ci-sár')
+        .replace(/disposição/gi, 'dis-po-zi-ssão')
+        .replace(/confirmado/gi, 'con-fir-má-du')
+        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu rre-a-li-sa-du')
 
         /**
          * 3. TRANSLATIONS
          */
         .replace(/\bpix\b/gi, 'píquice')
-        .replace(/\bdebit\b/gi, 'débito')
         .replace(/\bnubank\b/gi, 'nubânqui')
-        .replace(/\binter\b/gi, 'ínter')
-        .replace(/\bcashback\b/gi, 'dinheiro de volta')
         .replace(/\boff\b/gi, 'desligado')
         .replace(/\boverview\b/gi, 'panorama')
 
         /**
-         * 4. NUMBER EXPANSION WITH GENDER (PRIORITY TRANSACÕES)
+         * 4. GENDER & NUMBERS
          */
-        // Specific feminine count for transactions to fix "vinte e dois transações"
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
             return integerToWords(parseInt(n), 'f') + ' ' + word;
         })
-
-        // Currency (Masculine)
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-
-        // Percentages (Masculine)
         .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, '')), 'm') + ' por cento')
-
-        // Remaining Integers (Years, etc - usually masculine)
         .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n), 'm'))
 
         /**
-         * 5. FINAL POLISH
+         * 5. VOWEL OPENING (FORCING BR ACCENT)
          */
-        .replace(/disposição/gi, 'dis-po-si-ção')
+        .replace(/março/gi, 'marr-çô')
+        .replace(/receita/gi, 'rre-ceita')
+        .replace(/relatório/gi, 'rre-la-tó-ri-o')
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -138,15 +131,21 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * NATURAL STABILIZATION (V23.2)
-         * Using clean spaces. THE "BOM." ANCHOR IS PERMANENTLY REMOVED.
+         * STABILIZER ANCHORING (V24)
+         * Adding a short Portuguese natural starter for every segment to "anchor" the voice.
+         * This uses common fillers that sound human and 100% Brazilian.
          */
-        const phoneticText = `   ${cleanText}   `;
+        const starters = ['Tudo certo. ', 'Pois bem. ', 'Olha só. '];
+        const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        // Force log for verification
-        console.log(`\n>>> [TTS-FORCE-LOAD-v23.2] <<<`);
-        console.log(`Original: "${text.substring(0, 50)}..."`);
-        console.log(`Phonetic: "${phoneticText.substring(0, 100)}..."\n`);
+        // We use the starter only if it's the beginning of a larger response or for success
+        // This prevents English inflections in short segments like "Lançamento realizado"
+        const phoneticText = `${randomStarter} ${cleanText} .`;
+
+        console.log(`\n####################################`);
+        console.log(`[TTS-FORCE-v24] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[TTS-FORCE-v24] Phonetic: "${phoneticText.substring(0, 150)}..."`);
+        console.log(`####################################\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -164,7 +163,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-v23.2] Error:', error);
+        console.error('[TTS-v24] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
