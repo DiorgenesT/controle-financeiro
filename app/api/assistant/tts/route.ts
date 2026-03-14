@@ -9,6 +9,24 @@ const openai = new OpenAI({
  * Sanitize text for natural PT-BR speech.
  * Replaces tech terms, symbols and English words with phonetic Portuguese.
  */
+/**
+ * Converts a numeric string to natural Brazilian words for currency.
+ */
+function convertToWords(amountStr: string, decimalStr: string = '00'): string {
+    const cleanInteger = amountStr.replace(/\./g, '');
+    const reais = parseInt(cleanInteger);
+    const centavos = parseInt(decimalStr);
+
+    if (isNaN(reais)) return '';
+
+    // Space injection for better thousand recognition by OpenAI TTS
+    const formattedReais = cleanInteger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+
+    const suffix = reais === 1 ? 'real' : 'reais';
+    if (centavos === 0) return `${formattedReais} ${suffix}`;
+    return `${formattedReais} ${suffix} e ${centavos} centavos`;
+}
+
 function sanitizePhonetics(text: string): string {
     return text
         // Technical & UI Term Cleanup
@@ -24,26 +42,16 @@ function sanitizePhonetics(text: string): string {
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bbradesco\b/gi, 'bradêsco')
         .replace(/\bsantander\b/gi, 'santandér')
-        .replace(/^[\d.]+\s+/gm, '') // Remove leading list numbers like "1. "
-        .replace(/\b\d+\.\.\./g, '') // Remove list symbols like "1..." or "2..."
-        .replace(/[:\-]/g, ',')      // Replace colons and hyphens with commas for natural pauses
+        .replace(/^[\d.]+\s+/gm, '') // Remove leading list numbers
+        .replace(/\b\d+\.\.\./g, '') // Remove list symbols
+        .replace(/[:\-]/g, ',')      // Replace colons/dashes with commas
 
-        // Currency & Large Numbers Logic
-        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => {
-            const cleanInteger = integer.replace(/\./g, '');
-            const reais = parseInt(cleanInteger);
-            const centavos = parseInt(decimal);
-            const suffix = reais === 1 ? 'real' : 'reais';
-            if (reais === 0 && centavos > 0) return `${centavos} centavos`;
-            if (centavos === 0) return `${reais} ${suffix}`;
-            return `${reais} ${suffix} e ${centavos} centavos`;
-        })
-        .replace(/R\$\s?([\d.]+)/g, (_, val) => {
-            const clean = val.replace(/\./g, '');
-            const reais = parseInt(clean);
-            return `${reais} ${reais === 1 ? 'real' : 'reais'}`;
-        })
-        .replace(/(\d{1,3})\.(\d{3})/g, '$1$2') // Final safety for leftovers like 10.000
+        // Currency & Large Numbers Logic (Full phonetic expansion)
+        .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => convertToWords(integer, decimal))
+        .replace(/R\$\s?([\d.]+)/g, (_, val) => convertToWords(val))
+
+        // Final safety for large numbers
+        .replace(/(\d{1,3})\.(\d{3})/g, '$1$2')
         .replace(/\s+/g, ' ')
         .trim();
 }
