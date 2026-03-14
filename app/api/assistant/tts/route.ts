@@ -24,7 +24,8 @@ function sanitizePhonetics(text: string): string {
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bbradesco\b/gi, 'bradêsco')
         .replace(/\bsantander\b/gi, 'santandér')
-        .replace(/(\d+)\.\.\./g, '$1') // Remove list artifacts like 1... 2...
+        .replace(/^[\d.]+\s+/gm, '') // Remove leading list numbers like "1. "
+        .replace(/\b\d+\.\.\./g, '') // Remove list symbols like "1..." or "2..."
 
         // Currency & Large Numbers Logic
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => {
@@ -32,13 +33,16 @@ function sanitizePhonetics(text: string): string {
             const reais = parseInt(cleanInteger);
             const centavos = parseInt(decimal);
             const suffix = reais === 1 ? 'real' : 'reais';
-            if (centavos === 0) return `${cleanInteger} ${suffix}`;
-            return `${cleanInteger} ${suffix} e ${centavos} centavos`;
+            // Space injection for better thousand recognition by TTS
+            const formattedReais = cleanInteger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+            if (centavos === 0) return `${formattedReais} ${suffix}`;
+            return `${formattedReais} ${suffix} e ${centavos} centavos`;
         })
         .replace(/R\$\s?([\d.]+)/g, (_, val) => {
             const clean = val.replace(/\./g, '');
             const reais = parseInt(clean);
-            return `${clean} ${reais === 1 ? 'real' : 'reais'}`;
+            const formatted = clean.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+            return `${formatted} ${reais === 1 ? 'real' : 'reais'}`;
         })
         .replace(/(\d{1,3})\.(\d{3})/g, '$1$2') // Final safety for leftovers like 10.000
         .replace(/\s+/g, ' ')
