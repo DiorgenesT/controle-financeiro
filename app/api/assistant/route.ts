@@ -265,50 +265,91 @@ INSTRUÇÕES DE FERRAMENTAS:
                         await db.collection('invoices').doc(inv.id).update({ totalAmount: admin.firestore.FieldValue.increment(params.amount) });
                     }
                 }
-            } else if (params.paymentMethod === 'boleto') {
-                const tx: any = { ...baseTx, date: admin.firestore.Timestamp.fromDate(now), boletoStatus: 'pending' };
-                if (params.dueDate) {
-                    const [y, m, d] = params.dueDate.split('-').map(Number);
-                    tx.date = admin.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
-                    tx.boletoDueDate = tx.date;
-                }
-                if (params.installments === 'fixed') {
-                    tx.isRecurring = true;
-                    await db.collection('recurring_transactions').add({
-                        userId, type: params.type, description: params.description, amount: params.amount,
-                        category: params.category, day: now.getDate(), active: true,
-                        paymentMethod: 'boleto', lastProcessedDate: admin.firestore.Timestamp.fromDate(now),
-                        createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                    });
-                }
-                await db.collection('transactions').add(tx);
-            } else if (params.paymentMethod === 'debit' || params.paymentMethod === 'pix') {
-                if (!params.accountId) {
-                    throw new Error("⚠️ Conta bancária não especificada para Débito/Pix.");
-                }
-                const acc: any = accountsList.find((a: any) => a.id === params.accountId);
-                if (!acc) throw new Error(`⚠️ Conta '${params.accountId}' não encontrada.`);
-
-                const inc = params.type === 'receita' ? params.amount : -params.amount;
-                await db.collection('accounts').doc(params.accountId).update({
-                    balance: admin.firestore.FieldValue.increment(inc),
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
-                });
-
-                const tx: any = { ...baseTx, date: admin.firestore.Timestamp.fromDate(now) };
-                if (params.installments === 'fixed') {
-                    tx.isRecurring = true;
-                    await db.collection('recurring_transactions').add({
-                        userId, type: params.type, description: params.description, amount: params.amount,
-                        category: params.category, day: now.getDate(), active: true,
-                        paymentMethod: params.paymentMethod, accountId: params.accountId,
-                        lastProcessedDate: admin.firestore.Timestamp.fromDate(now),
-                        createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                    });
-                }
-                await db.collection('transactions').add(tx);
             } else {
-                throw new Error(`⚠️ Meio de pagamento '${params.paymentMethod}' não suportado ou incompleto.`);
+                // Non-Credit-Card Installments (Boleto, Pix, Debit)
+                const num = typeof params.installments === 'string' ? parseInt(params.installments) : params.installments;
+
+                if (num && num > 1) {
+                    const instAmt = Number((params.amount / num).toFixed(2));
+                    let firstId = '';
+
+                    for (let i = 0; i < num; i++) {
+                        const installmentDate = new Date(now);
+                        installmentDate.setMonth(now.getMonth() + i);
+
+                        // Handle custom due date for boletos
+                        if (params.paymentMethod === 'boleto' && params.dueDate) {
+                            const [y, m, d] = params.dueDate.split('-').map(Number);
+                            const baseDueDate = new Date(y, m - 1, d, 12, 0, 0);
+                            baseDueDate.setMonth(baseDueDate.getMonth() + i);
+                            installmentDate.setTime(baseDueDate.getTime());
+                        }
+
+                        const tx: any = {
+                            ...baseTx,
+                            amount: instAmt,
+                            description: `${params.description} (${i + 1}/${num})`,
+                            date: admin.firestore.Timestamp.fromDate(installmentDate),
+                            installments: num,
+                            installmentNumber: i + 1,
+                            totalAmount: params.amount
+                        };
+
+                        if (params.paymentMethod === 'boleto') {
+                            tx.boletoStatus = 'pending';
+                            tx.boletoDueDate = tx.date;
+                        } else if (params.paymentMethod === 'debit' || params.paymentMethod === 'pix') {
+                            if (!params.accountId) throw new Error("⚠️ Conta bancária não especificada.");
+
+                            // Only decrement balance for the FIRST installment if it's debit/pix? 
+                            // Actually, for future installments, we shouldn't decrement NOW.
+                            // But usually, "parcelado no boleto" implies future entries.
+                            // For simplicity and correctness in financial tracking:
+                            if (i === 0) {
+                                const inc = params.type === 'receita' ? instAmt : -instAmt;
+                                await db.collection('accounts').doc(params.accountId).update({
+                                    balance: admin.firestore.FieldValue.increment(inc),
+                                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+                        }
+
+                        if (i > 0 && firstId) tx.parentTransactionId = firstId;
+                        const res = await db.collection('transactions').add(tx);
+                        if (i === 0) firstId = res.id;
+                    }
+                } else {
+                    // Single transaction (Normal flow)
+                    const tx: any = { ...baseTx, date: admin.firestore.Timestamp.fromDate(now) };
+
+                    if (params.paymentMethod === 'boleto') {
+                        tx.boletoStatus = 'pending';
+                        if (params.dueDate) {
+                            const [y, m, d] = params.dueDate.split('-').map(Number);
+                            tx.date = admin.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
+                            tx.boletoDueDate = tx.date;
+                        }
+                    } else if (params.paymentMethod === 'debit' || params.paymentMethod === 'pix') {
+                        if (!params.accountId) throw new Error("⚠️ Conta bancária não especificada.");
+                        const inc = params.type === 'receita' ? params.amount : -params.amount;
+                        await db.collection('accounts').doc(params.accountId).update({
+                            balance: admin.firestore.FieldValue.increment(inc),
+                            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+
+                    if (params.installments === 'fixed') {
+                        tx.isRecurring = true;
+                        await db.collection('recurring_transactions').add({
+                            userId, type: params.type, description: params.description, amount: params.amount,
+                            category: params.category, day: now.getDate(), active: true,
+                            paymentMethod: params.paymentMethod, accountId: params.accountId,
+                            lastProcessedDate: admin.firestore.Timestamp.fromDate(now),
+                            createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                        });
+                    }
+                    await db.collection('transactions').add(tx);
+                }
             }
         };
 

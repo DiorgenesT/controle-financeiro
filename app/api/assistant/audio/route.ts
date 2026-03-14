@@ -19,7 +19,7 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 
     const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
     const tens = ['', '', 'vinn-te', 'trinn-ta', 'quarenn-ta', 'cinquen-ta', 'sessen-ta', 'seten-ta', 'oitenn-ta', 'noven-ta'];
-    const hundreds = ['', 'cen-to', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
+    const hundreds = ['', 'cento', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
 
     let words = '';
 
@@ -31,7 +31,11 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     }
 
     if (n >= 100) {
-        words += hundreds[Math.floor(n / 100)];
+        if (n === 100) {
+            words += 'cé-ém';
+        } else {
+            words += 'cen-to';
+        }
         n %= 100;
         if (n > 0) words += ' e ';
     }
