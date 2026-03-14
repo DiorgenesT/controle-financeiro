@@ -24,14 +24,16 @@ function sanitizePhonetics(text: string): string {
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bbradesco\b/gi, 'bradêsco')
         .replace(/\bsantander\b/gi, 'santandér')
+        .replace(/(\d+)\.\.\./g, '$1') // Remove list artifacts like 1... 2...
 
         // Currency & Large Numbers Logic
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => {
             const cleanInteger = integer.replace(/\./g, '');
             const reais = parseInt(cleanInteger);
+            const centavos = parseInt(decimal);
             const suffix = reais === 1 ? 'real' : 'reais';
-            if (decimal === '00') return `${cleanInteger} ${suffix}`;
-            return `${cleanInteger} ${suffix} e ${decimal} centavos`;
+            if (centavos === 0) return `${cleanInteger} ${suffix}`;
+            return `${cleanInteger} ${suffix} e ${centavos} centavos`;
         })
         .replace(/R\$\s?([\d.]+)/g, (_, val) => {
             const clean = val.replace(/\./g, '');
