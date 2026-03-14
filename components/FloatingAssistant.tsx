@@ -176,7 +176,7 @@ export function FloatingAssistant() {
                 const response = await fetch('/api/assistant/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, voice: 'shimmer' })
+                    body: JSON.stringify({ text, voice: 'nova' })
                 });
                 if (!response.ok) return null;
                 const blob = await response.blob();
@@ -448,6 +448,7 @@ export function FloatingAssistant() {
 
                                                     if (res.action === 'prepared' || (res.success && !res.action)) {
                                                         const isSuccess = res.success && !res.action;
+                                                        if (isSuccess && res.message === 'OK') return null; // V23.2: Skip raw OK messages
                                                         return (
                                                             <div key={idx} className={cn("mt-2", isSuccess ? "animate-in slide-in-from-top-1 duration-200" : "p-3 rounded-xl border border-indigo-500/20 bg-background/50 shadow-sm")}>
                                                                 {!isSuccess && (
@@ -456,7 +457,7 @@ export function FloatingAssistant() {
                                                                         <span>Itens Preparados</span>
                                                                     </div>
                                                                 )}
-                                                                {isSuccess && res.message && (
+                                                                {isSuccess && res.message && res.message !== 'OK' && (
                                                                     <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 ml-1">
                                                                         {res.message}
                                                                     </p>
@@ -529,7 +530,7 @@ export function FloatingAssistant() {
 
                                                 if (part.type === 'tool-executeSave') {
                                                     const res = part.output as AssistantUITools['executeSave']['output'];
-                                                    if (!res) return null;
+                                                    if (!res || res.message === 'OK') return null; // V23.2: Skip raw OK messages
 
                                                     return (
                                                         <div key={idx} className="mt-2 animate-in slide-in-from-top-1 duration-200 ml-1">

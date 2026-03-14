@@ -68,7 +68,7 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
 }
 
 function sanitizePhonetics(text: string): string {
-    // V23: NATURAL PURITY & GENDER FIX
+    // V23.2: ABSOLUTE PURITY & GENDER FIX (FORCE LOAD)
     let result = text
         /**
          * 1. PRE-CLEANING
@@ -138,13 +138,15 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * NATURAL STABILIZATION (V23)
-         * Removed the forced "Bom." anchor. Using triple spaces for engine stabilization.
+         * NATURAL STABILIZATION (V23.2)
+         * Using clean spaces. THE "BOM." ANCHOR IS PERMANENTLY REMOVED.
          */
         const phoneticText = `   ${cleanText}   `;
 
-        console.log(`[TTS-OpenAI-HD-v23] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v23] Phonetic: "${phoneticText.substring(0, 100)}..."`);
+        // Force log for verification
+        console.log(`\n>>> [TTS-FORCE-LOAD-v23.2] <<<`);
+        console.log(`Original: "${text.substring(0, 50)}..."`);
+        console.log(`Phonetic: "${phoneticText.substring(0, 100)}..."\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -162,7 +164,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v23] Error:', error);
+        console.error('[TTS-v23.2] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
