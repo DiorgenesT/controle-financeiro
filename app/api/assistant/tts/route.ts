@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words.
- * Handles up to 999,999 for years, counts, etc.
+ * Handles up to 999,999.
  */
 function integerToWords(n: number): string {
     if (n === 0) return 'zero';
@@ -65,32 +65,48 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
 }
 
 function sanitizePhonetics(text: string): string {
+    // V21.1: ROBUST CLEANING PIPELINE
     let result = text
-        // Technical Cleanup (Natural Overrides)
+        /**
+         * 1. PRE-CLEANING: Strip trailing/leading extra dots that cause clipping
+         */
+        .replace(/\.{2,}/g, '.') // Convert ... or .. to single dot
+        .replace(/[:\-]/g, ',')  // Convert colons/hyphens to commas for natural pauses
+
+        /**
+         * 2. TRANSLATIONS: Mandatory terms
+         */
         .replace(/\bpix\b/gi, 'píquice')
         .replace(/\bdebit\b/gi, 'débito')
-        .replace(/\bcredit_card\b/gi, 'cartão de crédito')
         .replace(/\bnubank\b/gi, 'nubânqui')
         .replace(/\binter\b/gi, 'ínter')
         .replace(/\bcashback\b/gi, 'dinheiro de volta')
         .replace(/\boff\b/gi, 'desligado')
         .replace(/\boverview\b/gi, 'panorama')
 
-        // Symbols
-        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, ''))) + ' por cento')
-
-        // Currency (Priority handling)
+        /**
+         * 3. NUMBER EXPANSION: Convert all digits to words to prevent engine acceleration
+         */
+        // Currency
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
 
-        // Remaining Digits (Years, Counts, etc)
-        // Convert any sequence of 1-6 digits to words to prevent engine acceleration
+        // Percentages
+        .replace(/([\d.]+)\s?%/g, (_, n) => integerToWords(parseInt(n.replace(/\./g, ''))) + ' por cento')
+
+        // Remaining Integers (Years, Counts)
         .replace(/\b(\d{1,6})\b/g, (_, n) => integerToWords(parseInt(n)))
 
-        // Cleanup
-        .replace(/^[\d.]+\s+/gm, '')
-        .replace(/\b\d+\.\.\./g, '')
-        .replace(/[:\-]/g, ',')
+        /**
+         * 4. PHONETIC POLISH: Force open Brazilian vowels and rolling R
+         */
+        .replace(/\brelatório\b/gi, 'rre-lató-rio')
+        .replace(/\breceita\b/gi, 'rre-ceita')
+        .replace(/\bmarço\b/gi, 'marr-ço')
+
+        /**
+         * 5. FINAL CLEANUP
+         */
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -108,13 +124,13 @@ export async function POST(req: Request) {
         const cleanText = sanitizePhonetics(text);
 
         /**
-         * STABILIZATION PADDING (V21)
-         * Added simple spacing to stabilize the start and end of the speech.
+         * STABILIZATION PADDING (V21.1)
+         * Using clean spaces to stabilize the engine without jittery punctuation.
          */
         const phoneticText = `    ${cleanText}    `;
 
-        console.log(`[TTS-OpenAI-HD-v21] Original: "${text.substring(0, 30)}..."`);
-        console.log(`[TTS-OpenAI-HD-v21] Phonetic: "${phoneticText.substring(0, 100)}..."`);
+        console.log(`[TTS-OpenAI-HD-v21.1] Original: "${text.substring(0, 30)}..."`);
+        console.log(`[TTS-OpenAI-HD-v21.1] Phonetic: "${phoneticText.substring(0, 100)}..."`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
@@ -132,7 +148,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-OpenAI-HD-v21] Error:', error);
+        console.error('[TTS-OpenAI-HD-v21.1] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
