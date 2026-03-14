@@ -7,24 +7,25 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words with gender support.
+ * V28: Selective "Stretching" for slower pronunciation of digits.
  */
 function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
-    if (n === 100) return 'cem';
+    if (n === 100) return 'cé-ém'; // Stretched
 
     const unitsM = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
     const unitsF = ['', 'uma', 'duas', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
     const units = gender === 'm' ? unitsM : unitsF;
 
     const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-    const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
-    const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+    const tens = ['', '', 'vinn-te', 'trinn-ta', 'quarenn-ta', 'cinquen-ta', 'sessen-ta', 'seten-ta', 'oitenn-ta', 'noven-ta'];
+    const hundreds = ['', 'cento', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
 
     let words = '';
 
     if (n >= 1000) {
         const t = Math.floor(n / 1000);
-        words += (t === 1 ? 'mil' : integerToWords(t, gender) + ' mil');
+        words += (t === 1 ? 'miiil' : integerToWords(t, gender) + ' miiil');
         n %= 1000;
         if (n > 0) words += (n < 100 || n % 100 === 0) ? ' e ' : ' ';
     }
@@ -49,8 +50,8 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
 }
 
 /**
- * Specialized converter for currency (always masculine 'reais').
- * V27: Using Ellipsis ( . . . ) for deep pause anchors.
+ * Specialized converter for currency.
+ * V28: Strategic punctuation (dots and commas) to slow down only these segments.
  */
 function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     const cleanInteger = amountStr.replace(/\./g, '');
@@ -60,29 +61,23 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     if (isNaN(reais)) return '';
 
     const reaisWords = integerToWords(reais, 'm');
-    const suffix = reais === 1 ? 'real' : 'reais';
+    const suffix = reais === 1 ? 're-al' : 're-ais';
 
-    // Triple dot ellipsis for extreme pause
-    if (centavos === 0) return ` . . . ${reaisWords} ${suffix} . . . `;
+    // Using dot and comma combo to force a natural but slow explanation
+    if (centavos === 0) return ` , . . ${reaisWords} ${suffix} . . , `;
     const centavosWords = integerToWords(centavos, 'm');
-    return ` . . . ${reaisWords} ${suffix} e ${centavosWords} centavos . . . `;
+    return ` , . . ${reaisWords} ${suffix} e ${centavosWords} centavos . . , `;
 }
 
-/**
- * Reworked function name to bypass Turbopack cache.
- */
-function ultraStabilizeBrazilianCadence(text: string): string {
-    // V27: ULTRA-SLOW & DEEP CADENCE SHIELD
+function vocalPurifyV28(text: string): string {
+    // V28: SELECTIVE STRETCHING & CACHE-KILLER PATH
     let result = text
-        /**
-         * 1. PRE-CLEANING
-         */
         .replace(/\.{2,}/g, '.')
         .replace(/[:]/g, ',')
         .replace(/[!]/g, '.')
 
         /**
-         * 2. EXTREMITY SHIELDS
+         * 1. EXTREMITY & PHONETIC ANCHORS
          */
         .replace(/^Em\b/gi, 'Êm')
         .replace(/estou aqui/gi, 'istô aqui')
@@ -94,34 +89,23 @@ function ultraStabilizeBrazilianCadence(text: string): string {
         .replace(/Lançamento realizado/gi, 'Lan-ssamén-tu rre-alizado')
 
         /**
-         * 3. TRANSLATIONS
-         */
-        .replace(/\bpix\b/gi, 'píquice')
-        .replace(/\bnubank\b/gi, 'nubânqui')
-        .replace(/\boff\b/gi, 'desligado')
-
-        /**
-         * 4. GENDER & NUMBERS (V27: ELLIPSIS ANCHORS)
+         * 2. ANALYTICAL SLOWDOWN for Numbers
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
-            return ` . . . ${integerToWords(parseInt(n), 'f')} . . . ${word}`;
+            return ` , . . ${integerToWords(parseInt(n), 'f')} . . , ${word}`;
         })
         .replace(/R\$\s?([\d.]+),(\d{2})/g, (_, integer, decimal) => currencyToWords(integer, decimal))
         .replace(/R\$\s?([\d.]+)/g, (_, val) => currencyToWords(val))
-        .replace(/([\d.]+)\s?%/g, (_, n) => ` . . . ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento . . . `)
-        .replace(/\b(\d{1,6})\b/g, (_, n) => ` . . . ${integerToWords(parseInt(n), 'm')} . . . `)
+        .replace(/([\d.]+)\s?%/g, (_, n) => ` , . . ${integerToWords(parseInt(n.replace(/\./g, '')), 'm')} por cento . . , `)
+        .replace(/\b(\d{1,6})\b/g, (_, n) => ` , . . ${integerToWords(parseInt(n), 'm')} . . , `)
 
         /**
-         * 5. VOWEL OPENING
+         * 3. VOWEL OPENING
          */
         .replace(/março/gi, 'marrço')
         .replace(/receita/gi, 'rreceita')
         .replace(/relatório/gi, 'rrela-tório')
 
-        /**
-         * 6. CLEANING GHOST SYMBOLS
-         */
-        .replace(/\.\s+\.\s+\./g, '...') // Standardize ellipsis
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -136,27 +120,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const cleanText = ultraStabilizeBrazilianCadence(text);
+        const cleanText = vocalPurifyV28(text);
 
-        /**
-         * NATURAL ANCHORING (V27)
-         */
         const starters = ['Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
 
-        // V27: Using more ellipsis for rhythm
-        const phoneticText = ` . . . ${randomStarter} . . . ${cleanText} . . . `;
+        // V28: The "Stabilizer" pause
+        const phoneticText = ` . . . ${randomStarter} , ${cleanText} . . . `;
 
-        console.log(`\n**************************************************`);
-        console.log(`[TTS-v27-ULTRA-SLOW-MASTER] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[TTS-v27-ULTRA-SLOW-MASTER] Phonetic: "${phoneticText.substring(0, 250)}..."`);
-        console.log(`**************************************************\n`);
+        console.log(`\n##################################################`);
+        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Path: /api/assistant/vocal`);
+        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[VOCAL-v28-SELECTIVE-SLOWDOWN] Phonetic: "${phoneticText.substring(0, 250)}..."`);
+        console.log(`##################################################\n`);
 
         const mp3 = await openai.audio.speech.create({
             model: 'tts-1-hd',
             voice: voice as any,
             input: phoneticText,
-            speed: 0.88, // V27: Global speed reduction for clarity
+            speed: 1.0, // Back to normal speed for text, phonetics handle numbers
         });
 
         const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -168,7 +150,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[TTS-v27] Error:', error);
+        console.error('[VOCAL-v28] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
