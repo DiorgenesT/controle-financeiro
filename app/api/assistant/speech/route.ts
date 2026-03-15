@@ -7,19 +7,18 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words with gender support.
- * V29: Fixed hundred handling to prevent "150" becoming "50".
+ * V31: Reduced hyphenation for more natural flow (Phrase Mastery).
  */
 function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
-    if (n === 100) return 'cé-ém'; // Stretched
 
     const unitsM = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
     const unitsF = ['', 'uma', 'duas', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
     const units = gender === 'm' ? unitsM : unitsF;
 
     const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-    const tens = ['', '', 'vinn-te', 'trinn-ta', 'quarenn-ta', 'cinquen-ta', 'sessen-ta', 'seten-ta', 'oitenn-ta', 'noven-ta'];
-    const hundreds = ['', 'cento', 'duzen-tos', 'trezen-tos', 'quatro-cen-tos', 'quinhen-tos', 'seiscen-tos', 'setecen-tos', 'oitocen-tos', 'novecen-tos'];
+    const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+    const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
 
     let words = '';
 
@@ -64,34 +63,38 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     if (isNaN(reais)) return '';
 
     const reaisWords = integerToWords(reais, 'm');
-    const suffix = reais === 1 ? 're-al' : 're-ais';
+    const suffix = reais === 1 ? 'real' : 'reais';
 
     if (centavos === 0) return ` , . ${reaisWords} ${suffix} . , `;
     const centavosWords = integerToWords(centavos, 'm');
     return ` , . ${reaisWords} ${suffix} e ${centavosWords} centavos . , `;
 }
 
-function vocalPurifyV29(text: string): string {
-    // V29: DIGIT CLARITY & AUDIO-PATH-KILLER
+function vocalPurifyV31(text: string): string {
+    // V31: PHRASE MASTERY & EMOJI STRIPPING
     let result = text
+        /**
+         * 0. CORE SANITIZATION
+         */
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') // Strip emojis
         .replace(/\.{2,}/g, '.')
         .replace(/[:]/g, ',')
         .replace(/[!]/g, '.')
 
         /**
-         * 1. EXTREMITY & PHONETIC ANCHORS
+         * 1. EXTREMITY & PHONETIC ANCHORS (BRAZILIAN RADIANCE)
          */
         .replace(/^Em\b/gi, 'Êm')
-        .replace(/estou aqui/gi, 'istô aqui')
+        .replace(/estou aqui/gi, 'istô aquí')
         .replace(/ajuda/gi, 'ajúda')
         .replace(/avisar/gi, 'avisár')
         .replace(/precisar/gi, 'precisár')
         .replace(/disposição/gi, 'dis-pozzi-ssão')
-        .replace(/confirmado/gi, 'confir-má-du')
-        .replace(/Lançamento realizado/gi, 'Lan-ssamén-tu rre-alizado')
+        .replace(/confirmado/gi, 'con-fir-má-du')
+        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-to ... rre-a-li-za-do')
 
         /**
-         * 2. ANALYTICAL SLOWDOWN (STRETCHED PHONETICS)
+         * 2. ANALYTICAL SLOWDOWN for Numbers
          */
         .replace(/\b(\d{1,6})\b\s+(transação|transações)/gi, (_, n, word) => {
             return ` , . ${integerToWords(parseInt(n), 'f')} . , ${word}`;
@@ -122,7 +125,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const cleanText = vocalPurifyV29(text);
+        const cleanText = vocalPurifyV31(text);
 
         const starters = ['Pois bem. ', 'Olha só. ', 'Continuando. '];
         const randomStarter = starters[Math.floor(Math.random() * starters.length)];
@@ -130,9 +133,9 @@ export async function POST(req: Request) {
         const phoneticText = ` . . . ${randomStarter} , ${cleanText} . . . `;
 
         console.log(`\n##################################################`);
-        console.log(`[AUDIO-v29-DIGIT-CLARITY] Path: /api/assistant/audio`);
-        console.log(`[AUDIO-v29-DIGIT-CLARITY] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[AUDIO-v29-DIGIT-CLARITY] Phonetic: "${phoneticText.substring(0, 250)}..."`);
+        console.log(`[SPEECH-v31-PHRASE-MASTERY] Path: /api/assistant/speech`);
+        console.log(`[SPEECH-v31-PHRASE-MASTERY] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[SPEECH-v31-PHRASE-MASTERY] Phonetic: "${phoneticText.substring(0, 250)}..."`);
         console.log(`##################################################\n`);
 
         const mp3 = await openai.audio.speech.create({
@@ -151,7 +154,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[AUDIO-v29] Error:', error);
+        console.error('[SPEECH-v31] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
