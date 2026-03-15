@@ -173,7 +173,7 @@ export function FloatingAssistant() {
 
         const preFetchSentence = async (text: string) => {
             try {
-                const response = await fetch('/api/assistant/speech', {
+                const response = await fetch('/api/assistant/speech?v=32', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, voice: 'nova' })
