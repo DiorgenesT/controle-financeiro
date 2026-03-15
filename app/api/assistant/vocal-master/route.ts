@@ -7,8 +7,7 @@ const openai = new OpenAI({
 
 /**
  * Converts any integer to Portuguese words with gender support.
- * V32: RESTORING THE "STRETCHED" PHONETICS (Digital Restoration)
- * These double letters and hyphens are essential for the slow cadence.
+ * V33: NUMERICAL INTEGRITY (Fixed Hundreds & Clean Flow)
  */
 function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
     if (n === 0) return 'zero';
@@ -27,23 +26,23 @@ function integerToWords(n: number, gender: 'm' | 'f' = 'm'): string {
         const t = Math.floor(n / 1000);
         words += (t === 1 ? 'miiil' : integerToWords(t, gender) + ' miiil');
         n %= 1000;
-        if (n > 0) words += (n < 100 || n % 100 === 0) ? ' e ' : ' ';
+        if (n > 0) words += (n < 100 || n % 100 === 0) ? ' . e . ' : ' ';
     }
 
     if (n >= 100) {
         if (n === 100) {
             words += 'cé-ém';
         } else {
-            words += 'cen-to';
+            words += hundreds[Math.floor(n / 100)];
         }
         n %= 100;
-        if (n > 0) words += ' e ';
+        if (n > 0) words += ' . e . ';
     }
 
     if (n >= 20) {
         words += tens[Math.floor(n / 10)];
         n %= 10;
-        if (n > 0) words += ' e ' + units[n];
+        if (n > 0) words += ' . e . ' + units[n];
     } else if (n >= 10) {
         words += teens[n - 10];
     } else if (n > 0) {
@@ -71,8 +70,8 @@ function currencyToWords(amountStr: string, decimalStr: string = '00'): string {
     return ` , . ${reaisWords} ${suffix} e ${centavosWords} centavos . , `;
 }
 
-function vocalPurifyV32(text: string): string {
-    // V32: DIGITAL RESTORATION & ACCENT ARMOR
+function vocalPurifyV33(text: string): string {
+    // V33: NUMERICAL INTEGRITY & STUTTER REMOVAL
     let result = text
         /**
          * 0. CORE SANITIZATION & EMOJI STRIPPING
@@ -92,8 +91,7 @@ function vocalPurifyV32(text: string): string {
         .replace(/precisar/gi, 'precisár')
         .replace(/disposição/gi, 'dis-pozzi-ssão')
         .replace(/confirmado/gi, 'con-fir-má-du')
-        // V32 Success Mastery: Stressing the vowels for a natural native sound
-        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu . . . rre-ah-li-zah-du')
+        .replace(/Lançamento realizado/gi, 'Lan-ssa-mén-tu rre-ah-li-zah-du')
 
         /**
          * 2. ANALYTICAL SLOWDOWN for Numbers
@@ -127,17 +125,15 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const cleanText = vocalPurifyV32(text);
+        const cleanText = vocalPurifyV33(text);
 
-        const starters = ['Pois bem. ', 'Olha só. ', 'Continuando. '];
-        const randomStarter = starters[Math.floor(Math.random() * starters.length)];
-
-        const phoneticText = ` . . . ${randomStarter} , ${cleanText} . . . `;
+        // V33: NO RANDOM STARTERS (Prevents repetitive "Continuando")
+        const phoneticText = ` . . . ${cleanText} . . . `;
 
         console.log(`\n##################################################`);
-        console.log(`[SPEECH-v32-DIGITAL-RESTORATION] Path: /api/assistant/speech`);
-        console.log(`[SPEECH-v32-DIGITAL-RESTORATION] Original: "${text.substring(0, 50)}..."`);
-        console.log(`[SPEECH-v32-DIGITAL-RESTORATION] Phonetic: "${phoneticText.substring(0, 250)}..."`);
+        console.log(`[VOCAL-MASTER-v33] Path: /api/assistant/vocal-master`);
+        console.log(`[VOCAL-MASTER-v33] Original: "${text.substring(0, 50)}..."`);
+        console.log(`[VOCAL-MASTER-v33] Phonetic: "${phoneticText.substring(0, 250)}..."`);
         console.log(`##################################################\n`);
 
         const mp3 = await openai.audio.speech.create({
@@ -156,7 +152,7 @@ export async function POST(req: Request) {
             },
         });
     } catch (error: any) {
-        console.error('[SPEECH-v32] Error:', error);
+        console.error('[VOCAL-MASTER-v33] Error:', error);
         return NextResponse.json({
             error: 'Failed to generate speech with OpenAI HD',
             details: error.message
