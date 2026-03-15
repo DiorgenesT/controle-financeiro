@@ -1,6 +1,10 @@
 import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
 
+/**
+ * Conversor de Texto para Fala (TTS) - Versão v34 Master
+ * Esta versão remove listas numeradas, limpa emojis e garante a clareza total dos valores.
+ */
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
