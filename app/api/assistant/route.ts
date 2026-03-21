@@ -282,7 +282,8 @@ TABELA DE DEFAULTS (aplique sempre que o campo não for informado):
 - Saldo de conta nova: R$ 0,00
 - Tipo de conta: "checking" (corrente)
 - Conta padrão: true APENAS se for a primeira conta do usuário
-- Banco conhecido → use BANK_DEFAULTS (nome, cor, ícone automáticos)
+- Banco conhecido → passe o bankCode CORRETO e o sistema preenche nome/cor/ícone:
+  nubank=Nubank | bb=Banco do Brasil | itau=Itaú | bradesco=Bradesco | caixa=Caixa | santander=Santander | inter=Inter | c6=C6 Bank | picpay=PicPay | mercadopago=Mercado Pago | neon=Neon | next=Next | digio=Digio | sicoob=Sicoob | sicredi=Sicredi | original=Banco Original | will=Will Bank | pagbank=PagBank
 - Método de pagamento para despesa sem contexto: débito ou pix (prefira a conta padrão)
 - Método de pagamento para receita: "transfer" ou "deposit"
 - isRecurring: false (SEMPRE, a menos que o usuário diga explicitamente "é fixo" ou "recorrente")
@@ -846,7 +847,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                         action: z.enum(['create', 'update', 'delete']).describe('Ação a ser realizada.'),
                         accountId: z.string().optional().describe('ID da conta (obrigatório para update e delete).'),
                         data: z.object({
-                            bankCode: z.string().optional().describe('Código do banco (ex: nubank, itau, inter).'),
+                            bankCode: z.string().optional().describe('Código do banco. Mapeamento OBRIGATÓRIO: "nubank"=Nubank, "bb"=Banco do Brasil, "itau"=Itaú, "bradesco"=Bradesco, "caixa"=Caixa Econômica Federal, "santander"=Santander, "inter"=Inter, "c6"=C6 Bank, "picpay"=PicPay, "mercadopago"=Mercado Pago, "neon"=Neon, "next"=Next, "digio"=Digio, "sicoob"=Sicoob, "sicredi"=Sicredi, "original"=Banco Original, "will"=Will Bank, "pagbank"=PagBank. Use EXATAMENTE esses códigos.'),
                             name: z.string().optional().describe('Nome da conta.'),
                             type: z.enum(['checking', 'savings', 'wallet', 'investment', 'emergency']).optional().describe('Tipo da conta: checking (corrente), savings (poupança), wallet (carteira), investment (investimento), emergency (reserva).'),
                             balance: z.number().optional().describe('Saldo inicial ou atual.'),
@@ -943,7 +944,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                         action: z.enum(['create', 'update', 'delete']).describe('Ação a ser realizada.'),
                         cardId: z.string().optional().describe('ID do cartão (obrigatório para update e delete).'),
                         data: z.object({
-                            bankCode: z.string().optional().describe('Código do banco (ex: nubank, itau, inter).'),
+                            bankCode: z.string().optional().describe('Código do banco. Mapeamento OBRIGATÓRIO: "nubank"=Nubank, "bb"=Banco do Brasil, "itau"=Itaú, "bradesco"=Bradesco, "caixa"=Caixa Econômica Federal, "santander"=Santander, "inter"=Inter, "c6"=C6 Bank, "picpay"=PicPay, "mercadopago"=Mercado Pago, "neon"=Neon, "next"=Next, "digio"=Digio, "sicoob"=Sicoob, "sicredi"=Sicredi, "original"=Banco Original, "will"=Will Bank, "pagbank"=PagBank. Use EXATAMENTE esses códigos.'),
                             name: z.string().optional().describe('Nome do cartão.'),
                             limit: z.number().optional().describe('Limite total.'),
                             closingDay: z.number().optional().describe('Dia de fechamento (1-31).'),
