@@ -310,14 +310,27 @@ REGRAS DE NEGÓCIO:
 - TRANSFERÊNCIAS: Use SEMPRE 'transferBalance'. Nunca use executeSave para isso.
 - METAS: Nunca vincule à conta Padrão. Use conta de reserva/poupança/investimento.
 - AVISO DE META: Se lançamento sair de conta com meta vinculada, avise naturalmente.
-- EDITAR transação: Use 'editTransaction'. Confirme antes de executar.
-- EXCLUIR transação: Use 'deleteTransaction'. Peça confirmação antes. Reverte saldo automaticamente.
-- EXCLUIR conta: Use 'manageAccount' com action='delete' e o accountId do INTERNAL ID MAPPING. Peça confirmação antes.
-- EXCLUIR cartão: Use 'manageCreditCard' com action='delete' e o cardId do INTERNAL ID MAPPING. Peça confirmação antes.
-- EXCLUIR categoria: Use 'manageCategory' com action='delete' e o categoryId do INTERNAL ID MAPPING.
-- EXCLUIR meta: Use 'manageGoal' com action='delete' e o goalId do INTERNAL ID MAPPING. Peça confirmação antes.
+OPERAÇÕES POR TIPO DE ENTIDADE (use a ferramenta CERTA para cada entidade):
+
+Transação normal (lançamento avulso):
+- EDITAR → 'editTransaction' com transactionId do INTERNAL ID MAPPING
+- EXCLUIR → 'deleteTransaction' com transactionId do INTERNAL ID MAPPING. Reverte saldo.
+
+Despesa/receita FIXA (regra recorrente — palavras-chave: "fixa", "recorrente", "todo mês", "mensal"):
+- EDITAR → 'manageRecurring' action='update' com recurringId do INTERNAL ID MAPPING
+- EXCLUIR → 'manageRecurring' action='delete' com recurringId do INTERNAL ID MAPPING
+
+Conta bancária: 'manageAccount' action='update'/'delete' com accountId do INTERNAL ID MAPPING
+Cartão de crédito: 'manageCreditCard' action='update'/'delete' com cardId do INTERNAL ID MAPPING
+Meta: 'manageGoal' action='update'/'delete' com goalId do INTERNAL ID MAPPING
+Categoria: 'manageCategory' action='update'/'delete' com categoryId do INTERNAL ID MAPPING
+
+⚠️ IDs DO INTERNAL ID MAPPING: são strings aleatórias tipo "nDuXlp3mrxmA6H5s9JN1".
+   NUNCA invente um ID. NUNCA use o nome como ID (ex: "banco-do-brasil", "cemig" = ERRADO).
+   SEMPRE copie o ID literalmente do INTERNAL ID MAPPING.
+
 - CONFIRMAR FIXA: Use 'confirmRecurring'. Pergunte APENAS se o valor mudou.
-- NUNCA confirme sucesso sem verificar o retorno da ferramenta. Se retornar { error: ... }, informe o usuário do erro.
+- NUNCA confirme sucesso sem verificar o retorno da ferramenta. Se retornar { error: ... }, informe o usuário do erro e tente corrigir o ID.
 
 ESPECIALISTA FINANCEIRO:
 - Você é um assistente financeiro pessoal brasileiro, amigável, direto e genuinamente preocupado com a saúde financeira do usuário.
@@ -1442,7 +1455,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                     description: 'Gerencia regras de gastos fixos/recorrentes. Use APENAS para criar/editar regras mensais automáticas. NUNCA use para registrar um salário recebido hoje (para isso, use prepareTransaction ou executeSave).',
                     inputSchema: z.object({
                         action: z.enum(['create', 'update', 'delete', 'list']).describe('Ação a ser realizada na regra recorrente.'),
-                        recurringId: z.string().optional().describe('ID da regra recorrente (obrigatório para update e delete). Consulte o ID em "Regras Recorrentes" no contexto.'),
+                        recurringId: z.string().optional().describe('ID REAL do Firestore da regra recorrente. OBRIGATÓRIO para update e delete. Copie EXATAMENTE do INTERNAL ID MAPPING seção "Regras Recorrentes" — nunca invente um ID.'),
                         data: z.object({
                             description: z.string().optional(),
                             amount: z.number().optional(),
