@@ -917,7 +917,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 const existing = catsList.find((c: any) => c.name.toLowerCase() === data.name?.toLowerCase());
                                 if (existing) return { error: `A categoria '${data.name}' já existe.` };
 
-                                const res = await db.collection('categories').add({
+                                await db.collection('categories').add({
                                     ...data, userId,
                                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                                     updatedAt: admin.firestore.FieldValue.serverTimestamp()
