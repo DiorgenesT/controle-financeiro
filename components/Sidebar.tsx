@@ -140,8 +140,8 @@ export function Sidebar() {
                 </Link>
             </div>
 
-            {/* Navigation */}
-            <nav id="sidebar-menu" className="flex-1 p-3 space-y-1">
+            {/* Navigation — scrollável para telas baixas (ex: 1366x768) */}
+            <nav id="sidebar-menu" className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-none">
                 {menuItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -150,7 +150,7 @@ export function Sidebar() {
                             href={item.href}
                             id={`sidebar-item-${item.href.replace("/", "")}`}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
                                 isActive
                                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
                                     : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
@@ -162,7 +162,7 @@ export function Sidebar() {
                     );
                 })}
 
-                <div className="pt-4 pb-2 px-3">
+                <div className="pt-3 pb-1.5 px-3">
                     <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Especial</p>
                 </div>
 
@@ -174,7 +174,7 @@ export function Sidebar() {
                             href={item.href}
                             id={`sidebar-item-${item.href.replace("/", "")}`}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
                                 isActive
                                     ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/20"
                                     : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
@@ -194,8 +194,8 @@ export function Sidebar() {
 
             <Separator className="bg-sidebar-border" />
 
-            {/* Bottom Menu */}
-            <div className="p-3 space-y-1">
+            {/* Bottom Menu — fixo na parte inferior, nunca é cortado */}
+            <div className="p-3 space-y-0.5">
                 {bottomMenuItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -204,7 +204,7 @@ export function Sidebar() {
                             href={item.href}
                             id={`sidebar-item-${item.href.replace("/", "")}`}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
                                 isActive
                                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
                                     : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
@@ -217,7 +217,7 @@ export function Sidebar() {
                 })}
             </div>
 
-            <div className="mt-auto p-4 flex justify-center">
+            <div className="p-3 flex justify-center">
                 <span className="text-[10px] font-medium text-muted-foreground/40 tracking-widest uppercase">
                     Versão 1.0.0
                 </span>
