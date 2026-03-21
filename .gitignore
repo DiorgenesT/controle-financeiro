@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev / debug
+assistant_actions.log
+assistant_error.log
+*.mp3
+*.py
+.venv/
+CLAUDE.md
+app/api/assistant/vocal-human/
