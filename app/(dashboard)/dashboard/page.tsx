@@ -350,15 +350,7 @@ export default function DashboardPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-1 overflow-y-auto custom-scrollbar pr-1 max-h-[180px] md:max-h-[280px]">
-                                    {transactions
-                                        .filter(t => {
-                                            if (t.installmentNumber && t.installmentNumber > 1) return false;
-                                            if (t.paymentMethod === "credit") return false;
-                                            if (t.paymentMethod === "boleto" && t.boletoStatus === "pending") return false;
-                                            return true;
-                                        })
-                                        .slice(0, 5) // Keep 5 for desktop, hide last 2 on mobile via CSS
-                                        .map((transaction, index) => {
+                                    {recentTransactions.map((transaction, index) => {
                                             const isReceita = transaction.type === "receita";
                                             // Hide items > 3 on mobile
                                             const mobileHiddenClass = index >= 3 ? "hidden md:flex" : "flex";
