@@ -25,7 +25,7 @@ O **Tudo Em Dia** é uma aplicação web completa para organização financeira 
 - **Score de saúde financeira:** 4 pilares — poupança, reserva de emergência, disciplina e tendência (0–1000)
 - **Seguro Gastar Hoje:** Orçamento diário com acúmulo natural, disponível a partir do 2º mês de uso
 - **Assistente IA com voz:** CRUD completo por linguagem natural, especialista financeiro com alertas proativos
-- **Assinaturas:** Planos Free e Premium via Stripe e AbacatePay (PIX)
+- **Assinaturas:** Planos Free e Premium via Stripe (cartão, boleto, PIX)
 
 ## Stack
 
@@ -49,8 +49,7 @@ O **Tudo Em Dia** é uma aplicação web completa para organização financeira 
 | Vercel AI SDK + OpenAI (gpt-4o-mini) | Assistente IA com streaming |
 | Google Cloud TTS | Síntese de voz do assistente |
 | Web Speech API | Reconhecimento de voz no browser |
-| Stripe | Assinaturas, boleto, parcelamento |
-| AbacatePay | Pagamentos PIX |
+| Stripe | Assinaturas, boleto, parcelamento e PIX |
 | Resend | E-mails transacionais |
 
 ### Infraestrutura
@@ -114,9 +113,6 @@ GOOGLE_APPLICATION_CREDENTIALS=
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
-
-# AbacatePay (server-side only)
-ABACATEPAY_API_KEY=
 
 # Resend (server-side only)
 RESEND_API_KEY=
