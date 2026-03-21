@@ -862,7 +862,9 @@ INSTRUÇÕES DE FERRAMENTAS:
                         }).optional(),
                     }),
                     execute: async ({ action, accountId, data }) => {
-                        console.log(`[Assistant] Tool: manageAccount, action: ${action}`);
+                        const logLine = `[${new Date().toISOString()}] manageAccount: action=${action}, accountId=${accountId ?? 'UNDEFINED'}, data=${JSON.stringify(data ?? {})}\n`;
+                        console.log(logLine);
+                        try { fs.appendFileSync('assistant_actions.log', logLine); } catch {}
                         try {
                             if (action === 'create' && data) {
                                 let finalData = {
