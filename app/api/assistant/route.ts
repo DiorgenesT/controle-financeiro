@@ -310,9 +310,14 @@ REGRAS DE NEGÓCIO:
 - TRANSFERÊNCIAS: Use SEMPRE 'transferBalance'. Nunca use executeSave para isso.
 - METAS: Nunca vincule à conta Padrão. Use conta de reserva/poupança/investimento.
 - AVISO DE META: Se lançamento sair de conta com meta vinculada, avise naturalmente.
-- EDITAR: Use 'editTransaction'. Confirme antes de executar.
-- EXCLUIR: Use 'deleteTransaction'. Peça confirmação antes. Reverte saldo automaticamente.
+- EDITAR transação: Use 'editTransaction'. Confirme antes de executar.
+- EXCLUIR transação: Use 'deleteTransaction'. Peça confirmação antes. Reverte saldo automaticamente.
+- EXCLUIR conta: Use 'manageAccount' com action='delete' e o accountId do INTERNAL ID MAPPING. Peça confirmação antes.
+- EXCLUIR cartão: Use 'manageCreditCard' com action='delete' e o cardId do INTERNAL ID MAPPING. Peça confirmação antes.
+- EXCLUIR categoria: Use 'manageCategory' com action='delete' e o categoryId do INTERNAL ID MAPPING.
+- EXCLUIR meta: Use 'manageGoal' com action='delete' e o goalId do INTERNAL ID MAPPING. Peça confirmação antes.
 - CONFIRMAR FIXA: Use 'confirmRecurring'. Pergunte APENAS se o valor mudou.
+- NUNCA confirme sucesso sem verificar o retorno da ferramenta. Se retornar { error: ... }, informe o usuário do erro.
 
 ESPECIALISTA FINANCEIRO:
 - Você é um assistente financeiro pessoal brasileiro, amigável, direto e genuinamente preocupado com a saúde financeira do usuário.
@@ -889,11 +894,12 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 });
                                 return { success: true };
                             }
-                            if (action === 'delete' && accountId) {
+                            if (action === 'delete') {
+                                if (!accountId) return { error: 'FALHA: accountId é obrigatório para excluir uma conta. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('accounts').doc(accountId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Conta excluída com sucesso.' };
                             }
-                            return { error: 'Ação inválida ou ID ausente.' };
+                            return { error: 'Ação inválida ou dados ausentes.' };
                         } catch (e: any) { return { error: `Erro ao gerenciar conta: ${e.message}` }; }
                     }
                 }),
@@ -930,11 +936,12 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 });
                                 return { success: true };
                             }
-                            if (action === 'delete' && categoryId) {
+                            if (action === 'delete') {
+                                if (!categoryId) return { error: 'FALHA: categoryId é obrigatório para excluir. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('categories').doc(categoryId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Categoria excluída com sucesso.' };
                             }
-                            return { error: 'Ação inválida ou ID ausente.' };
+                            return { error: 'Ação inválida ou dados ausentes.' };
                         } catch (e: any) { return { error: `Erro ao gerenciar categoria: ${e.message}` }; }
                     }
                 }),
@@ -979,11 +986,12 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 await db.collection('creditCards').doc(cardId).update({ ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
                                 return { success: true };
                             }
-                            if (action === 'delete' && cardId) {
+                            if (action === 'delete') {
+                                if (!cardId) return { error: 'FALHA: cardId é obrigatório para excluir um cartão. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('creditCards').doc(cardId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Cartão excluído com sucesso.' };
                             }
-                            return { error: 'Ação inválida ou ID ausente.' };
+                            return { error: 'Ação inválida ou dados ausentes.' };
                         } catch (e: any) { return { error: `Erro ao gerenciar cartão: ${e.message}` }; }
                     }
                 }),
@@ -1033,9 +1041,10 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 await db.collection('goals').add(cleanData);
                                 return { success: true };
                             }
-                            if (action === 'delete' && goalId) {
+                            if (action === 'delete') {
+                                if (!goalId) return { error: 'FALHA: goalId é obrigatório para excluir uma meta. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('goals').doc(goalId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Meta excluída com sucesso.' };
                             }
                             if (action === 'update' && goalId && data) {
                                 let currentGoal = goalsList.find((g: any) => g.id === goalId) as any;
@@ -1142,9 +1151,10 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 await db.collection('people').add({ ...data, userId, createdAt: admin.firestore.FieldValue.serverTimestamp() });
                                 return { success: true, name: data.name };
                             }
-                            if (action === 'delete' && personId) {
+                            if (action === 'delete') {
+                                if (!personId) return { error: 'FALHA: personId é obrigatório para excluir. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('people').doc(personId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Pessoa excluída com sucesso.' };
                             }
                             if (action === 'update' && personId && data) {
                                 await db.collection('people').doc(personId).update({ ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
@@ -1466,11 +1476,12 @@ INSTRUÇÕES DE FERRAMENTAS:
                                 });
                                 return { success: true };
                             }
-                            if (action === 'delete' && recurringId) {
+                            if (action === 'delete') {
+                                if (!recurringId) return { error: 'FALHA: recurringId é obrigatório para excluir uma regra recorrente. Busque o ID no INTERNAL ID MAPPING.' };
                                 await db.collection('recurring_transactions').doc(recurringId).delete();
-                                return { success: true };
+                                return { success: true, message: 'Regra recorrente excluída com sucesso.' };
                             }
-                            return { error: 'Ação inválida.' };
+                            return { error: 'Ação inválida ou dados ausentes.' };
                         } catch (e) { return { error: 'Erro ao gerenciar recorrência.' }; }
                     }
                 })
