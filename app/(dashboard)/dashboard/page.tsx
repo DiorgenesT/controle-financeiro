@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TransactionModal } from "@/components/TransactionModal";
 import { ForecastCard } from "@/components/ForecastCard";
 import { FinancialScoreCard } from "@/components/FinancialScoreCard";
+import { SafeToSpendCard } from "@/components/SafeToSpendCard";
 import { UpcomingBillsCard } from "@/components/UpcomingBillsCard";
 import { InsightsCarousel } from "@/components/InsightsCarousel";
 import {
@@ -335,7 +336,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="grid gap-3 md:gap-4 md:grid-cols-1 lg:grid-cols-3 items-start w-full min-w-0">
+                <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-4 items-start w-full min-w-0">
                     {/* 1. Transações Recentes (Compacto) */}
                     <Card className="h-full flex flex-col overflow-hidden min-w-0 w-full border border-blue-500/40 dark:border-white/10 bg-gradient-to-b from-card to-muted/20 shadow-[0_0_20px_-5px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.2)] transition-all duration-300 group relative">
                         {/* Top Glow Line */}
@@ -444,6 +445,11 @@ export default function DashboardPage() {
                     {/* 3. Previsão */}
                     <div id="dashboard-forecast-card" className="h-full">
                         <ForecastCard />
+                    </div>
+
+                    {/* 4. Seguro Gastar Hoje */}
+                    <div id="dashboard-safe-spend-card" className="h-full">
+                        <SafeToSpendCard />
                     </div>
                 </div>
             </div>

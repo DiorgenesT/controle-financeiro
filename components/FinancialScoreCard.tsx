@@ -16,8 +16,8 @@ export function FinancialScoreCard() {
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 transition-all duration-700" />
 
             {/* Animated Aurora Orbs */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-pink-400/40 dark:bg-fuchsia-900/20 blur-[80px] rounded-full mix-blend-screen animate-pulse" />
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-400/40 dark:bg-violet-900/20 blur-[80px] rounded-full mix-blend-screen animate-pulse delay-1000" />
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-fuchsia-500/25 blur-[80px] rounded-full mix-blend-screen animate-pulse" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-violet-500/25 blur-[80px] rounded-full mix-blend-screen animate-pulse delay-1000" />
 
             {/* Glass Texture */}
             <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
