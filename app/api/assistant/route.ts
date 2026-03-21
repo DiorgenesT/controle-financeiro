@@ -345,7 +345,10 @@ CONTEXTO ATUAL:
 ALERTAS FINANCEIROS ATIVOS:
 ${alertsStr}
 
-INTERNAL ID MAPPING (NUNCA MOSTRAR IDs):
+INTERNAL ID MAPPING — IDs REAIS DO BANCO DE DADOS:
+⚠️ Para qualquer operação de update ou delete, você DEVE usar o ID exato desta lista.
+⚠️ NUNCA invente IDs. NUNCA use o nome do banco como ID (ex: "banco-do-brasil" é ERRADO).
+⚠️ O ID correto é uma string aleatória tipo "nDuXlp3mrxmA6H5s9JN1" — copie literalmente.
 ${idMappingStr}
 
 INSTRUÇÕES DE FERRAMENTAS:
@@ -850,7 +853,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                     description: 'Cria, edita ou exclui contas bancárias. Ao criar: se o banco for conhecido (nubank, itau, bradesco, inter, etc.), passe apenas bankCode e o sistema preenche nome/cor/ícone automaticamente. Defaults: balance=0, type="checking", isDefault=true somente se for a primeira conta.',
                     inputSchema: z.object({
                         action: z.enum(['create', 'update', 'delete']).describe('Ação a ser realizada.'),
-                        accountId: z.string().optional().describe('ID da conta (obrigatório para update e delete).'),
+                        accountId: z.string().optional().describe('ID REAL do Firestore da conta. OBRIGATÓRIO para update e delete. Copie EXATAMENTE do INTERNAL ID MAPPING — nunca invente um ID, nunca use o nome do banco como ID.'),
                         data: z.object({
                             bankCode: z.string().optional().describe('Código do banco. Mapeamento OBRIGATÓRIO: "nubank"=Nubank, "bb"=Banco do Brasil, "itau"=Itaú, "bradesco"=Bradesco, "caixa"=Caixa Econômica Federal, "santander"=Santander, "inter"=Inter, "c6"=C6 Bank, "picpay"=PicPay, "mercadopago"=Mercado Pago, "neon"=Neon, "next"=Next, "digio"=Digio, "sicoob"=Sicoob, "sicredi"=Sicredi, "original"=Banco Original, "will"=Will Bank, "pagbank"=PagBank. Use EXATAMENTE esses códigos.'),
                             name: z.string().optional().describe('Nome da conta.'),
@@ -951,7 +954,7 @@ INSTRUÇÕES DE FERRAMENTAS:
                     description: 'Cria, edita ou exclui cartões de crédito. Ao criar: se banco for conhecido, passe bankCode e o sistema preenche nome/cor/ícone automaticamente. O usuário DEVE informar limit, closingDay e dueDay — esses três são obrigatórios e não têm default razoável.',
                     inputSchema: z.object({
                         action: z.enum(['create', 'update', 'delete']).describe('Ação a ser realizada.'),
-                        cardId: z.string().optional().describe('ID do cartão (obrigatório para update e delete).'),
+                        cardId: z.string().optional().describe('ID REAL do Firestore do cartão. OBRIGATÓRIO para update e delete. Copie EXATAMENTE do INTERNAL ID MAPPING — nunca invente um ID.'),
                         data: z.object({
                             bankCode: z.string().optional().describe('Código do banco. Mapeamento OBRIGATÓRIO: "nubank"=Nubank, "bb"=Banco do Brasil, "itau"=Itaú, "bradesco"=Bradesco, "caixa"=Caixa Econômica Federal, "santander"=Santander, "inter"=Inter, "c6"=C6 Bank, "picpay"=PicPay, "mercadopago"=Mercado Pago, "neon"=Neon, "next"=Next, "digio"=Digio, "sicoob"=Sicoob, "sicredi"=Sicredi, "original"=Banco Original, "will"=Will Bank, "pagbank"=PagBank. Use EXATAMENTE esses códigos.'),
                             name: z.string().optional().describe('Nome do cartão.'),
