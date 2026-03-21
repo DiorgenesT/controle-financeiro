@@ -1,117 +1,149 @@
-# 💰 Tudo Em Dia - Controle Financeiro Inteligente
+# Tudo Em Dia — Controle Financeiro Inteligente
 
-> Uma plataforma moderna e intuitiva para gestão de finanças pessoais, construída com as tecnologias mais recentes do mercado.
+> SaaS de gestão financeira pessoal para o mercado brasileiro.
 
-**Acesse agora:** [https://tatudoemdia.com.br/](https://tatudoemdia.com.br/)
+**Acesse:** [tatudoemdia.com.br](https://tatudoemdia.com.br/)
 
-![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-emerald)
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange)
 ![Version](https://img.shields.io/badge/Versão-0.1.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-## 📋 Sobre o Projeto
+## Sobre
 
-O **Tudo Em Dia** é uma aplicação web completa (SaaS) projetada para ajudar usuários a organizarem sua vida financeira. Com foco em UX/UI premium, o sistema oferece controle de despesas, receitas, cartões de crédito, metas financeiras e relatórios detalhados, tudo em uma interface responsiva e elegante (Dark Mode).
+O **Tudo Em Dia** é uma aplicação web completa para organização financeira pessoal. Controle de contas bancárias, cartões de crédito, transações, metas, despesas recorrentes e relatórios — tudo em uma interface responsiva com dark mode e um assistente de IA com voz integrado.
 
-## ✨ Funcionalidades Principais
+## Funcionalidades
 
-- **📊 Dashboard Interativo:** Visão geral de saldo, despesas e receitas com gráficos dinâmicos.
-- **💳 Gestão de Cartões:** Controle de faturas, limites e datas de fechamento/vencimento.
-- **🔄 Transações Recorrentes:** Automação de despesas e receitas fixas.
-- **🎯 Metas Financeiras:** Definição e acompanhamento de objetivos de economia.
-- **📈 Relatórios Detalhados:** Análises visuais de gastos por categoria e evolução mensal.
-- **🤖 Assistente IA:** Chat integrado com inteligência artificial para insights financeiros.
-- **🔐 Autenticação Segura:** Login, cadastro e recuperação de senha personalizados.
-- **💳 Assinaturas:** Integração completa com Stripe para planos Premium.
+- **Dashboard:** Saldo total, receitas/despesas do mês, insights automáticos, score de saúde financeira, previsão de saldo e "Seguro Gastar Hoje"
+- **Contas bancárias:** Múltiplas contas com saldo em tempo real
+- **Cartões de crédito:** Controle de faturas, limites, datas de fechamento e vencimento
+- **Transações:** Lançamentos avulsos, parcelados, boletos e PIX
+- **Despesas fixas:** Automação de receitas e despesas recorrentes mensais
+- **Metas financeiras:** Objetivos com prazo, progresso e conta vinculada
+- **Relatórios:** Análise por categoria, evolução mensal e comparativos
+- **Score de saúde financeira:** 4 pilares — poupança, reserva de emergência, disciplina e tendência (0–1000)
+- **Seguro Gastar Hoje:** Orçamento diário com acúmulo natural, disponível a partir do 2º mês de uso
+- **Assistente IA com voz:** CRUD completo por linguagem natural, especialista financeiro com alertas proativos
+- **Assinaturas:** Planos Free e Premium via Stripe e AbacatePay (PIX)
 
-## 🛠️ Tecnologias Utilizadas
+## Stack
 
-O projeto foi desenvolvido utilizando uma stack moderna e robusta, focada em performance, escalabilidade e experiência do desenvolvedor.
+### Frontend
+| Tecnologia | Uso |
+|---|---|
+| Next.js 16 (App Router) | Framework principal |
+| React 19 + TypeScript 5 | UI e tipagem |
+| Tailwind CSS 4 | Estilização |
+| Radix UI + shadcn/ui | Componentes acessíveis |
+| Framer Motion + GSAP | Animações |
+| Recharts | Gráficos |
+| Lucide React | Ícones |
 
-### Frontend & Interface
-- **[Next.js 16](https://nextjs.org/)** (App Router) - Framework React de última geração.
-- **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática para código mais seguro.
-- **[Tailwind CSS 4](https://tailwindcss.com/)** - Estilização utilitária e responsiva.
-- **[Radix UI](https://www.radix-ui.com/)** - Componentes acessíveis e sem estilo (Headless).
-- **[Lucide React](https://lucide.dev/)** - Ícones vetoriais leves e consistentes.
-- **[Recharts](https://recharts.org/)** - Biblioteca de gráficos composta e declarativa.
-- **[GSAP](https://gsap.com/)** - Animações de alta performance.
-- **[Sonner](https://sonner.emilkowal.ski/)** - Notificações toast elegantes.
+### Backend / Serviços
+| Tecnologia | Uso |
+|---|---|
+| Firebase Firestore | Banco de dados NoSQL em tempo real |
+| Firebase Auth | Autenticação |
+| Firebase Admin SDK | Operações server-side |
+| Vercel AI SDK + OpenAI (gpt-4o-mini) | Assistente IA com streaming |
+| Google Cloud TTS | Síntese de voz do assistente |
+| Web Speech API | Reconhecimento de voz no browser |
+| Stripe | Assinaturas, boleto, parcelamento |
+| AbacatePay | Pagamentos PIX |
+| Resend | E-mails transacionais |
 
-### Backend & Serviços (Serverless)
-- **[Firebase](https://firebase.google.com/)**
-    - **Firestore:** Banco de dados NoSQL em tempo real.
-    - **Authentication:** Gestão de identidade e segurança.
-- **[Stripe](https://stripe.com/)** - Processamento de pagamentos e gestão de assinaturas.
-- **[Resend](https://resend.com/)** - API moderna para envio de e-mails transacionais.
+### Infraestrutura
+- **Vercel** — deploy, CI/CD, edge network
+- **Domínio:** Registro.br + ImprovMX (e-mail)
 
-### Infraestrutura & DevOps
-- **[Vercel](https://vercel.com/)** - Hospedagem, CI/CD e Edge Network.
-- **[ImprovMX](https://improvmx.com/)** - Redirecionamento de e-mails corporativos.
-- **[Registro.br](https://registro.br/)** - Gestão de domínio.
+## Estrutura de pastas
 
-## 🚀 Como Rodar o Projeto
+```
+app/
+├── (auth)/           # Login, cadastro, recuperação de senha
+├── (dashboard)/      # Área protegida — dashboard, contas, cartões, metas...
+└── api/              # Rotas serverless: assistente IA, webhooks, checkout
+components/           # Componentes React reutilizáveis e de domínio
+hooks/                # Custom React Hooks
+lib/                  # Firebase, Stripe, Resend, utilitários
+types/                # Tipos TypeScript centralizados
+public/               # Arquivos estáticos
+```
+
+**Coleções Firestore:** `users` · `accounts` · `transactions` · `credit_cards` · `invoices` · `goals` · `categories` · `recurring_transactions` · `people`
+
+## Rodando localmente
 
 ### Pré-requisitos
 - Node.js 18+
-- Gerenciador de pacotes (npm, yarn, pnpm ou bun)
+- npm ou yarn
 
 ### Instalação
 
-1. **Clone o repositório**
-   ```bash
-   git clone https://github.com/seu-usuario/controle-financeiro.git
-   cd controle-financeiro
-   ```
-
-2. **Instale as dependências**
-   ```bash
-   yarn install
-   # ou
-   npm install
-   ```
-
-3. **Configure as Variáveis de Ambiente**
-   Crie um arquivo `.env.local` na raiz do projeto e preencha as chaves necessárias (veja `.env.example` se disponível):
-   ```env
-   # Firebase
-   NEXT_PUBLIC_FIREBASE_API_KEY=...
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-   
-   # Stripe
-   STRIPE_SECRET_KEY=...
-   NEXT_PUBLIC_STRIPE_KEY=...
-   STRIPE_WEBHOOK_SECRET=...
-   
-   # Resend
-   RESEND_API_KEY=...
-   
-   # App
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   ```
-
-4. **Execute o servidor de desenvolvimento**
-   ```bash
-   yarn dev
-   ```
-
-5. **Acesse a aplicação**
-   Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
-
-## 📂 Estrutura de Pastas
-
+```bash
+git clone https://github.com/DiorgenesT/controle-financeiro.git
+cd controle-financeiro
+npm install
 ```
-/app              # Rotas e páginas (Next.js App Router)
-  /(auth)         # Rotas de autenticação (login, cadastro, senha)
-  /(dashboard)    # Rotas protegidas do sistema principal
-  /api            # API Routes (Serverless functions)
-/components       # Componentes React reutilizáveis
-  /ui             # Componentes base (botões, inputs, cards)
-/lib              # Configurações de serviços (Firebase, Stripe, Utils)
-/hooks            # Custom React Hooks
-/types            # Definições de tipos TypeScript
-/public           # Arquivos estáticos (imagens, ícones)
+
+### Variáveis de ambiente
+
+Crie `.env.local` na raiz:
+
+```env
+# Firebase (client)
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+# Firebase Admin (server-side only)
+FIREBASE_ADMIN_PRIVATE_KEY=
+FIREBASE_ADMIN_CLIENT_EMAIL=
+
+# OpenAI (server-side only)
+OPENAI_API_KEY=
+
+# Google Cloud TTS (server-side only)
+GOOGLE_APPLICATION_CREDENTIALS=
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# AbacatePay (server-side only)
+ABACATEPAY_API_KEY=
+
+# Resend (server-side only)
+RESEND_API_KEY=
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+### Executar
+
+```bash
+npm run dev        # Servidor de desenvolvimento
+npm run build      # Build de produção
+npm run lint       # ESLint
+npm run type-check # TypeScript sem emitir
+```
+
+Acesse [http://localhost:3000](http://localhost:3000).
+
+## Segurança
+
+- Firebase Admin SDK nunca exposto no client — apenas em `app/api/`
+- Stripe e OpenAI secret keys apenas server-side
+- Webhooks validados com assinatura antes de processar
+- Dados protegidos por Firestore Security Rules (`request.auth.uid === resource.data.userId`)
+- Variáveis `NEXT_PUBLIC_` apenas para o que precisa estar no browser
 
 ---
 
-Desenvolvido com 💚 por **Diorgenes**.
+Desenvolvido por **Diorgenes**.
