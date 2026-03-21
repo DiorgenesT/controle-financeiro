@@ -10,7 +10,6 @@ import { TransactionModal } from "@/components/TransactionModal";
 import { ForecastCard } from "@/components/ForecastCard";
 import { FinancialScoreCard } from "@/components/FinancialScoreCard";
 import { SafeToSpendCard } from "@/components/SafeToSpendCard";
-import { UpcomingBillsCard } from "@/components/UpcomingBillsCard";
 import { InsightsCarousel } from "@/components/InsightsCarousel";
 import {
     TrendingUp,
@@ -206,7 +205,7 @@ export default function DashboardPage() {
 
 
 
-                {/* Main Grid */}
+                {/* KPIs — Saldo, Receitas, Despesas, Insights */}
                 <div className="grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
                     <Card id="dashboard-balance-card" className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-800 border-0 shadow-none ring-1 ring-white/10 overflow-hidden relative text-white group">
                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -290,7 +289,6 @@ export default function DashboardPage() {
                             )}
                         </CardContent>
                     </Card>
-
                     <div id="dashboard-insights-carousel" className="h-full col-span-2 md:col-span-1">
                         <InsightsCarousel
                             totalReceitas={totalReceitas}
@@ -302,40 +300,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Tickers Grid - Relocated */}
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start mb-2 md:mb-4">
-                    {/* Market Ticker */}
-                    <div id="dashboard-market-ticker" className="h-full">
-                        <MarketTicker
-                            isOpen={isDesktop ? showTickers : undefined}
-                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
-                        />
-                    </div>
-
-                    {/* Central Toggle Button (Desktop Only) */}
-                    <div id="dashboard-ticker-toggle" className="hidden md:flex flex-col items-center justify-start pt-4 h-full z-10">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowTickers(!showTickers)}
-                            className={cn(
-                                "rounded-full w-6 h-6 p-0 border border-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300",
-                                !showTickers && "bg-primary/10 text-primary border-primary/20"
-                            )}
-                        >
-                            <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-500", showTickers && "rotate-180")} />
-                        </Button>
-                    </div>
-
-                    {/* Economic Indicators */}
-                    <div id="dashboard-economic-indicators" className="h-full">
-                        <EconomicIndicatorsCard
-                            isOpen={isDesktop ? showTickers : undefined}
-                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
-                        />
-                    </div>
-                </div>
-
+                {/* Cards de análise */}
                 <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-4 items-start w-full min-w-0">
                     {/* 1. Transações Recentes (Compacto) */}
                     <Card className="h-full flex flex-col overflow-hidden min-w-0 w-full border border-blue-500/40 dark:border-white/10 bg-gradient-to-b from-card to-muted/20 shadow-[0_0_20px_-5px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.2)] transition-all duration-300 group relative">
@@ -450,6 +415,37 @@ export default function DashboardPage() {
                     {/* 4. Seguro Gastar Hoje */}
                     <div id="dashboard-safe-spend-card" className="h-full">
                         <SafeToSpendCard />
+                    </div>
+                </div>
+
+                {/* Mercado — colapsável, no rodapé para não interromper o fluxo principal */}
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start">
+                    <div id="dashboard-market-ticker" className="h-full">
+                        <MarketTicker
+                            isOpen={isDesktop ? showTickers : undefined}
+                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                        />
+                    </div>
+
+                    <div id="dashboard-ticker-toggle" className="hidden md:flex flex-col items-center justify-start pt-4 h-full z-10">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowTickers(!showTickers)}
+                            className={cn(
+                                "rounded-full w-6 h-6 p-0 border border-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300",
+                                !showTickers && "bg-primary/10 text-primary border-primary/20"
+                            )}
+                        >
+                            <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-500", showTickers && "rotate-180")} />
+                        </Button>
+                    </div>
+
+                    <div id="dashboard-economic-indicators" className="h-full">
+                        <EconomicIndicatorsCard
+                            isOpen={isDesktop ? showTickers : undefined}
+                            onToggle={isDesktop ? () => setShowTickers(!showTickers) : undefined}
+                        />
                     </div>
                 </div>
             </div>
